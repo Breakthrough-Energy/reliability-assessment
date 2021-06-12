@@ -3,7 +3,13 @@
 import numpy as np
 
 def readInputFileB(FileNameAndPath):
+    """ read and parse raw text data from the input file INPUTB.
 
+    :param string FileNameAndPath: absolute file path and name for the file 'INPUTB'
+
+    :return: (*arrays*) -- arrays for each data card (raw data); 
+             each data card can have multiple arrays
+    """
     file =  open(FileNameAndPath, 'r')
     Lines = file.readlines()
    
@@ -130,7 +136,7 @@ def readInputFileB(FileNameAndPath):
     JSTEP = int(tmp[12])#e.g. 1
     
     '''
-    1:  Hourly MOnte Carlo draws of generator ;and lien status are used
+    1:  Hourly Monte Carlo draws of generator ;and line status are used
     24: Daily Monte Carlo draws are used 
     '''
     JFREQ = int(tmp[13])#e.g. 1
@@ -273,9 +279,9 @@ def readInputFileB(FileNameAndPath):
     II = 0
     
     # assume maximum number of Gen Units = 1000
-    SNRI = np.zeros((1000,1)).astype(int)
-    NAT, NAR = ["" for _ in range(1000)], ["" for _ in range(1000)]
-    HRLOAD, ID = np.zeros((7, 1000)), np.zeros((1000, 5)).astype(int)
+    SNRI_ZZUD = np.zeros((1000,1)).astype(int)
+    NAT, NAR_ZZUD = ["" for _ in range(1000)], ["" for _ in range(1000)]
+    HRLOAD, ID_ZZUD = np.zeros((7, 1000)), np.zeros((1000, 5)).astype(int)
     # Note: the orginal Fortran code set the HRLOAD array as INT type; 
     # Here, I use float type for it.
     
@@ -287,7 +293,7 @@ def readInputFileB(FileNameAndPath):
         '''
         Serial number (refet to ZZLD)
         '''
-        SNRI[II] =  int(tmp[0].strip('.'))
+        SNRI_ZZUD[II] =  int(tmp[0].strip('.'))
         
         '''
         Unit name is six alphanumeric characters. The 
@@ -299,7 +305,7 @@ def readInputFileB(FileNameAndPath):
         '''
         Area of location, up to four letters.
         '''
-        NAR[II] =  tmp[2]
+        NAR_ZZUD[II] =  tmp[2]
         
         '''
         Unit capacity, MW, in the ith season (see ZZLD)        
@@ -327,7 +333,7 @@ def readInputFileB(FileNameAndPath):
         '''
         Predetermined (1) or automatic (0) scheduling.
         '''
-        ID[II, 0] = int(tmp[10])       
+        ID_ZZUD[II, 0] = int(tmp[10])       
         
         # Notes:
         #    1. In scheduling the planned outages, the program does not
@@ -347,21 +353,21 @@ def readInputFileB(FileNameAndPath):
         Beginning week and duration of the first outage.
         In the automatic mode Bl is ignored.(B1, D1)
         '''      
-        ID[II, 1:3] = list(map(int, tmp[11:13])) 
+        ID_ZZUD[II, 1:3] = list(map(int, tmp[11:13])) 
 
         '''
         Beginning week and duration of second outage. In 
         the automatic mode, B2 is ignored.(B2, D2)
         '''
-        ID[II, 3:5] = list(map(int, tmp[13:15]))          
+        ID_ZZUD[II, 3:5] = list(map(int, tmp[13:15]))          
         
         II = II + 1 
 
-    SNRI =  SNRI[:II].flatten() 
+    SNRI_ZZUD =  SNRI_ZZUD[:II].flatten() 
     NAT = NAT[:II]
-    NAR = NAR[:II]
+    NAR_ZZUD = NAR_ZZUD[:II]
     HRLOAD = HRLOAD[:, :II]
-    ID = ID[:II, :]
+    ID_ZZUD = ID_ZZUD[:II, :]
     
     
     '''------------------------------------------------------------
@@ -412,9 +418,9 @@ def readInputFileB(FileNameAndPath):
     cnt = cnt + 8
     
     # assume maximum number of Lines = 1000
-    SNRI = np.zeros((1000,1)).astype(int)
-    ID  =  np.zeros((1000,1)).astype(int)
-    NAR, NAE = ["" for _ in range(1000)], ["" for _ in range(1000)]
+    SNRI_ZZTD = np.zeros((1000,1)).astype(int)
+    ID_ZZTD  =  np.zeros((1000,1)).astype(int)
+    NAR_ZZTD, NAE = ["" for _ in range(1000)], ["" for _ in range(1000)]
     ADM = np.zeros((1000, 6))
     CAP, CAPR = np.zeros((1000, 6)), np.zeros((1000, 6))
     PROP = np.zeros((1000, 6))
@@ -423,13 +429,13 @@ def readInputFileB(FileNameAndPath):
     while cnt < len(Lines) and len(Lines[cnt].strip()) > 0 and Lines[cnt].strip()[0].isdigit():
         tmp = Lines[cnt].strip().split()
         
-        SNRI[II] = int(tmp[0].strip('.'))
-        ID[II] =  int(tmp[1].strip('.'))
+        SNRI_ZZTD[II] = int(tmp[0].strip('.'))
+        ID_ZZTD[II] =  int(tmp[1].strip('.'))
         
         '''
         Name of From area
         '''
-        NAR[II] = tmp[2]
+        NAR_ZZTD[II] = tmp[2]
         
         '''
         Name of To area
@@ -451,8 +457,9 @@ def readInputFileB(FileNameAndPath):
         cnt = cnt + 1
         II = II + 1 
     
-    SNRI =  SNRI[:II].flatten() 
-    NAR = NAR[:II]
+    SNRI_ZZTD =  SNRI_ZZTD[:II].flatten() 
+    ID_ZZTD =  ID_ZZTD[:II].flatten() 
+    NAR_ZZTD = NAR_ZZTD[:II]
     NAE = NAE[:II]
     ADM = ADM[:II, :]
     CAP, CAPR = CAP[:II, :], CAPR[:II, :]
@@ -474,8 +481,8 @@ def readInputFileB(FileNameAndPath):
     '''------------------------------------------------------------
     ZZND:TERMINATING CARD (The end of INPUT-B file)      
     ''' 
-
-    
-if __name__ =="__ main__":
-    FileNameAndPath = 'D:/Dropbox/PostdocTAMU/Code/INPUTB'
-    readInputFileB(FileNameAndPath)
+    return JSEED,NLS,IW1,IW2,IW3,KWHERE,KVWHEN,KVSTAT,KVTYPE,KVLOC,\
+        CVTEST,FINISH,JSTEP,JFREQ,MAXEUE,IOI,IOJ,IREM,INTV,IREPD,IREPM,\
+        SNRI,NAR,RATES,ID,\
+        SNRI_ZZUD, NAT, NAR_ZZUD, HRLOAD, ID_ZZUD, \
+        SNRI_ZZTD, ID_ZZTD, NAR_ZZTD, NAE, ADM, CAP, CAPR, PROP
