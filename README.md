@@ -28,3 +28,11 @@ One output file (named as 'OUTPUT') contains:
 1) System descriptions (rephrased and re-arranged information extracted from INPUTB file), e.g., how many areas are contained.
 2) Chosen method options, e.g., Specifications for convergence test of the Monte Carlo simulation.
 3) Summary of numerical results: summary statistics (LOLE, HLOLE, EUE) for the pool (all areas); (discrete) probability distribution table (LOLE, HLOLE, EUE) for each area; other meta-information during calculation or Monte Carlo simulation.
+
+## License
+
+The source code for the site is licensed under the MIT license, which you can find in
+the MIT-LICENSE.txt file.
+
+All graphical assets are licensed under the
+[Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/).
