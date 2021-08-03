@@ -29,6 +29,12 @@ The output of the simulation will contain:
 2) Chosen method options, e.g., Specifications for convergence test of the Monte Carlo simulation.
 3) Summary of numerical results: summary statistics (LOLE, HLOLE, EUE) for the pool (all areas); (discrete) probability distribution table (LOLE, HLOLE, EUE) for each area; other meta-information during calculation or Monte Carlo simulation.
 
+# Flowchart
+
+(up to refine or change)
+
+![Flowchart_high_level](https://user-images.githubusercontent.com/45750983/127577146-133cb8a9-1fc3-48eb-bfd2-6d0f5a0d057e.png)
+
 ## License
 
 The source code for the site is licensed under the MIT license, which you can find in
