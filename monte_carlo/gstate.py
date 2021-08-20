@@ -1,10 +1,9 @@
 import numpy as np 
 
-def gstate(NUNITS, PROBG, RATING, DERATE, PLNDST):
+def gstate(PROBG, RATING, DERATE, PLNDST):
     """
     It samples the state of available capacity for each generator up to NUNITS
     
-    :param int NUNITS: total number of generator units
     :param array PROBG: 2D array of accumulated probability for each capacity tier of each unit
     :param array DERATE: array of the derated capacity of each unit
     :param array RATING:  array of the fully rated capacity of each unit
@@ -22,7 +21,7 @@ def gstate(NUNITS, PROBG, RATING, DERATE, PLNDST):
              break a critical implicit requirement for the Monte Carlo simulation -- 
              "generated random numbers should be mutually independent."
     """    
-
+    NUNITS = len(PROBG)
     print("Enter subroutine gstate, total number of Gen units is %d" % (NUNITS))
     
     PCTAVL = np.zeros((NUNITS,1))
