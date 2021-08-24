@@ -7,16 +7,16 @@ def xldnew(FileNameAndPath, PKLOAD):
     and normalize to per unit load profile. Then, re-scale it based on the user-defined
     annual peak of each area.
 
-    :param string FileNameAndPath: full file path for the input file 'LEEI '
-    :param float PKLOAD: array of user-defined annual peak of each area.
+    :param str FileNameAndPath: full file path for the input file 'LEEI '
+    :param np.arrays PKLOAD: array of user-defined annual peak of each area.
     :return: (*np.arrays*) HRLOAD -- 2D array of hourly load data
                                      (0-dim: area index, 1-dim: hour index)
 
-    Note: the hardcoded number "8760" is OK in this code package.
-    Because for Monte Carlo Simulation in reliability analysis area, researchers does not
-    try to simulate "real-life year", but purely for statistic purpose. In fact,
-    each reliability index is eventually an averaged number. So, the leap year is not
-    a concern in this area.
+    .. note:: the hardcoded number "8760" is OK in this code package.
+        Because for Monte Carlo Simulation in reliability analysis area, researchers does not
+        try to simulate "real-life year", but purely for statistic purpose. In fact,
+        each reliability index is eventually an averaged number. So, the leap year is not
+        a concern in this area.
     """
 
     # Read file LEEI and parsing
