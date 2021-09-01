@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-install_requires = ["numpy"]
+install_requires = ["numpy", "pytest-benchmark"]
 
 setup(
     name="reliabilityassessment",
