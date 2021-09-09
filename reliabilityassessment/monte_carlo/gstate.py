@@ -1,5 +1,7 @@
-import numpy as np
 from bisect import bisect_left
+
+import numpy as np
+
 
 def gstate(PROBG, RATING, DERATE, PLNDST):
     """
@@ -19,10 +21,15 @@ def gstate(PROBG, RATING, DERATE, PLNDST):
 
     PCTAVL = np.zeros((NUNITS, 1))
     AVAIL = np.zeros((NUNITS, 1))
-    
+
     # Vectorized operation utilizing the bisect API
-    aux = {i:{0:1, 1:d, 2:0} for i, d in enumerate(DERATE)}
-    PCTAVL = np.array([aux[i][bisect_left(PROBG[i], x)] for i,x in enumerate(np.random.rand(len(PROBG)))])
-    AVAIL = (PCTAVL * RATING * PLNDST).reshape(-1,1)
-    
+    aux = {i: {0: 1, 1: d, 2: 0} for i, d in enumerate(DERATE)}
+    PCTAVL = np.array(
+        [
+            aux[i][bisect_left(PROBG[i], x)]
+            for i, x in enumerate(np.random.rand(len(PROBG)))
+        ]
+    )
+    AVAIL = (PCTAVL * RATING * PLNDST).reshape(-1, 1)
+
     return PCTAVL, AVAIL
