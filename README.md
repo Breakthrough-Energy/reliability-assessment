@@ -35,7 +35,7 @@ The output of the simulation will contain:
 
 ![Flowchart_high_level](https://user-images.githubusercontent.com/45750983/127577146-133cb8a9-1fc3-48eb-bfd2-6d0f5a0d057e.png)
 
-## Features
+## Features (last updated on Sep.27.2021)
 |  | NARP (Ours) | PRAS (NREL) | Impact on Reliability Indices |
 | ------------- | ------------- | ------------- | ------------- |
 | Transmission model | Consider admittance | Not consider admittance <br /> (only capacity based) | More optimistic (PRAS) |
