@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 
 import numpy as np
 import pandas as pd
@@ -10,7 +11,8 @@ def read_card_ZZTC(filepath):
     under this card is simply reproduced. This is the only formatted card in this file.
 
     :param str filepath: root file path for input csvs.
-    :return: (*str*) -- the title string
+    :return: (*dict*) -- A nested ython dictionary for each data card (INPUTB file). Originally,
+                         each data card contain either a single value or multiple arrays.
     """
     df_ZZTC = pd.read_csv(os.path.join(filepath, "ZZTC.csv"), header=None).to_numpy()
     data = ". ".join([s[0] for s in df_ZZTC])
@@ -40,6 +42,7 @@ def read_card_ZZMC(filepath):
     """
     data["NLS"] = df_ZZMC["LS"].item()  # 1
 
+
     """
     Ending weeks for the 1st (beginning week is assumed to be the 1st week),
     2nd, 3rd seasons. The ending weeks of the 4th season is assumed as 52
@@ -51,6 +54,7 @@ def read_card_ZZMC(filepath):
         df_ZZMC["END WK3"].item(),
     )
 
+
     # ----------Vars for convergence test--------------
     """
     1: based on area-statistics. The area is specified by the variable KVL below
@@ -58,10 +62,12 @@ def read_card_ZZMC(filepath):
     """
     data["KWHERE"] = df_ZZMC["WHERE"].item()  # e.g. 1
 
+
     """
     1: Hourly statistics are to be used for convergence
     2: Peak statistic are to be used for convergence"""
     data["KVWHEN"] = df_ZZMC["WHEN"].item()  # e.g. 1
+
 
     """
     1: LOLE is to be used for convegence
@@ -71,6 +77,7 @@ def read_card_ZZMC(filepath):
     """
     data["KVSTAT"] = df_ZZMC["KVS"].item()  # e.g. 1
 
+
     """
     1: Weighted average statistcs (cosniderring forecast error)
        is to be used for convegence
@@ -78,10 +85,12 @@ def read_card_ZZMC(filepath):
     """
     data["KVTYPE"] = df_ZZMC["KVT"].item()  # e.g. 2
 
+
     """
     Area number (used only if 'WHERE'=1) for convergence
     """
     data["KVLOC"] = df_ZZMC["KVL"].item()  # e.g. 1
+
 
     """
     0: Program stops when standard deviation of the
@@ -94,11 +103,13 @@ def read_card_ZZMC(filepath):
     """
     data["CVTEST"] = df_ZZMC["CVT"].item()  # e.g. 0.025
 
+
     """
     Time to terminate simulation if no convergence.
     Should be an INT type (years)
     """
     data["FINISH"] = df_ZZMC["FIN"].item()  # e.g. 9999
+
 
     # ---- Other variables
     """
@@ -107,11 +118,13 @@ def read_card_ZZMC(filepath):
     """
     data["JSTEP"] = df_ZZMC["STEP"].item()  # e.g. 1
 
+
     """
     1:  Hourly Monte Carlo draws of generator ;and line status are used
     24: Daily Monte Carlo draws are used
     """
     data["JFREQ"] = df_ZZMC["FREQ"].item()  # e.g. 1
+
 
     """
     Defines the upper limit of the prob distribution of
@@ -121,11 +134,13 @@ def read_card_ZZMC(filepath):
     """
     data["MAXEUE"] = df_ZZMC["MAXE"].item()  # e.g. 1000
 
+
     """
     0: Transmission mod results are not printed.
     1: Transmission mod results are printed into file TRAOUT.
     """
     data["IOI"] = df_ZZMC["II"].item()  # e.g. 0
+
 
     """
     0: Only final statistics are printed.
@@ -134,21 +149,25 @@ def read_card_ZZMC(filepath):
     """
     data["IOJ"] = df_ZZMC["IJ"].item()  # e.g. 0
 
+
     """
     0: Delete DUMP after the run.
     1: Retain DUMP after the run.
     """
     data["IREM"] = df_ZZMC["IR"].item()  # e.g. 1
 
+
     """
     Interval, in number of replications, for storing
     """
     data["INTV"] = df_ZZMC["IN"].item()  # e.g. 5
 
+
     """
     0: Input data from INPUTB and INPUTC is not printed.
     1: Input data is printed."""
     data["IREPD"] = df_ZZMC["D"].item()  # 1
+
 
     """
     0: Planned outage schedules are not printed.
@@ -157,6 +176,7 @@ def read_card_ZZMC(filepath):
     data["IREPM"] = df_ZZMC["M"].item()  # e.g. 1
 
     return data
+
 
 
 def read_card_ZZLD(filepath):
@@ -184,6 +204,7 @@ def read_card_ZZLD(filepath):
     through INPUTC file.
     """
     data["SNRI"] = df_ZZLD["SN"].astype(int).to_numpy()
+    
 
     """
     The name of the area. It can have up to four letters and
@@ -191,16 +212,19 @@ def read_card_ZZLD(filepath):
     """
     data["NAR"] = df_ZZLD["AREA NAME"].to_numpy()
 
+
     """
     Annual peak in the area, in MW.
     """
     RATES[:, 0] = df_ZZLD["PEAK (MW)"].to_numpy()
+
 
     """
     Load forecast uncertainty (LFU).
     One standard deviation expressed as percentage of the mean
     """
     RATES[:, 1] = df_ZZLD["LFU"].to_numpy()
+
 
     """
     Outage Window.
@@ -212,6 +236,7 @@ def read_card_ZZLD(filepath):
         df_ZZLD["OUTAGE BEG WK"].to_numpy(),
         df_ZZLD["OUTAGE END WK"].to_numpy(),
     )
+
 
     """
     Forbidden Period.
@@ -225,11 +250,15 @@ def read_card_ZZLD(filepath):
         df_ZZLD["FORBIDDEN END WK"].to_numpy(),
     )
 
+
     """
     Sum of Flows Constraint.
     The algebraic sum of flows at this node is not to exceed this value.
     """
     RATES[:, 2] = df_ZZLD["SUM OF FLOWS CONSTRAINT"].to_numpy()
+    inputB_dict["ZZLD"]["RATES"] = RATES
+    inputB_dict["ZZLD"]["ID"] = ID
+
     data["RATES"] = RATES
     data["ID"] = ID
 
@@ -256,16 +285,19 @@ def read_card_ZZUD(filepath):
     """
     data["SNRI"] = df_ZZUD["SN"].astype(int).to_numpy()
 
+
     """
     Unit name is six alphanumeric characters. The first four letters are the plant
     number and the next two numbers identify the unit.
     """
     data["NAT"] = df_ZZUD["NAME"].to_numpy()
 
+
     """
     Area of location
     """
     data["NAR"] = df_ZZUD["LOC"].to_numpy()
+
 
     """
     Unit capacity, MW, in the ith season (see ZZLD)
@@ -353,15 +385,18 @@ def read_card_ZZTD(filepath):
     """
     data["SNRI"] = df_ZZTD["SN"].to_numpy()
 
+
     """
     Line Id
     """
     data["LineID"] = df_ZZTD["Line No."].to_numpy()
 
+
     """
     Name of From area
     """
     data["NAR"] = df_ZZTD["From Area"].to_numpy()
+
 
     """
     Name of To area
