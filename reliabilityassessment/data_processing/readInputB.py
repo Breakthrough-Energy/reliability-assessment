@@ -21,19 +21,21 @@ def read_card_ZZTC(filepath):
 
 def read_card_ZZMC(filepath):
     """ZZMC: miscellaneous card.
-    The basic seed used by the program to create seeds for generators and
-    transmission lines, a 7-digit integer.
 
     :param str filepath: root file path for input csvs.
     :return: (*dict*) -- a dictionary contains info from the raw data frame with
         designated keys.
-
-    .. note:: this may be useless in Python since random number can be easily generated.
-        Will remove it later
     """
+    
     df_ZZMC = pd.read_csv(os.path.join(filepath, "ZZMC.csv"))
     data = dict()
-
+    
+    """
+    The basic seed used by the program to create seeds for generators and
+    transmission lines, a 7-digit integer.
+    This may be useless in Python since random number can be easily generated.
+    Will remove it later
+    """
     data["JSEED"] = df_ZZMC["SEED"].item()  # e.g. 345237
 
     """
@@ -272,8 +274,10 @@ def read_card_ZZUD(filepath):
     :return: (*dict*) -- a dictionary contains info from the raw data frame with
         designated keys.
     """
+
     df_ZZUD = pd.read_csv(os.path.join(filepath, "ZZUD.csv"))
     data = dict()
+
 
     # Note: the original Fortran code set the HRLOAD array as INT type;
     # Here, I use float type for it.
