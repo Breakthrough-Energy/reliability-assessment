@@ -36,7 +36,7 @@ If this margin is positive for all areas, the clock advances to the next hour, a
 
 	1. First, a load flow is conducted using area loss injections associated with net scheduled transfers as well as injections associated with desired emergency transfers. If this load flow can be solved without violation of transmission capacity limits, the clock is advanced to the next hour. 
 
-	2. Otherwise, a linear programming approach is employed to find a feasible load flow solution or minimize the amount of load loss. _(The linear programming approach can consider two modes of emergency assistance: loss-sharing or no-loss sharing. Further, the linear programming approach can enforce constraints on the sum of flows around each area.)_ If load loss persists after the optimization step, load-loss statistics are collected. 
+	2. Otherwise, a linear programming approach is employed to find a feasible load flow solution or minimize the amount of load loss. _(The linear programming approach can consider two modes of emergency assistance: loss-sharing or no-loss sharing. Further, the linear programming approach can enforce constraints on the sum of flows around each area.)_ **If load loss persists after the optimization step, load-loss statistics are collected.**
 
 8) The simulation process is continued until the specified number of years have been simulated or the specified convergence criterion has been satisfied.
 
