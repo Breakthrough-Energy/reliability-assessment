@@ -3,7 +3,7 @@ Reliability Assessment Module
 
 **This readme file will get continuous updating based on the development progress. The description of the method logic and the input/output data formats are subjected to change based on later code-optimization during the development.**
 
-This project is starting by porting an original Fortran-based power system reliability assessment program ('NARP') to Python. The program will calculate several useful reliability indices, including LOLE (Loss of Load Expectations),  Hourly LOLE (HLOLE in short), EUE (Expected Unserved Energy, in kWh or MWh) for transmission power systems. Those reliability indices measure the availability of generation and transmission capacity given a preset table of failure probabilities.
+The goal of this project is to port an original Fortran-based power system reliability assessment program ('NARP') to Python. The program will calculate several useful reliability indices, including LOLE (Loss of Load Expectations),  Hourly LOLE (HLOLE in short), EUE (Expected Unserved Energy, in kWh or MWh) for transmission power systems. Those reliability indices measure the availability of generation and transmission capacity given a preset table of failure probabilities.
 
 ## General Program Logic
 The simulation proceeds sequentially in chronological order. As the target is to compute hourly relibility indices, the temporal granularity of the simulation is hourly. Daily peak reliability indices are calculated in a similar way except the process only steps through daily peaks, which is defined as the time of interconnected system peak. 
