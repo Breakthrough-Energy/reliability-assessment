@@ -10,12 +10,10 @@ def thetac(THET,THETC,LT,NN):
     
     :return: (*None*)
     """
-    NX=NN-1
-    
     for i in range(NN):
         THETC[i] = 0.
     
-    for i in range(NX):
+    for i in range(NN-1):
         j = LT[i]
         THETC[j] = THET[i]
     
