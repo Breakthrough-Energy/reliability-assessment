@@ -1,14 +1,14 @@
 
 def thetac(THET,THETC,LT,NN):
     """
-    This subroutine generates vector THETC of bus angles.
-    for all buses including ref bus.
+    Generates vector of bus angles for all buses including ref bus
     
-    THET(I) CONTAINS ANGLE AT NODE I OF THE ADM MATRIX
-    LT(I) CONTAINS THE ACTUAL NODE CORRESPONDING TO NODE
-    I OF THE ADM MATRIX
+    :param numpy.ndarray THET: angle at node i of the ADM matrix
+    :param numpy.ndarray THETC: angle for actual node corresponding to node i of the ADM matrix
+    :param numpy.ndarray LT: actual node corresponding to node i of the ADM matrix
+    :param int NN: number of nodes
     
-    return THETC
+    :return: (*None*)
     """
     NX=NN-1
     
