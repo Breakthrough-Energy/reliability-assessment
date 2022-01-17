@@ -407,7 +407,8 @@ def read_card_ZZTD(filepath):
     """
     data["NAE"] = df_ZZTD["To Area"].to_numpy()
 
-    tmp = df_ZZTD["Meta data"].to_numpy()
+
+    tmp = df_ZZTD["META DATA"].to_numpy()
     for i in range(len(tmp)):
         tmp_ = np.array(list(map(float, tmp[i].strip().split(",")))).reshape((6, 4))
         ADM[i, :] = tmp_[:, 0]
@@ -424,33 +425,118 @@ def read_card_ZZTD(filepath):
 
 
 def read_card_ZZFC():
-    """ZZFC: firm contracts data card
+    """
+    ZZFC: firm contracts data card
     This card is to specify firm interchanges of power between areas. The following
     format is used for input of these interchanges
+    
+    ** ZZFC data is not required and is given now **.
+    Default values (zero , empty , None, etc.) will be given here
     """
-    pass
+    
+    df_ZZFC = pd.read_csv(os.path.join(FilePath, "ZZFC.csv"))
+    data = dict()
+    
+    """
+    Serial number
+    """
+    data["SNRI"] = df_ZZFC["SN"].to_numpy()
+    
+    """
+    Name of From area sending power
+    """
+    data["NAR"] = df_ZZFC["FROM AREA"].to_numpy()
+    
+    """
+    Name of To area receiving power
+    """
+    data["NAE"] = df_ZZFC["TO AREA"].to_numpy()
+    
+    """
+    Beginning and ending days (1 to 365) of the contract.
+    """
+    data["BEG DAY"] = df_ZZFC["BEG DAY"].to_numpy()
+    data["END DAY"] = df_ZZFC["END DAY"].to_numpy()   
+    
+    """
+    Exchanged power (MW) of the firm interchange (power) during the period.
+    """
+    data["MW"] = df_ZZFC["MW"].to_numpy()
+    
+    return data
+
 
 
 def read_card_ZZOD():
-    """ZZOD: unit ownership data card
-    This card is to specify the joint ownership of a unit by several areas.
     """
-    pass
+    ZZOD: unit ownership data card
+    This card is to specify the joint ownership of a unit by several areas.
+
+    ** ZZOD data is NOT required and is not given now **.
+    Default values (zero , empty , None, etc.) will be used here
+    """
+   
+    df_ZZOD = pd.read_csv(os.path.join(FilePath, "ZZOD.csv"))
+    data = dict()
+    
+    """
+    Serial number
+    """
+    data["SNRI"] = df_ZZOD["SN"].to_numpy()
+
+    """
+    Name of the (jointly owned) unit
+    """
+    data["NAT"] = df_ZZOD["UNIT NAME"].to_numpy()
+
+    """
+    Percentage ownership by each area
+    """
+    data["PERCENT"] = df_ZZOD["PERCENT OWNED BY AREA"].to_numpy()
+    
+    return data
 
 
 def read_card_ZZDD():
-    """ZZDD: line derarting data card
+    """
+    ZZDD: line derarting data card
     Status of certain units can effect the line rating. For a given line, four units
     can be specified in a combination such that if all the units in the combination
     are down, then the line ratings will be multiplied by the derating factors. For
     a given line, more than one combination can be specified.
+    
+    ** ZZDD data is NOT required and is not given now **.
+    Default values (zero , empty , None, etc.) will be used here
     """
-    pass
+    
+    df_ZZDD = pd.read_csv(os.path.join(FilePath, "ZZDD.csv"))
+    data = dict()
+    
+    """
+    Serial number
+    """
+    data["SNRI"] = df_ZZDD["SN"].to_numpy()
 
+    """
+    Line number
+    """
+    data["LineID"] = df_ZZDD["LINE NUMBER"].to_numpy()
 
-def read_card_ZZND():
-    """ZZND: terminating card (The end of INPUT-B file)"""
-    pass
+    """
+    Four related generator unit name
+    """
+    data["unit1_name"] = df_ZZDD["UNIT1"].to_numpy()
+    data["unit2_name"] = df_ZZDD["UNIT2"].to_numpy()
+    data["unit3_name"] = df_ZZDD["UNIT3"].to_numpy()
+    data["unit4_name"] = df_ZZDD["UNIT4"].to_numpy()
+
+    """
+    Derate factors
+    """
+    data["forward_derate"] = df_ZZDD["FORWARD"].to_numpy()
+    data["backward_derate"] = df_ZZDD["BACKWARD"].to_numpy()   
+    
+    return data
 
 
 def readInputB(filepath):
@@ -467,5 +553,8 @@ def readInputB(filepath):
     inputB_dict["ZZLD"] = read_card_ZZLD(filepath)
     inputB_dict["ZZUD"] = read_card_ZZUD(filepath)
     inputB_dict["ZZTD"] = read_card_ZZTD(filepath)
+    inputB_dict["ZZFC"] = read_card_ZZLD(filepath)
+    inputB_dict["ZZOD"] = read_card_ZZUD(filepath)
+    inputB_dict["ZZDD"] = read_card_ZZTD(filepath)    
 
     return inputB_dict
