@@ -68,7 +68,7 @@ The output of the simulation will contain:
 
 (up to refine or change)
 
-![Flowchart_high_level](https://user-images.githubusercontent.com/45750983/127577146-133cb8a9-1fc3-48eb-bfd2-6d0f5a0d057e.png)
+![Flowchart_updated_wtih_tm2](https://user-images.githubusercontent.com/45750983/150057615-bd7f2817-09af-4798-b0cd-7cb6d170429b.gif)
 
 ## Features (last updated on Sep.27.2021)
 |  | NARP (Ours) | PRAS (NREL) | Impact on Reliability Indices |
