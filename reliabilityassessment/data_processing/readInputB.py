@@ -1,18 +1,18 @@
 import os
-from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 
 
 def read_card_ZZTC(filepath):
-    """ZZTC: title card
+    """
+    ZZTC: title card
     The purpose of this card is to provide a title in the final output. Data inserted
     under this card is simply reproduced. This is the only formatted card in this file.
 
     :param str filepath: root file path for input csvs.
-    :return: (*dict*) -- A nested ython dictionary for each data card (INPUTB file). Originally,
-                         each data card contain either a single value or multiple arrays.
+    :return: (*string*) -- A string describes some basic information about
+                            the studied power system (e.g., how many areas).
     """
     df_ZZTC = pd.read_csv(os.path.join(filepath, "ZZTC.csv"), header=None).to_numpy()
     data = ". ".join([s[0] for s in df_ZZTC])
@@ -20,16 +20,17 @@ def read_card_ZZTC(filepath):
 
 
 def read_card_ZZMC(filepath):
-    """ZZMC: miscellaneous card.
+    """
+    ZZMC: miscellaneous card.
 
     :param str filepath: root file path for input csvs.
-    :return: (*dict*) -- a dictionary contains info from the raw data frame with
-        designated keys.
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
+                         designated keys.
     """
-    
+
     df_ZZMC = pd.read_csv(os.path.join(filepath, "ZZMC.csv"))
     data = dict()
-    
+
     """
     The basic seed used by the program to create seeds for generators and
     transmission lines, a 7-digit integer.
@@ -44,7 +45,6 @@ def read_card_ZZMC(filepath):
     """
     data["NLS"] = df_ZZMC["LS"].item()  # 1
 
-
     """
     Ending weeks for the 1st (beginning week is assumed to be the 1st week),
     2nd, 3rd seasons. The ending weeks of the 4th season is assumed as 52
@@ -56,7 +56,6 @@ def read_card_ZZMC(filepath):
         df_ZZMC["END WK3"].item(),
     )
 
-
     # ----------Vars for convergence test--------------
     """
     1: based on area-statistics. The area is specified by the variable KVL below
@@ -64,12 +63,10 @@ def read_card_ZZMC(filepath):
     """
     data["KWHERE"] = df_ZZMC["WHERE"].item()  # e.g. 1
 
-
     """
     1: Hourly statistics are to be used for convergence
     2: Peak statistic are to be used for convergence"""
     data["KVWHEN"] = df_ZZMC["WHEN"].item()  # e.g. 1
-
 
     """
     1: LOLE is to be used for convegence
@@ -79,7 +76,6 @@ def read_card_ZZMC(filepath):
     """
     data["KVSTAT"] = df_ZZMC["KVS"].item()  # e.g. 1
 
-
     """
     1: Weighted average statistcs (cosniderring forecast error)
        is to be used for convegence
@@ -87,12 +83,10 @@ def read_card_ZZMC(filepath):
     """
     data["KVTYPE"] = df_ZZMC["KVT"].item()  # e.g. 2
 
-
     """
     Area number (used only if 'WHERE'=1) for convergence
     """
     data["KVLOC"] = df_ZZMC["KVL"].item()  # e.g. 1
-
 
     """
     0: Program stops when standard deviation of the
@@ -105,13 +99,11 @@ def read_card_ZZMC(filepath):
     """
     data["CVTEST"] = df_ZZMC["CVT"].item()  # e.g. 0.025
 
-
     """
     Time to terminate simulation if no convergence.
     Should be an INT type (years)
     """
     data["FINISH"] = df_ZZMC["FIN"].item()  # e.g. 9999
-
 
     # ---- Other variables
     """
@@ -120,13 +112,11 @@ def read_card_ZZMC(filepath):
     """
     data["JSTEP"] = df_ZZMC["STEP"].item()  # e.g. 1
 
-
     """
     1:  Hourly Monte Carlo draws of generator ;and line status are used
     24: Daily Monte Carlo draws are used
     """
     data["JFREQ"] = df_ZZMC["FREQ"].item()  # e.g. 1
-
 
     """
     Defines the upper limit of the prob distribution of
@@ -136,13 +126,11 @@ def read_card_ZZMC(filepath):
     """
     data["MAXEUE"] = df_ZZMC["MAXE"].item()  # e.g. 1000
 
-
     """
     0: Transmission mod results are not printed.
     1: Transmission mod results are printed into file TRAOUT.
     """
     data["IOI"] = df_ZZMC["II"].item()  # e.g. 0
-
 
     """
     0: Only final statistics are printed.
@@ -151,25 +139,21 @@ def read_card_ZZMC(filepath):
     """
     data["IOJ"] = df_ZZMC["IJ"].item()  # e.g. 0
 
-
     """
     0: Delete DUMP after the run.
     1: Retain DUMP after the run.
     """
     data["IREM"] = df_ZZMC["IR"].item()  # e.g. 1
 
-
     """
     Interval, in number of replications, for storing
     """
     data["INTV"] = df_ZZMC["IN"].item()  # e.g. 5
 
-
     """
     0: Input data from INPUTB and INPUTC is not printed.
     1: Input data is printed."""
     data["IREPD"] = df_ZZMC["D"].item()  # 1
-
 
     """
     0: Planned outage schedules are not printed.
@@ -180,14 +164,14 @@ def read_card_ZZMC(filepath):
     return data
 
 
-
 def read_card_ZZLD(filepath):
-    """ZZLD: system data card
+    """
+    ZZLD: system data card
     Area names are given in four letters. The purpose of this card is to specify
     data applicable to a given area.
 
     :param str filepath: root file path for input csvs.
-    :return: (*dict*) -- a dictionary contains info from the raw data frame with
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
         designated keys.
     """
     df_ZZLD = pd.read_csv(os.path.join(filepath, "ZZLD.csv"))
@@ -206,7 +190,6 @@ def read_card_ZZLD(filepath):
     through INPUTC file.
     """
     data["SNRI"] = df_ZZLD["SN"].astype(int).to_numpy()
-    
 
     """
     The name of the area. It can have up to four letters and
@@ -214,19 +197,16 @@ def read_card_ZZLD(filepath):
     """
     data["NAR"] = df_ZZLD["AREA NAME"].to_numpy()
 
-
     """
     Annual peak in the area, in MW.
     """
     RATES[:, 0] = df_ZZLD["PEAK (MW)"].to_numpy()
-
 
     """
     Load forecast uncertainty (LFU).
     One standard deviation expressed as percentage of the mean
     """
     RATES[:, 1] = df_ZZLD["LFU"].to_numpy()
-
 
     """
     Outage Window.
@@ -238,7 +218,6 @@ def read_card_ZZLD(filepath):
         df_ZZLD["OUTAGE BEG WK"].to_numpy(),
         df_ZZLD["OUTAGE END WK"].to_numpy(),
     )
-
 
     """
     Forbidden Period.
@@ -252,14 +231,11 @@ def read_card_ZZLD(filepath):
         df_ZZLD["FORBIDDEN END WK"].to_numpy(),
     )
 
-
     """
     Sum of Flows Constraint.
     The algebraic sum of flows at this node is not to exceed this value.
     """
     RATES[:, 2] = df_ZZLD["SUM OF FLOWS CONSTRAINT"].to_numpy()
-    inputB_dict["ZZLD"]["RATES"] = RATES
-    inputB_dict["ZZLD"]["ID"] = ID
 
     data["RATES"] = RATES
     data["ID"] = ID
@@ -268,16 +244,16 @@ def read_card_ZZLD(filepath):
 
 
 def read_card_ZZUD(filepath):
-    """ZZUD: generator unit data card
+    """
+    ZZUD: generator unit data card
 
     :param str filepath: root file path for input csvs.
-    :return: (*dict*) -- a dictionary contains info from the raw data frame with
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
         designated keys.
     """
 
     df_ZZUD = pd.read_csv(os.path.join(filepath, "ZZUD.csv"))
     data = dict()
-
 
     # Note: the original Fortran code set the HRLOAD array as INT type;
     # Here, I use float type for it.
@@ -289,19 +265,16 @@ def read_card_ZZUD(filepath):
     """
     data["SNRI"] = df_ZZUD["SN"].astype(int).to_numpy()
 
-
     """
     Unit name is six alphanumeric characters. The first four letters are the plant
     number and the next two numbers identify the unit.
     """
     data["NAT"] = df_ZZUD["NAME"].to_numpy()
 
-
     """
     Area of location
     """
     data["NAR"] = df_ZZUD["LOC"].to_numpy()
-
 
     """
     Unit capacity, MW, in the ith season (see ZZLD)
@@ -369,11 +342,12 @@ def read_card_ZZUD(filepath):
 
 
 def read_card_ZZTD(filepath):
-    """ZZTD: line data card
+    """
+    ZZTD: line data card
     The purpose of this card is to specify the data for transmission links.
 
     :param str filepath: root file path for input csvs.
-    :return: (*dict*) -- a dictionary contains info from the raw data frame with
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
         designated keys.
     """
 
@@ -389,24 +363,20 @@ def read_card_ZZTD(filepath):
     """
     data["SNRI"] = df_ZZTD["SN"].to_numpy()
 
-
     """
     Line Id
     """
-    data["LineID"] = df_ZZTD["Line No."].to_numpy()
-
+    data["LineID"] = df_ZZTD["LINE NUMBER"].to_numpy()
 
     """
     Name of From area
     """
-    data["NAR"] = df_ZZTD["From Area"].to_numpy()
-
+    data["NAR"] = df_ZZTD["FROM AREA"].to_numpy()
 
     """
     Name of To area
     """
-    data["NAE"] = df_ZZTD["To Area"].to_numpy()
-
+    data["NAE"] = df_ZZTD["TO AREA"].to_numpy()
 
     tmp = df_ZZTD["META DATA"].to_numpy()
     for i in range(len(tmp)):
@@ -424,61 +394,68 @@ def read_card_ZZTD(filepath):
     return data
 
 
-def read_card_ZZFC():
+def read_card_ZZFC(filepath):
     """
     ZZFC: firm contracts data card
     This card is to specify firm interchanges of power between areas. The following
     format is used for input of these interchanges
-    
+
+    :param str filepath: root file path for input csvs.
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
+        designated keys.
+
     ** ZZFC data is not required and is given now **.
     Default values (zero , empty , None, etc.) will be given here
     """
-    
-    df_ZZFC = pd.read_csv(os.path.join(FilePath, "ZZFC.csv"))
+
+    df_ZZFC = pd.read_csv(os.path.join(filepath, "ZZFC.csv"))
     data = dict()
-    
+
     """
     Serial number
     """
     data["SNRI"] = df_ZZFC["SN"].to_numpy()
-    
+
     """
     Name of From area sending power
     """
     data["NAR"] = df_ZZFC["FROM AREA"].to_numpy()
-    
+
     """
     Name of To area receiving power
     """
     data["NAE"] = df_ZZFC["TO AREA"].to_numpy()
-    
+
     """
     Beginning and ending days (1 to 365) of the contract.
     """
     data["BEG DAY"] = df_ZZFC["BEG DAY"].to_numpy()
-    data["END DAY"] = df_ZZFC["END DAY"].to_numpy()   
-    
+    data["END DAY"] = df_ZZFC["END DAY"].to_numpy()
+
     """
     Exchanged power (MW) of the firm interchange (power) during the period.
     """
     data["MW"] = df_ZZFC["MW"].to_numpy()
-    
+
     return data
 
 
-
-def read_card_ZZOD():
+def read_card_ZZOD(filepath):
     """
     ZZOD: unit ownership data card
     This card is to specify the joint ownership of a unit by several areas.
 
+    :param str filepath: root file path for input csvs.
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
+        designated keys.
+
     ** ZZOD data is NOT required and is not given now **.
     Default values (zero , empty , None, etc.) will be used here
     """
-   
-    df_ZZOD = pd.read_csv(os.path.join(FilePath, "ZZOD.csv"))
+
+    df_ZZOD = pd.read_csv(os.path.join(filepath, "ZZOD.csv"))
     data = dict()
-    
+
     """
     Serial number
     """
@@ -493,25 +470,29 @@ def read_card_ZZOD():
     Percentage ownership by each area
     """
     data["PERCENT"] = df_ZZOD["PERCENT OWNED BY AREA"].to_numpy()
-    
+
     return data
 
 
-def read_card_ZZDD():
+def read_card_ZZDD(filepath):
     """
     ZZDD: line derarting data card
     Status of certain units can effect the line rating. For a given line, four units
     can be specified in a combination such that if all the units in the combination
     are down, then the line ratings will be multiplied by the derating factors. For
     a given line, more than one combination can be specified.
-    
+
+    :param str filepath: root file path for input csvs.
+    :return: (*dict*) -- a dictionary contains info from the raw dataframe with
+        designated keys.
+
     ** ZZDD data is NOT required and is not given now **.
     Default values (zero , empty , None, etc.) will be used here
     """
-    
-    df_ZZDD = pd.read_csv(os.path.join(FilePath, "ZZDD.csv"))
+
+    df_ZZDD = pd.read_csv(os.path.join(filepath, "ZZDD.csv"))
     data = dict()
-    
+
     """
     Serial number
     """
@@ -534,8 +515,8 @@ def read_card_ZZDD():
     Derate factors
     """
     data["forward_derate"] = df_ZZDD["FORWARD"].to_numpy()
-    data["backward_derate"] = df_ZZDD["BACKWARD"].to_numpy()   
-    
+    data["backward_derate"] = df_ZZDD["BACKWARD"].to_numpy()
+
     return data
 
 
@@ -553,8 +534,8 @@ def readInputB(filepath):
     inputB_dict["ZZLD"] = read_card_ZZLD(filepath)
     inputB_dict["ZZUD"] = read_card_ZZUD(filepath)
     inputB_dict["ZZTD"] = read_card_ZZTD(filepath)
-    inputB_dict["ZZFC"] = read_card_ZZLD(filepath)
-    inputB_dict["ZZOD"] = read_card_ZZUD(filepath)
-    inputB_dict["ZZDD"] = read_card_ZZTD(filepath)    
+    inputB_dict["ZZFC"] = read_card_ZZFC(filepath)
+    inputB_dict["ZZOD"] = read_card_ZZOD(filepath)
+    inputB_dict["ZZDD"] = read_card_ZZDD(filepath)
 
     return inputB_dict
