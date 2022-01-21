@@ -1,3 +1,5 @@
+import numpy as np
+
 def thetac(THET, THETC, LT, NN):
     """
     Generates vector of bus angles for all buses including ref bus
@@ -7,10 +9,7 @@ def thetac(THET, THETC, LT, NN):
     :param numpy.ndarray LT: actual node corresponding to node i of the ADM matrix
     :param int NN: number of nodes
     """
-    for i in range(NN):
-        THETC[i] = 0.0
+    THETC = np.zeros(NN)
 
-    # subtract 1 as "reference" bus ALWAYS has a zero phase angle
-    for i in range(NN - 1):
-        j = LT[i]
-        THETC[j] = THET[i]
+    # last array value is the "reference" bus that ALWAYS has a zero phase angle
+    THETC[LT[:-2]] = THET[:-2]
