@@ -19,5 +19,4 @@ def thetac(THET, LT):
 
     # last array value is the "reference" bus that ALWAYS has a zero phase angle
     THETC[LT[:-1]] = THET[:-1]
-    print(THETC)
     return THETC
