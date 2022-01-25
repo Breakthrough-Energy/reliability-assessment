@@ -14,9 +14,6 @@ def thetac(THET, LT):
     NN = len(THET)
     THETC = np.zeros(NN)
 
-    # subtract 1 to account for zero indexing
-    LT = LT - 1
-
     # last array value is the "reference" bus that ALWAYS has a zero phase angle
     THETC[LT[:-1]] = THET[:-1]
     return THETC

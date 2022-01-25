@@ -7,7 +7,7 @@ def test_thetac():
     # arrange
     NUNITS = 3
     THET = np.array([0.3, 0.5, 0.7])
-    LT = np.array([3, 1, 2])
+    LT = np.array([2, 0, 1])
     # act
     THETC = thetac(THET, LT)
     # assert
