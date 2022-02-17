@@ -1,15 +1,15 @@
 import numpy as np
 
 
-def _admitr(BB, NR, BN):
+def _admitr(BB, BN, NR):
     """
     Remove Ref bus (node) from the admittance matrix
 
-    :param np.ndarray BB: 2D array of the 'B matrix' (i.e., admittance matrix)
+    :param numpy.ndarray BB: 2D array of the 'B matrix' (i.e., admittance matrix)
                                   size: # Area-by-# Area
                           at input stage, BB  contains the entire YBUS matrix
                           at output stage, BB  contains YBUS matrix without the REF bus
-    :param np.ndarray BN(I,J): for bus (i.e., area) I,
+    :param numpy.ndarray BN(I,J): for bus (i.e., area) I,
              J=0   bus number
              J=1   load (MW) at bus I
              J=2   generation (MW) at bus  I
@@ -21,7 +21,7 @@ def _admitr(BB, NR, BN):
              LT: array recording the original bus no.
     """
 
-    NN = BB.shape[0]  # :param int NN: total numebr of buese (i.e., areas)
+    NN = BB.shape[0]  # total numebr of buses (i.e., areas)
     NX = NN - 1
 
     BT = np.zeros((NX, NX))
@@ -48,15 +48,15 @@ def _admitr(BB, NR, BN):
     return BB, LT
 
 
-def admitr(BB, NR, BN):
+def admitr(BB, BN, NR):
     """
     Remove Ref bus (node) from the admittance matrix
 
-    :param np.ndarray BB: 2D array of the 'B matrix' (i.e., admittance matrix)
+    :param numpy.ndarray BB: 2D array of the 'B matrix' (i.e., admittance matrix)
                                   size: # Area-by-# Area
                           at input stage, BB  contains the entire YBUS matrix
                           at output stage, BB  contains YBUS matrix without the REF bus
-    :param np.ndarray BN(I,J): for bus (i.e., area) I,
+    :param numpy.ndarray BN(I,J): for bus (i.e., area) I,
              J=0   bus number
              J=1   load (MW) at bus I
              J=2   generation (MW) at bus  I
@@ -68,7 +68,7 @@ def admitr(BB, NR, BN):
              LT: array recording the original bus no.
     """
 
-    NN = BB.shape[0]  # :param int NN: total numebr of buese (i.e., areas)
+    NN = BB.shape[0]  # total numebr of buses (i.e., areas)
     LT = np.zeros((NN,))
     NX = NN - 1
     ii = 0
