@@ -3,17 +3,16 @@ import numpy as np
 
 def _dpeak(HRLOAD, hour_within_day=24):
     """
-    Find daily peaks and hour of daily peaks
+    Find daily peaks (MW) and hour (index) of those peaks
 
-    NOAREA: total number of areas
-    HRLOAD: 2D array of annual (hourly) load profile
+    :param numpy.ndarray HRLOAD: 2D array of hourly load data
+                         (0-dim: area index, 1-dim: hour index (1~8760 hr))
 
     return (*tuple*) -- a tuple of multiple arrays, i.e.,
-        DYLOAD: 2D array, daily peak load amount (MW)
-        MAXHR: 2D array, daily peak load hour index
-        (not in the range of 1 to 24 but in the range 1 to 8760;
-        also note that python index starts from 0)
-
+                    DYLOAD: 2D array, daily peak load amount (MW)
+                    MAXHR: 2D array, daily peak load hour index
+                    (not in the range of 1 to 24 but in the range 1 to 8760;
+                    also note that python index starts from 0)
     """
     NOAREA = HRLOAD.shape[0]
     day_within_year = HRLOAD.shape[1] // hour_within_day
@@ -35,17 +34,16 @@ def _dpeak(HRLOAD, hour_within_day=24):
 
 def dpeak(HRLOAD, hour_within_day=24):
     """
-    Find daily peaks and hour of daily peaks
+    Find daily peaks (MW) and hour (index) of those peaks
 
-    NOAREA: total number of areas
-    HRLOAD: 2D array of annual (hourly) load profile
+    :param numpy.ndarray HRLOAD: 2D array of hourly load data
+                         (0-dim: area index, 1-dim: hour index (1~8760 hr))
 
     return (*tuple*) -- a tuple of multiple arrays, i.e.,
-        DYLOAD: 2D array, daily peak load amount (MW), in the shape of ((NOAREA, 365))
-        MAXHR: 2D array, daily peak load hour index, in the shape of ((NOAREA, 365))
-        (not in the range of 1 to 24 but in the range 1 to 8760;
-        also note that python index starts from 0)
-
+                    DYLOAD: 2D array, daily peak load amount (MW)
+                    MAXHR: 2D array, daily peak load hour index
+                    (not in the range of 1 to 24 but in the range 1 to 8760;
+                    also note that python index starts from 0)
     """
     NOAREA = HRLOAD.shape[0]
 
