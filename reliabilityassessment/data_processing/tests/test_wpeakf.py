@@ -1,6 +1,6 @@
 import numpy as np
 
-from reliabilityassessment.data_processing.wpeakf import wpeakf
+from reliabilityassessment.data_processing.wpeakf import _wpeakf, wpeakf
 
 
 def test_wpeakf():
@@ -17,6 +17,8 @@ def test_wpeakf():
     WPEAK_truth_2 = np.hstack((np.ones(51) * 1.0, 101.0))
     WPEAK_truth = np.vstack((WPEAK_truth_1, WPEAK_truth_2))
 
-    WPEAK = wpeakf(DYLOAD)
+    _WPEAK = _wpeakf(DYLOAD)  # vanilla verison
+    np.testing.assert_array_equal(_WPEAK, WPEAK_truth)
 
+    WPEAK = wpeakf(DYLOAD)  # vectorized version
     np.testing.assert_array_equal(WPEAK, WPEAK_truth)
