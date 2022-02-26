@@ -1,6 +1,7 @@
 import numpy as np
 
 
+# vanilla version
 def _admitr(BB, BN, NR):
     """
     Remove Ref bus (node) from the admittance matrix
@@ -48,6 +49,7 @@ def _admitr(BB, BN, NR):
     return BB, LT
 
 
+# vectorized version
 def admitr(BB, BN, NR):
     """
     Remove Ref bus (node) from the admittance matrix
@@ -68,18 +70,7 @@ def admitr(BB, BN, NR):
              LT: array recording the original bus no.
     """
 
-    NN = BB.shape[0]  # total numebr of buses (i.e., areas)
-    LT = np.zeros((NN,))
-    NX = NN - 1
-    ii = 0
-
-    for i in range(NN):
-        if i == NR:
-            continue
-        LT[ii] = BN[i, 0]
-        ii += 1
-    LT[NX] = NR
-
+    LT = np.append(np.delete(BN[:, 0], NR), BN[NR, 0])
     BB = np.delete(np.delete(BB, obj=NR, axis=0), obj=NR, axis=1)
 
     return BB, LT
