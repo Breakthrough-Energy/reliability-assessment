@@ -1,0 +1,141 @@
+from pathlib import Path
+
+import numpy as np
+
+from reliabilityassessment.data_preprcossing.datax import datax
+from reliabilityassessment.data_preprcossing.readInputB import readInputB
+
+
+def test_datax():
+
+    TEST_DIR = str(Path(__file__).parent.absolute())
+    inputB_dict = readInputB(TEST_DIR)
+
+    (
+        QTR,
+        NORR,
+        NFCST,
+        NOAREA,
+        PKLOAD,
+        FU,
+        MINRAN,
+        MAXRAN,
+        INHBT1,
+        INHBT2,
+        BN,
+        SUSTAT,
+        FCTERR,
+        PROBD,
+        CAPOWN,
+        NOGEN,
+        PROBG,
+        DERATE,
+        JENT,
+        INTCH,
+        INTCHR,
+        LP,
+        LINENO,
+        PROBL,
+        BLPA,
+        MXCRIT,
+        JCRIT,
+    ) = datax(inputB_dict)
+
+    QTR_ = np.array([13 * 168 + 0.5, 26 * 168 + 0.5, 39 * 168 + 0.5]).astype("int")
+    assert QTR_ == QTR
+    NORR_ = 1
+    assert NORR_ == NORR
+    NFCST_ = 1
+    assert NFCST_ == NFCST
+    NOAREA_ = 2
+    assert NOAREA_ == NOAREA
+
+    PKLOAD_ = np.array([3000.0, 3000.0])
+    np.testing.assert_array_equal(PKLOAD_, PKLOAD)
+
+    FU_ = np.array([0.0, 0.0])
+    np.testing.assert_array_equal(FU_, FU)
+
+    MINRAN_ = np.array([1, 1], dtype=int)
+    np.testing.assert_array_equal(MINRAN_, MINRAN)
+    MAXRAN_ = np.array([52, 52], dtype=int)
+    np.testing.assert_array_equal(MAXRAN_, MAXRAN)
+
+    INHBT1_ = np.array([31, 31], dtype=int)
+    np.testing.assert_array_equal(INHBT1_, INHBT1)
+    INHBT2_ = np.array([32, 32], dtype=int)
+    np.testing.assert_array_equal(INHBT2_, INHBT2)
+
+    BN_ = np.array([[0, 0, 0, 30000.0, 30000.0], [1, 0, 0, 30000.0, 30000.0]])
+    np.testing.assert_array_equal(BN_, BN)
+
+    SUSTAT_ = np.array([[30000.0, 0, 0, 0, 0, 0], [30000.0, 0, 0, 0, 0, 0]])
+    np.testing.assert_array_equal(SUSTAT_, SUSTAT)
+
+    FCTERR_ = np.array([[1.0, 1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0, 1.0]])
+    np.testing.assert_array_equal(FCTERR_, FCTERR)
+
+    PROBD_ = np.array([0.067, 0.242, 0.382, 0.242, 0.067])
+    np.testing.assert_array_equal(PROBD_, PROBD)
+
+    CAPOWN_ = np.array([[1, 0], [0, 1]], dtype=int)
+    np.testing.assert_array_equal(CAPOWN_, CAPOWN)
+
+    NOGEN_ = 2
+    assert NOGEN_ == NOGEN
+
+    PROBG_ = np.array([[0.98, 0.98], [0.98, 0.98]])
+    np.testing.assert_array_equal(PROBG_, PROBG)
+
+    DERATE_ = np.array([0.0, 0.0])
+    np.testing.assert_array_equal(DERATE_, DERATE)
+
+    JENT_ = np.array([-1, -1], [-1, -1], dtype=int)
+    np.testing.assert_array_equal(JENT_, JENT)
+
+    INTCH_ = np.zeros((60, 365))  # 60 is the maium posobel conut of fixed contracts
+    np.testing.assert_array_equal(INTCH_, INTCH)
+
+    INTCHR_ = np.zeros((60, 2))  # 60 is the maium posobel conut of fixed contracts
+    np.testing.assert_array_equal(INTCHR_, INTCHR)
+
+    LP_ = np.array([0, 0, 1], dtype=int)
+    np.testing.assert_array_equal(LP_, LP)
+
+    LINENO_ = np.array([0, 1], [0, 0], dtype=int)
+    np.testing.assert_array_equal(LINENO_, LINENO)
+
+    PROBL_ = np.array([[0], [0], [0], [0], [0], [0]])
+    np.testing.assert_array_equal(PROBL_, PROBL)
+
+    BLPA_ = np.array(
+        [
+            [
+                -120.0,
+                300.0,
+                300.0,
+                -60.0,
+                150.0,
+                150.0,
+                0.0,
+                0.0,
+                0.0,
+                -80.0,
+                150.0,
+                150.0,
+                -40.0,
+                100.0,
+                100.0,
+                -20.0,
+                50.0,
+                50.0,
+            ]
+        ]
+    )
+    np.testing.assert_array_equal(BLPA_, BLPA)
+
+    MXCRIT_ = np.array([[0.9216], [0.9984], [1.0], [1.0], [1.0], [1.0]])
+    assert MXCRIT_ == MXCRIT
+
+    JCRIT_ = np.zeros((500,))
+    np.testing.assert_array_equal(JCRIT_, JCRIT)

@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 
@@ -15,9 +17,9 @@ def datax(inputB_dict):
     # --------------------------------------------------------------
     # Read JSEED,LOSS SHARING POLICY,ENDING WEEKS OF FOUR SEASONS
     # and create QTR(3) -- HOURS OF THE YEAR FOR QUARTER CHANGE.
-    # ISH = 0 # wariables used to indciate whether to wrtie soem infor to TRAOUT file or not
+    # ISH = 0 # wariables used to indciate whether to wrtie some infor to TRAOUT file or not
     # '0' meanss 'not'
-    QTR = np.zeros((3, 1)).astype("int")
+    QTR = np.zeros((3,)).astype("int")
     QTR[0] = inputB_dict["ZZMC"]["IW1"] * 168 + 0.5
     QTR[1] = inputB_dict["ZZMC"]["IW2"] * 168 + 0.5
     QTR[2] = inputB_dict["ZZMC"]["IW3"] * 168 + 0.5
@@ -30,24 +32,26 @@ def datax(inputB_dict):
     NORR = 1
     NFCST = 1
     NOAREA = len(inputB_dict["ZZLD"]["RATES"])
-    PKLOAD = inputB_dict["ZZLD"]["RATES"][:, 0]  # Annual peak in the area, in MW.
-    FU = inputB_dict["ZZLD"]["RATES"][:, 1]  # forecasting uncertaint
-    MINRAN = inputB_dict["ZZLD"]["ID"][
-        :, 0
-    ]  # BEG WK: Beginning week of the outage window
-    MAXRAN = inputB_dict["ZZLD"]["ID"][
-        :, 1
-    ]  # END WK: Beginning week of the outage window
-    INHBT1 = inputB_dict["ZZLD"]["ID"][
-        :, 2
-    ]  # BEG WK: Beginning week of the Forbidden Period.
-    INHBT2 = inputB_dict["ZZLD"]["ID"][
-        :, 3
-    ]  # END WK: Beginning week of the Forbidden Period.
+    PKLOAD = deepcopy(
+        inputB_dict["ZZLD"]["RATES"][:, 0]
+    )  # Annual peak in the area, in MW.
+    FU = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 1])  # forecasting uncertaint
+    MINRAN = deepcopy(
+        inputB_dict["ZZLD"]["ID"][:, 0]
+    )  # BEG WK: Beginning week of the outage window
+    MAXRAN = deepcopy(
+        inputB_dict["ZZLD"]["ID"][:, 1]
+    )  # END WK: Beginning week of the outage window
+    INHBT1 = deepcopy(
+        inputB_dict["ZZLD"]["ID"][:, 2]
+    )  # BEG WK: Beginning week of the Forbidden Period.
+    INHBT2 = deepcopy(
+        inputB_dict["ZZLD"]["ID"][:, 3]
+    )  # END WK: Beginning week of the Forbidden Period.
 
     BN = np.zeros((NOAREA, 5))
-    BN[:, 3] = inputB_dict["ZZLD"]["RATES"][:, 2]  # Sum of Flows Constraint.
-    BN[:, 4] = inputB_dict["ZZLD"]["RATES"][:, 2]  # Sum of Flows Constraint.
+    BN[:, 3] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 2])  # Sum of Flows Constraint.
+    BN[:, 4] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 2])  # Sum of Flows Constraint.
 
     for fu in FU:
         if fu != 0:
@@ -59,7 +63,9 @@ def datax(inputB_dict):
     BN[:, 2] = 0
 
     SUSTAT = np.zeros((NOAREA, 6))
-    SUSTAT[:, 0] = inputB_dict["ZZLD"]["RATES"][:, 0]  # Annual peak in the area, in MW.
+    SUSTAT[:, 0] = deepcopy(
+        inputB_dict["ZZLD"]["RATES"][:, 0]
+    )  # Annual peak in the area, in MW.
 
     FCTERR = np.zeros((NOAREA, 5))
     FCTERR[:, 2] = 1.0
@@ -90,8 +96,8 @@ def datax(inputB_dict):
     PROBG = np.zeros((NUNITS, 2))
     DERATE = np.zeros((NUNITS,))
     for i in range(NUNITS):
-        j = inputB_dict["ZZUD"]["NAR"]  # idx (int) for area
-        j1 = inputB_dict["ZZUD"]["SNRI"]  # idx (int) for gen. unit
+        j = deepcopy(inputB_dict["ZZUD"]["NAR"])  # idx (int) for area
+        j1 = deepcopy(inputB_dict["ZZUD"]["SNRI"])  # idx (int) for gen. unit
         CAPCON[j1] = j
         CAPOWN[j, j1] = 1.0
         NOGEN[j] = NOGEN[j] + 1
@@ -118,32 +124,32 @@ def datax(inputB_dict):
         IP = -1
         for i in range(len(inputB_dict["ZZFC"])):
             # (from area, to area, begin day, end day, MW)
-            j1 = inputB_dict["ZZFC"][
-                "NAR"
-            ]  # idx (int) for from area (i.e., sending power)
-            j2 = inputB_dict["ZZFC"][
-                "NAE"
-            ]  # idx (int) for to area (i.e., receiving power)
+            j1 = deepcopy(
+                inputB_dict["ZZFC"]["NAR"]
+            )  # idx (int) for from area (i.e., sending power)
+            j2 = deepcopy(
+                inputB_dict["ZZFC"]["NAE"]
+            )  # idx (int) for to area (i.e., receiving power)
             if JENT[j1, j2] == -1:
                 IP = IP + 1
                 JENT[j1, j2] = IP
                 INTCHR[IP, 0] = j1  # INTCHR : recording the from and to area no.
                 INTCHR[IP, 1] = j2  # for the IP-th power transfer contract
-            i1 = inputB_dict["ZZFC"][
-                "BEG DAY"
-            ]  # idx (int) for from area (i.e., sending power)
-            i2 = inputB_dict["ZZFC"][
-                "END DAY"
-            ]  # idx (int) for to area (i.e., receiving power)
+            i1 = deepcopy(
+                inputB_dict["ZZFC"]["BEG DAY"]
+            )  # idx (int) for from area (i.e., sending power)
+            i2 = deepcopy(
+                inputB_dict["ZZFC"]["END DAY"]
+            )  # idx (int) for to area (i.e., receiving power)
             for k in range(i1, i2):  # BEG DAY, END DAY
-                INTCH[JENT[j1, j2], k] = inputB_dict["ZZFC"]["MW"]
+                INTCH[JENT[j1, j2], k] = deepcopy(inputB_dict["ZZFC"]["MW"])
 
     # --------------------------------------------------------------
     # Read ownership of units and create CAPOWN(j,i),
     # fraction of unit i owned by area j
     if inputB_dict["ZZOD"] and len(inputB_dict["ZZOD"]) > 0:
         for i in range(CAPOWN.shape[0]):  # CAPOWN.shape = (NOAREA, NUNITS)
-            CAPOWN[j, :] = inputB_dict["ZZOD"]["PERCENT"]
+            CAPOWN[i, :] = deepcopy(inputB_dict["ZZOD"]["PERCENT"])
 
     # --------------------------------------------------------------
     # Read line data and create
@@ -154,18 +160,24 @@ def datax(inputB_dict):
     NLINES = inputB_dict["ZZTD"].shape[0]
     LINENO = np.zeros((NOAREA, NOAREA))
     LP = np.zeros((NLINES, 3))
-    LP = inputB_dict["ZZTD"]["LineID"]
+    LP = deepcopy(inputB_dict["ZZTD"]["LineID"])
     for lineIdx in range(NLINES):
-        # READ(JU,1110)(LP(l,K),K=1,3),(BLPA(l,K),K=1,18),(PROBL(K,l),K=1,6)
-        LP[lineIdx, 0] = inputB_dict["ZZTD"]["LineID"][lineIdx]
-        LP[lineIdx, 1] = inputB_dict["ZZTD"]["NAR"][lineIdx]  # from area
-        LP[lineIdx, 2] = inputB_dict["ZZTD"]["NAE"][lineIdx]  # to area
+        LP[lineIdx, 0] = deepcopy(
+            inputB_dict["ZZTD"]["LineID"][lineIdx]
+        )  # idx (int) for the line
+        LP[lineIdx, 1] = deepcopy(
+            inputB_dict["ZZTD"]["NAR"][lineIdx]
+        )  # idx (int) for 'from area'
+        LP[lineIdx, 2] = deepcopy(
+            inputB_dict["ZZTD"]["NAE"][lineIdx]
+        )  # idx (int) for 'to area'
         LINENO[LP[lineIdx, 1], LP[lineIdx, 2]] = LP[lineIdx, 0]
 
     # Convert discrete probability to cumulative probability
-    PROBL = np.zeros((6, NLINES))
+    # PROBL = inputB_dict["ZZTD"]["PROBT"].T # (6, NLINES)
+    PROBL = deepcopy(inputB_dict["ZZTD"]["PROBT"].T)
     for lineIdx in range(NLINES):
-        for m in range(1, 5):
+        for m in range(1, 6):
             PROBL[m, lineIdx] = PROBL[m, lineIdx] + PROBL[m - 1, lineIdx]
 
     BLPA = np.zeros((NLINES, 18))
@@ -173,17 +185,17 @@ def datax(inputB_dict):
         if inputB_dict["ZZTD"]["ADM"][i] == 0:
             BLPA[i, 0:18:3] = -0.5
         else:
-            BLPA[i, 0:18:3] = inputB_dict["ZZTD"]["ADM"][i]
+            BLPA[i, 0:18:3] = deepcopy(inputB_dict["ZZTD"]["ADM"][i])
 
         if inputB_dict["ZZTD"]["CAP"][i] == 0:
             BLPA[i, 1:18:3] = 1.0
         else:
-            BLPA[i, 1:18:3] = inputB_dict["ZZTD"]["CAP"][i]
+            BLPA[i, 1:18:3] = deepcopy(inputB_dict["ZZTD"]["CAP"][i])
 
         if inputB_dict["ZZTD"]["CAPR"][i] == 0:
             BLPA[i, 2:18:3] = 1.0
         else:
-            BLPA[i, 2:18:3] = inputB_dict["ZZTD"]["CAPR"][i]
+            BLPA[i, 2:18:3] = deepcopy(inputB_dict["ZZTD"]["CAPR"][i])
 
     # Read critical unit data and create JCRIT(l) - for the l-th line:
     # position 1           line number
@@ -215,6 +227,7 @@ def datax(inputB_dict):
         DERATE,
         JENT,
         INTCH,
+        INTCHR,
         LP,
         LINENO,
         PROBL,
