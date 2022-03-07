@@ -29,9 +29,11 @@ def flo(LP, BLP, FLOW, THET):
     """
     NLINES = LP.shape[0]
     SFLOW = np.zeros((NLINES,))
-    for i in range(len(NLINES)):
+    for i in range(NLINES):
         j = LP[i, 1]  # from bus (area)
         k = LP[i, 2]  # to bus (area)
         FLOW[i] = (THET[j] - THET[k]) * BLP[i, 0]
         SFLOW[k] += FLOW[i]
         SFLOW[j] -= FLOW[i]
+
+    return SFLOW
