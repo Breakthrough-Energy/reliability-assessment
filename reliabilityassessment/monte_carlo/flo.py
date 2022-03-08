@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def flo(LP, BLP, FLOW, THET):
+def flo(LP, BLP, THET):
     """
     Computes line power flows and bus (power) injection
 
@@ -20,15 +20,18 @@ def flo(LP, BLP, FLOW, THET):
                               BLP(I,1)  capacity (MW)
                               BLP(I,2)  backward capacity (MW)
 
-    :param numpy.ndarray FLOW: vector of line power flows (MW),  shape: (NLINES, )
-
     :param numpy.ndarray THET: bus (area) angle, shape: (NOAREA, )
 
-    :return: (*numpy.ndarray*) SFLOW -- vector of bus (area) injection power (MW)
+    :return: (*tuple*)  -- SFLOW: vector of bus (area) injection power (MW)
                                         shape (NOAREA, )
+                           FLOW: vector of line power flows (MW),  shape: (NLINES, )
     """
+
     NLINES = LP.shape[0]
-    SFLOW = np.zeros((NLINES,))
+    NOAREA = len(THET)
+    SFLOW = np.zeros((NOAREA,))
+    FLOW = np.zeros((NLINES,))
+
     for i in range(NLINES):
         j = LP[i, 1]  # from bus (area)
         k = LP[i, 2]  # to bus (area)
@@ -36,4 +39,4 @@ def flo(LP, BLP, FLOW, THET):
         SFLOW[k] += FLOW[i]
         SFLOW[j] -= FLOW[i]
 
-    return SFLOW
+    return SFLOW, FLOW
