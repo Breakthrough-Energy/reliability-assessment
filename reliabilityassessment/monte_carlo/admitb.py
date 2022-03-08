@@ -22,16 +22,12 @@ def admitb(LP, BLP, BB):
 
     :return: (*none*)
     """
-    BB[:] = 0.0
 
-    i = 0
-    while LP[i, 0] != -1:  # End of data detected by integer -1
-        j = LP(i, 1)  # from-bus (area) id
-        k = LP(i, 2)  # to-bus (area) id
+    NLINES = LP.shape[0]
+    for i in range(NLINES):
+        j = LP[i, 1]  # from-bus (area) id
+        k = LP[i, 2]  # to-bus (area) id
         BB[j, k] += BLP[i, 0] * (-1.0)
         BB[k, j] = BB[j, k]
         BB[j, j] += BLP[i, 0]
         BB[k, k] += BLP[i, 0]
-        i = i + 1
-
-    return BB
