@@ -8,16 +8,16 @@ def admitb(LP, BLP):
     :param numpy.ndarray LP: array storing line related information
                             shape: (NLINES, 3)
                             LP(I,J)  I  ENTRY  NUMBER
-                            LP(I,1)  LINE NUMBER SET=I
-                            LP(I,2)  STARTING NODE
-                            LP(I,3)  ENDING NODE
+                            LP(I,0)  LINE NUMBER SET=I
+                            LP(I,1)  STARTING NODE
+                            LP(I,2)  ENDING NODE
     :param numpy.ndarray BLP: contains the data on admittance, cap and backward cap
                               of the line at position I in LP(I,J) (at the state-1)
                               shape: (NLINES, 3)
                               BLP(I,J) I  ENTRY  NUMBER
-                              BLP(I,1)  admittance
-                              BLP(I,2)  capacity (MW)
-                              BLP(I,3)  backward capacity (MW)
+                              BLP(I,0)  admittance
+                              BLP(I,1)  capacity (MW)
+                              BLP(I,2)  backward capacity (MW)
 
     :return: (*numpy.ndarray*) -- BB: 2D array of the 'B matrix' (i.e., admittance matrix)
                              used in DC power flow
@@ -25,7 +25,7 @@ def admitb(LP, BLP):
     """
 
     NLINES = LP.shape[0]
-    NOAREA = 1 + max(max(LP[:, 1]), max(LP[:, 2]))
+    NOAREA = 1 + LP[:, 1:].max()
     BB = np.zeros((NOAREA, NOAREA))
     for i in range(NLINES):
         j = LP[i, 1]  # from-bus (area) id
