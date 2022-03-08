@@ -25,7 +25,7 @@ def admitb(LP, BLP):
     """
 
     NLINES = LP.shape[0]
-    NOAREA = 1 + max(max(LP[:, 0]), max(LP[:, 1]))
+    NOAREA = 1 + max(max(LP[:, 1]), max(LP[:, 2]))
     BB = np.zeros((NOAREA, NOAREA))
     for i in range(NLINES):
         j = LP[i, 1]  # from-bus (area) id
