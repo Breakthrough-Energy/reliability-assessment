@@ -1,4 +1,7 @@
-def admitb(LP, BLP, BB):
+import numpy as np
+
+
+def admitb(LP, BLP):
     """
     Construct the admittance matrix (B) from the line data array (BLP)
 
@@ -16,14 +19,14 @@ def admitb(LP, BLP, BB):
                               BLP(I,2)  capacity (MW)
                               BLP(I,3)  backward capacity (MW)
 
-    :param numpy.ndarray BB: 2D array of the 'B matrix' (i.e., admittance matrix)
+    :return: (*numpy.ndarray*) -- BB: 2D array of the 'B matrix' (i.e., admittance matrix)
                              used in DC power flow
                              shape (NOAREA, NOAREA)
-
-    :return: (*none*)
     """
 
     NLINES = LP.shape[0]
+    NOAREA = 1 + max(max(LP[:, 0]), max(LP[:, 1]))
+    BB = np.zeros((NOAREA, NOAREA))
     for i in range(NLINES):
         j = LP[i, 1]  # from-bus (area) id
         k = LP[i, 2]  # to-bus (area) id
@@ -31,3 +34,5 @@ def admitb(LP, BLP, BB):
         BB[k, j] = BB[j, k]
         BB[j, j] += BLP[i, 0]
         BB[k, k] += BLP[i, 0]
+
+    return BB
