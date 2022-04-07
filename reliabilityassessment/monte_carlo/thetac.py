@@ -3,13 +3,12 @@ import numpy as np
 
 def thetac(THET, LT):
     """
-    Generates vector of bus angles for all buses including ref bus. This function is used during step 7 in
-    the General Program Logic section of the project README.
+    Generate vector of bus angles for all buses including ref bus.
 
     :param numpy.ndarray THET: angle at every node of the ADM matrix
     :param numpy.ndarray LT: actual node corresponding to node i of the ADM matrix
-
-    :return: (*numpy.ndarray*) -- THETC: angle of actual node corresponding to each node of the ADM matrix
+    :return: (*numpy.ndarray*) -- THETC: angle of actual node corresponding to each
+        node of the ADM matrix
     """
     NN = len(THET)
     THETC = np.zeros(NN)

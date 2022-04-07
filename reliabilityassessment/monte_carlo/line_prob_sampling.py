@@ -4,14 +4,14 @@ import numpy as np
 
 
 def lstate(PROBL, test_seed=None):
-    """Establishes the line state according the probability of the line being in
+    """Establish the line state according the probability of the line being in
     each particular state. This vectorized implementation allows the line state
     probabilities to be different for each line, and assumes that the lines can be
     in up to 6 states overall.
 
-    :param numpy.ndarray PROBL: array of the cumulative capacity probability of each line
-    :raises TypeError:PROBL must be a numpy array
-    :return: (*numpy.ndarray*) -- array of line state value (in integer) of each line
+    :param numpy.ndarray PROBL: cumulative capacity probability of each line
+    :raises TypeError: if PROBL is not a numpy array
+    :return: (*numpy.ndarray*) -- line state value (in integer) of each line
     """
     if not isinstance(PROBL, np.ndarray):
         raise TypeError("PROBL must be a numpy array")

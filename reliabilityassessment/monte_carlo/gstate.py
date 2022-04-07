@@ -5,15 +5,16 @@ import numpy as np
 
 def gstate(PROBG, RATING, DERATE, PLNDST, rng=np.random.default_rng()):
     """
-    It samples the state of available capacity for each generator up to NUNITS
+    Sample the state of available capacity for each generator up to NUNITS
 
-    :param numpy.ndarray PROBG: 2D array of accumulated probability for each capacity tier of each unit
+    :param numpy.ndarray PROBG: 2D array of accumulated probability for each capacity
+        tier of each unit
     :param numpy.ndarray DERATE: array of the derated capacity of each unit
-    :param numpy.ndarray RATING:  array of the fully rated capacity of each unit
-    :param numpy.ndarray PLNDST: array of the on/off status (due to planned maintenance) of each unit
-
-    :return: (*tuple*) -- a pair of numpy.ndarray objects for unadjusted power capacity in p.u.
-                                   of each unit and finalized power capacity in MW of each unit.
+    :param numpy.ndarray RATING: array of the fully rated capacity of each unit
+    :param numpy.ndarray PLNDST: array of the on/off status (due to planned maintenance)
+        of each unit
+    :return: (*tuple*) -- a pair of numpy.ndarray objects for unadjusted power
+        capacity in p.u. of each unit and finalized power capacity in MW of each unit.
     """
 
     NUNITS = len(PROBG)

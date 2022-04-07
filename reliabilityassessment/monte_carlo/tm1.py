@@ -20,8 +20,8 @@ def tm1(BN, LP, BLP, NR):
                              LP[I, 0]: line number, set to I
                              LP[I, 1]: starting node
                              LP[I, 2]: ending node
-    :param numpy.ndarray BLP: 2D array with shape (NLINEs, 3)
-                              BLP[I, 0]: admittance of line I, i.e. Ith entry in LP
+    :param numpy.ndarray BLP: 2D array with shape (NLINES, 3)
+                              BLP[I, 0]: admittance of the line at the Ith entry of LP
                               BLP[I, 1]: capacity (MW)
                               BLP[I, 2]: backward capacity (MW)
     :param int NR: index number of the reference node.

@@ -5,17 +5,18 @@ def initfl():
     """
     Initialize array EVNTS and several related pointers
 
-    return (*tuple*) --
-                     MFA: pointer of first available (i.e. unoccupied) slot in the event list
-                     IPOINT: pointer of the first already occupied slot (i.e. an stored entry)
+    return (*tuple*) -- MFA: pointer of first available (i.e. unoccupied) slot
                              in the event list
-                             initial value = -1
-                     EVNTS: 1D array of event list
+                        IPOINT: pointer of the first already occupied slot
+                                (i.e. an stored entry) in the event list initial
+                                value = -1
+                        EVNTS: 1D array of event list
     """
 
     MFA = 0
     IPOINT = -1
-    MXCELL = 100  # this value is predefined and adjustable; it won't change during simulation.
+    # this value is predefined and adjustable; it won't change during simulation.
+    MXCELL = 100
     EVNTS = np.zeros(MXCELL)
 
     # array slots starting from MXCELL – 4 (1-based index) are 0 after initialization.
