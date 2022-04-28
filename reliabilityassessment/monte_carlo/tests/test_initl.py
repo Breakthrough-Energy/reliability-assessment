@@ -1,6 +1,6 @@
 import numpy as np
 
-from reliabilityassessment.monte_carlo.initl import initl
+from reliabilityassessment.monte_carlo.initl import _initl
 
 
 def test_initl():
@@ -13,7 +13,7 @@ def test_initl():
     JSTEP = 1
     QTR = np.array([13 * 168 + 0.5, 13 * 2 * 168 + 0.5, 13 * 3 * 168 + 0.5])
 
-    ATRIB, CLOCK, IPOINT, MFA, NUMINQ = initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR)
+    ATRIB, CLOCK, IPOINT, MFA, NUMINQ = _initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR)
 
     ATRIB_truth = np.array([1.0, 0.0])
     np.testing.assert_array_almost_equal(ATRIB_truth, ATRIB)
@@ -61,5 +61,3 @@ def test_initl():
     )
 
     np.testing.assert_array_almost_equal(EVNTS_truth, EVNTS)
-
-    return

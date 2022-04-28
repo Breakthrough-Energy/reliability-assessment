@@ -3,7 +3,7 @@ import numpy as np
 from reliabilityassessment.monte_carlo.filem import filem
 
 
-def initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR):
+def _initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR):
     """
     Initialization for the Monte Carlo Simulation
 
@@ -70,5 +70,51 @@ def initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR):
     ATRIB[0] = JSTEP
     # Call the entry point function of Monte Carlo simulation
     NUMINQ, MFA, IPOINT = filem(MFA, ATRIB, NUMINQ, IPOINT, EVNTS)
+
+    return ATRIB, CLOCK, IPOINT, MFA, NUMINQ
+
+
+def initl(JSTEP, EVNTS):
+    """
+    Initialization for the Monte Carlo Simulation
+
+    :param int JSTEP: frequency of simulation statistics collection, 1: hourly 24:
+        daily, i.e. only peak stats are collected
+    :param numpy.ndarray EVNTS: 1D array of events
+    :return: (*tuple*) -- ATRIB: events attribute vector of length 2
+                                 ATRIB[0] -- global simulation clock (in unit: hour)
+                                 ATRIB[1] -- int, simulation type
+                                 0: hourly
+                                 1: weekly
+                                 2: quarterly
+                                 3: yearly
+                          CLOCK: global time clock used in sequential Monte Carlo
+                                 simulation
+                          IPOINT: pointer of the first (already/previously stored) entry
+                                  in the event list, defaults to -1 if the list is empty
+                          MFA: pointer of the first available (i.e. empty) entry in the
+                               event list
+                          NUMINQ: up-to-date total number of event entries (inquires)
+
+    .. note:: EVNTS is modified in place
+    """
+    # fmt: off
+    EVNTS[:28] = np.array(
+        [
+            20.0, 0.5,    2.0, 0.0,  # noqa: E241 1st quarterly state change
+            8.0,  2184.5, 2.0, 0.0,  # noqa: E241 2nd quarterly state change
+            12.0, 4368.5, 2.0, 0.0,  # noqa: E241 3rd quarterly state change
+            16.0, 6552.5, 2.0, 0.0,  # noqa: E241 4th quarterly state change
+            -1.0, 8760.0, 3.0, 0.0,  # noqa: E241 first call to subroutine "year"
+            24.0, 0.5,    1.0, 0.0,  # noqa: E241 first call to subroutine "week"
+            4.0,  JSTEP,  0.0, 0.0,  # noqa: E241 first Monte Carlo draw
+        ]
+    )
+    # fmt: on
+    ATRIB = np.array([JSTEP, 0.0])
+    CLOCK = 0.0
+    IPOINT = 0
+    MFA = 28
+    NUMINQ = 7
 
     return ATRIB, CLOCK, IPOINT, MFA, NUMINQ
