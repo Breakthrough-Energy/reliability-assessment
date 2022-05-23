@@ -10,6 +10,7 @@ from reliabilityassessment.monte_carlo.line_prob_sampling import (
 
 # The following three tests are probabilistic which rely on the law of large numbers.
 # If a test failure occurs, run again and see if the test passes
+@pytest.mark.slow
 def test_lstate():
     # arrange
     NLINES = 1000000
@@ -27,6 +28,7 @@ def test_lstate():
         assert PROB[i] == pytest.approx(LNSTAT_bins[i + 1] / NLINES, 0.05)
 
 
+@pytest.mark.slow
 def test_lstate_original():
     # arrange
     NLINES = 1000000
@@ -43,6 +45,7 @@ def test_lstate_original():
         assert PROB[i] == pytest.approx(LNSTAT_bins[i + 1] / NLINES, 0.05)
 
 
+@pytest.mark.slow
 def test_generate_discrete_probability_generator():
     # arrange
     NLINES = 1000000
@@ -59,6 +62,7 @@ def test_generate_discrete_probability_generator():
         assert PROB[i] == pytest.approx(LNSTAT_bins[i + 1] / NLINES, 0.05)
 
 
+@pytest.mark.slow
 def test_lstate_benchmark(benchmark):
     # setup
     NLINES = 1000000
@@ -69,6 +73,7 @@ def test_lstate_benchmark(benchmark):
     benchmark(lstate, PROBL_mat)
 
 
+@pytest.mark.slow
 def test_lstate_original_benchmark(benchmark):
     # setup
     NLINES = 1000000
@@ -78,6 +83,7 @@ def test_lstate_original_benchmark(benchmark):
     benchmark(lstate_original, NLINES, PROBL)
 
 
+@pytest.mark.slow
 def test_discrete_prob_gen_benchmark(benchmark):
     # setup
     NLINES = 1000000
