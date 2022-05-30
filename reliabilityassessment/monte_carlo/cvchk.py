@@ -41,12 +41,12 @@ def cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST):
         XX = CVTEST * XMEAN
 
     VAR = (SSQ / IYEAR) - (XMEAN**2)
-    STD = VAR**0.5
+    STD = pow(VAR, 0.5)
 
     STDERR = STD / (IYEAR**0.5)
     XKCPXX = 0.0
     if XX != 0.0:
-        XKCPXX = STDERR / XX  # how many times of our "COV" to the given threshold
+        XKCPXX = STDERR / XX  # how many multiples of our "COV" to the given threshold
 
     print(
         IYEAR,
