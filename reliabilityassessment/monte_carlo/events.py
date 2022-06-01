@@ -1,41 +1,333 @@
-from hour import hour
-
-import globalVar as g
-from quartr import quartr
-from week import week
-from year import year
+from reliabilityassessment.monte_carlo.hour import hour
+from reliabilityassessment.monte_carlo.quartr import quartr
+from reliabilityassessment.monte_carlo.week import week
+from reliabilityassessment.monte_carlo.year import year
 
 
-def events(number, RFLAG):
+def events(
+    NUMBER,
+    RFLAG,
+    CLOCK,
+    ATRIB,
+    MFA,
+    NUMINQ,
+    IPOINT,
+    EVNTS,
+    PLNDST,
+    JHOUR,
+    JPLOUT,
+    IQ,
+    RATES,
+    NHRSYR,
+    JSTEP,
+    JFREQ,
+    MXPLHR,
+    PROBG,
+    RATING,
+    DERATE,
+    CAPOWN,
+    CAPCON,
+    PROBL,
+    JENT,
+    INTCH,
+    MXCRIT,
+    JCRIT,
+    NFCST,
+    HRLOAD,
+    FCTERR,
+    LSFLG,
+    LOLGHA,
+    LOLGPA,
+    LOLGHP,
+    LOLGPP,
+    LOLTHA,
+    LOLTHP,
+    LOLTPA,
+    LOLTPP,
+    MGNGHA,
+    MGNGPA,
+    MGNGHP,
+    MGNGPP,
+    MGNTHA,
+    MGNTHP,
+    MGNTPA,
+    MGNTPP,
+    LINENO,
+    LP,
+    LT,
+    BB,
+    ZB,
+    BLP0,
+    BLPA,
+    IOI,
+    BN,
+    NR,
+    NLS,
+    CVTEST,
+    DPLOLE,
+    EUES,
+    FINISH,
+    HLOLE,
+    NAMA,
+    SSQ,
+    SUSTAT,
+    XLAST,
+    INTV,
+    INTVT,
+    IOJ,
+    KVLOC,
+    KVSTAT,
+    KVTYPE,
+    KVWHEN,
+    KWHERE,
+    LSTEP,
+    NORR,
+    INDX,
+    ITAB,
+    SGNGHA,
+    SGNGHP,
+    SGNGPA,
+    SGNGPP,
+    SGNSHA,
+    SGNSHP,
+    SGNSPA,
+    SGNSPP,
+    SGNTHA,
+    SGNTHP,
+    SGNTPA,
+    SGNTPP,
+    SOLGHA,
+    SOLGHP,
+    SOLGPA,
+    SOLGPP,
+    SOLSHA,
+    SOLSHP,
+    SOLSPA,
+    SOLSPP,
+    SOLTHA,
+    SOLTHP,
+    SOLTPA,
+    SOLTPP,
+    SWLGHA,
+    SWLGHP,
+    SWLGPA,
+    SWLGPP,
+    SWLSHA,
+    SWLSHP,
+    SWLSPA,
+    SWLSPP,
+    SWLTHA,
+    SWLTHP,
+    SWLTPA,
+    SWLTPP,
+    SWNGHA,
+    SWNGHP,
+    SWNGPA,
+    SWNGPP,
+    SWNSHA,
+    SWNSHP,
+    SWNSPA,
+    SWNSPP,
+    SWNTHA,
+    SWNTHP,
+    SWNTPA,
+    SWNTPP,
+    XNEWA,
+    XNEWP,
+):
     """
     Simulation schedule for different time-scale of events
 
-    :param: IERR int -- error indicator
-    :param: number int -- Simulaiton type indicator
-    :return: N/A
+    :param: int NUMBER: Simulation type indicator
+    :return: (*tuple*) -- a series of numpy arrays
+
+    .. note:: detailed variable info see ``variable description list.xlsx`` at
+        https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
     """
+    # print("Events called with argument = %d" % (NUMBER))
 
-    g.IERR = 0  # indicator/flag of run time error
-    print("Events called with argument = %d" % (number))
+    assert NUMBER in (1, 2, 3, 4), "The argument 'NUMBER' is invalid! Program aborted."
 
-    assert number in (1, 2, 3, 4), "The argument 'number' is invalid! Program aborted."
-
-    if number == 1:
+    if NUMBER == 1:
         # simulate hourly event
-        hour()
-        g.JHOUR = g.JHOURT
-        return
-    elif number == 2:
+        (NUMINQ, MFA, IPOINT, JHOURT) = hour(
+            ATRIB,
+            CLOCK,
+            MFA,
+            JSTEP,
+            JFREQ,
+            NUMINQ,
+            IPOINT,
+            EVNTS,
+            MXPLHR,
+            PROBG,
+            RATING,
+            DERATE,
+            PLNDST,
+            CAPOWN,
+            CAPCON,
+            PROBL,
+            JENT,
+            INTCH,
+            MXCRIT,
+            JCRIT,
+            NFCST,
+            HRLOAD,
+            FCTERR,
+            LSFLG,
+            LOLGHA,
+            LOLGPA,
+            LOLGHP,
+            LOLGPP,
+            LOLTHA,
+            LOLTHP,
+            LOLTPA,
+            LOLTPP,
+            MGNGHA,
+            MGNGPA,
+            MGNGHP,
+            MGNGPP,
+            MGNTHA,
+            MGNTHP,
+            MGNTPA,
+            MGNTPP,
+            LINENO,
+            LP,
+            LT,
+            BB,
+            ZB,
+            BLP0,
+            BLPA,
+            IOI,
+            BN,
+            NR,
+            NLS,
+        )
+
+        JHOUR = JHOURT
+    elif NUMBER == 2:
         # simulate weekly event
-        week()
-        return
-    elif number == 3:
+        IPOINT, MFA, NUMINQ = week(
+            CLOCK, ATRIB, MFA, NUMINQ, IPOINT, EVNTS, PLNDST, JHOUR, JPLOUT
+        )
+    elif NUMBER == 3:
         # simulate quarterly event
-        quartr()
-        return
-    else:  # number == 4:
+        IQ, IPOINT, MFA, NUMINQ, RATING[:] = quartr(
+            IQ, RATES, CLOCK, ATRIB, NHRSYR, MFA, NUMINQ, IPOINT, EVNTS
+        )
+    else:  # NUMBER == 4:
         # simulate yearly event
-        year(g.IERR, RFLAG)
-        if g.IERR == 1:
-            print("Error Iin subroutine year")
-        return
+        IPOINT, MFA, NUMINQ, SSQ, XLAST, RFLAG, INTVT, ITAB = year(
+            ATRIB,
+            CLOCK,
+            CVTEST,
+            DPLOLE,
+            EUES,
+            EVNTS,
+            FINISH,
+            HLOLE,
+            IPOINT,
+            MFA,
+            NUMINQ,
+            RFLAG,
+            LSFLG,
+            NAMA,
+            SSQ,
+            SUSTAT,
+            XLAST,
+            BB,
+            LT,
+            ZB,
+            INTV,
+            INTVT,
+            IOJ,
+            KVLOC,
+            KVSTAT,
+            KVTYPE,
+            KVWHEN,
+            KWHERE,
+            LSTEP,
+            NFCST,
+            NORR,
+            INDX,
+            ITAB,
+            LOLGHA,
+            LOLGHP,
+            LOLGPA,
+            LOLGPP,
+            LOLTHA,
+            LOLTHP,
+            LOLTPA,
+            LOLTPP,
+            MGNGHA,
+            MGNGHP,
+            MGNGPA,
+            MGNGPP,
+            MGNTHA,
+            MGNTHP,
+            MGNTPA,
+            MGNTPP,
+            SGNGHA,
+            SGNGHP,
+            SGNGPA,
+            SGNGPP,
+            SGNSHA,
+            SGNSHP,
+            SGNSPA,
+            SGNSPP,
+            SGNTHA,
+            SGNTHP,
+            SGNTPA,
+            SGNTPP,
+            SOLGHA,
+            SOLGHP,
+            SOLGPA,
+            SOLGPP,
+            SOLSHA,
+            SOLSHP,
+            SOLSPA,
+            SOLSPP,
+            SOLTHA,
+            SOLTHP,
+            SOLTPA,
+            SOLTPP,
+            SWLGHA,
+            SWLGHP,
+            SWLGPA,
+            SWLGPP,
+            SWLSHA,
+            SWLSHP,
+            SWLSPA,
+            SWLSPP,
+            SWLTHA,
+            SWLTHP,
+            SWLTPA,
+            SWLTPP,
+            SWNGHA,
+            SWNGHP,
+            SWNGPA,
+            SWNGPP,
+            SWNSHA,
+            SWNSHP,
+            SWNSPA,
+            SWNSPP,
+            SWNTHA,
+            SWNTHP,
+            SWNTPA,
+            SWNTPP,
+            XNEWA,
+            XNEWP,
+        )
+
+    return (
+        RFLAG,
+        IPOINT,
+        MFA,
+        NUMINQ,
+        SSQ,
+        XLAST,
+        INTVT,
+        ITAB,
+        IQ,
+        JHOUR,
+    )
