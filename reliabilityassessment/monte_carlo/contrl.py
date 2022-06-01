@@ -2,12 +2,6 @@ from reliabilityassessment.monte_carlo.events import events
 from reliabilityassessment.monte_carlo.remove import remove
 from reliabilityassessment.monte_carlo.report import report
 
-# Special Note: The function upload here is for the help in understanding'filem' function
-# This function itself is simple; but since multiple deep-level
-# children function calls (triggered here by function 'event') are involved;
-# Thus, it is NOT completely ready.
-# DELETE THIS SPECIAL NOTE IN THE FUTURE WHEN THIS FUCNTION IS LATER FINALIZLED
-
 
 def contrl(RFLAG, CLOCK, IPOINT, EVNTS, ATRIB, FINISH):
     """
@@ -29,35 +23,37 @@ def contrl(RFLAG, CLOCK, IPOINT, EVNTS, ATRIB, FINISH):
      :param numpy.ndarray EVNTS: 1D array of events
      :param int RFLAG: ureport flag, indicating whether or not to generate a output report
                                      with all the so-far obtianed reliability assessment results
-
-     :return: (*tuple*) -- TBD
     """
 
     print("In function contrl")
+    NUMINQ = 0  # initialize NUMINQ
 
-    if IPOINT == 0:
-        print("Error: Pointer To Event File Is 0!")
-        return
+    while True:
 
-    if CLOCK > EVNTS[IPOINT + 1]:
-        print("Error: Next Event To Occur Scheduled Prior To Current Time!")
-        print("ATRIB vector is: ")
-        print(ATRIB)
-        return
+        if IPOINT == 0:
+            print("Error: Pointer to event list Is 0!")
+            return
 
-    if RFLAG == 1.0:
-        return
+        if CLOCK > EVNTS[IPOINT + 1]:
+            print("Error: Next event to occur scheduled prior to current time!")
+            print("ATRIB vector is: ")
+            print(ATRIB)
+            return
 
-    if EVNTS[IPOINT + 1] > (FINISH + 1.0):
-        IYEAR = CLOCK / 8760.0
-        report(IYEAR)
-        return
-    else:
-        remove()
-        CLOCK = ATRIB(1)
-        NUMBER = ATRIB(2)
+        if RFLAG == 1.0:
+            return
 
-        # event funciton is not ready; so has to mock at this moment
-        events(NUMBER, RFLAG)
+        if EVNTS[IPOINT + 1] > (FINISH + 1.0):
+            IYEAR = CLOCK / 8760.0
+            report(IYEAR)  # No return values of 'report' are explitly needed here
+            return
+        else:
+            MFA, NUMINQ, IPOINT = remove(NUMINQ, ATRIB, EVNTS, IPOINT)
+            CLOCK = ATRIB(1)
+            NUMBER = ATRIB(2)
 
-    return  # TBD; we might have explict return-values here
+            # Only partial return values of 'event' funciton are needed here
+            IPOINT, CLOCK, EVNTS, ATRIB, RFLAG, IYEAR, NUMINQ, *_ = events(
+                NUMBER, RFLAG
+            )
+    return
