@@ -44,7 +44,7 @@ def narp2020():
         snapshot_data = rstart("DUMP.pkl")
         INTVTT = CLOCK / 8760
         print("**           Warning ! This is a restart case!\n            ")
-        print("**           NUMBER OF PREVIOUS REPLICATIONS : %8d \n", INTVTT)
+        print("**           NUMBER OF PREVIOUS REPLICATIONS : %8d \n" % (INTVTT))
 
     # No return value is the intened behavior for function 'contrl'
     # * Its input argument list is not finalized *
