@@ -71,7 +71,7 @@ def intm(
     """
 
     snapshot_data = {
-        "ATRIB": ATRIB(2),
+        "ATRIB": ATRIB[1],
         "CLOCK": CLOCK,
         "IPOINT": IPOINT,
         "XLAST": XLAST,
