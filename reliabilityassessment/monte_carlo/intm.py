@@ -62,12 +62,20 @@ def intm(
     LSFLG,
 ):
     """
-    Save (dump) intermediate result into a DUMP file  (in case of unintentional or intentional interruption)
+    Save intermediate results into a pickle file, DUMP.pkl, in case of unintentional or
+    intentional interruption.
 
-    :param: multiple numpy.ndarrays and scalars.
-            Detailed description can be refer to 'variable descriptions.xlsx'(continuously updated)
-
-    :return: none (save the serialized data as a file on disk)
+    .. note:: For descriptions of input variables, please refer to `variable
+        descriptions.xlsx` in the project Dropbox folder.
+    .. todo::
+        1. Once the main loop of the sequential Monte Carlo simulation is
+        implemented, refactor/remove this function according to the call signature
+        such as directly save input variables into the caching file within the scope.
+        2. If this function is kept during future refactor, update the doc strings of
+        input variables according to the final version of the project doc.
+        3. If this function is kept during future refactor, make the caching file
+        name capable to be specified so that multiple users can run this module on a
+        cluster with intermediate results caching due to interruptions.
     """
 
     snapshot_data = {
