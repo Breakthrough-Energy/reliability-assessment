@@ -71,15 +71,34 @@ def report(
 ):
 
     """
-    Post-processing the simulation reult and write to the final output file
+    Post-processing the simulation results and writing to the final output file
 
-    :param int IYEAR: the year index (simulated so far)
-    :param int ITAB: the table index (created so far) (because other function(s) may also write
-                                                       tables to the final output file)
-    :return: (*tuple*) -- ITAB, SUSTAT
-    .. note::  the inputs are multiple scalars, 1D and 2D numpy.ndarrays. For detailed description of each variables see 'variable descriptions.xlsx' at:
-        https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
+    .. note:: The inputs and outputs are massive scalars, 1D and 2D numpy.ndarrays.
+             For descriptions of input and output variables, please refer to `variable descriptions.xlsx.`
+             in the project Dropbox folder: https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
+             For arrays LOLGHA to WOLTPP:
+                    please refer to the following naming rules for those
+                    6-digit statistic-related quantities:
+                    The first three digits identify the type of statistic
+                        LOL means this is an annual loss of load statistic of some type
+                        MGN means this is the annual sum of negative margins (EUE)
+                        SOL means this is the cumulative sum, all years, LOLE
+                        SNG means this is the cumulative sum, all years, EUE
+                    The fourth digit identifies the cause of the outage
+                        T is transmission
+                        G is generation
+                        S is sum statistics of T & G
+                     The fifth digit indicates whether the stat is hourly or peak
+                         H is for hourly stats
+                         P is for peak stats
+                     The sixth digit is for area or pool
+                         A is area
+                         P is pool
+                    Examples:
+                        SGNSPA  is the cumulative sum, EUE, total of T & G, peak, area
+                        LOLTHP  is the annual loss of load, transmission, hourly, pool
     """
+
     f = open("output.txt", "a")
 
     ITAB += 1
