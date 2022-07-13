@@ -27,6 +27,7 @@ def test_datax():
         BN,
         SUSTAT,
         FCTERR,
+        CAPCON,
         CAPOWN,
         NOGEN,
         PROBG,
@@ -40,6 +41,7 @@ def test_datax():
         BLPA,
         MXCRIT,
         JCRIT,
+        ID,
     ) = datax(inputB_dict_nameToInt)
 
     QTR_ = np.array([13 * 168 + 0.5, 26 * 168 + 0.5, 39 * 168 + 0.5])
@@ -76,6 +78,9 @@ def test_datax():
 
     FCTERR_ = np.array([[1.0, 1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0, 1.0]])
     np.testing.assert_array_equal(FCTERR_, FCTERR)
+
+    CAPCON_ = np.array([0, 1])
+    np.testing.assert_array_equal(CAPCON_, CAPCON)
 
     CAPOWN_ = np.array([[1, 0], [0, 1]])
     np.testing.assert_array_equal(CAPOWN_, CAPOWN)
@@ -138,3 +143,6 @@ def test_datax():
 
     JCRIT_ = np.zeros((500,))
     np.testing.assert_array_equal(JCRIT_, JCRIT)
+
+    ID_ = np.array([[0, 0, 0, -1, 0, -1, 0, 0], [1, 1, 1, -1, 0, -1, 0, 0]], dtype=int)
+    np.testing.assert_array_equal(ID_, ID)

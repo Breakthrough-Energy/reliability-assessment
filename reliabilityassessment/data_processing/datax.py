@@ -167,6 +167,18 @@ def datax(inputB_dict):
     MXCRIT = 0  # total (maximum) number of critical units
     JCRIT = np.zeros((500,))  # critical (affecting) unit id
 
+    # Create array 'ID':
+    NUNITS = len(PROBG)
+    ID = np.zeros((NUNITS, 8), dtype=int)
+    ID[:, 0] = deepcopy(inputB_dict["ZZUD"]["NAT"])
+    ID[:, 1] = deepcopy(inputB_dict["ZZUD"]["NAT"])
+    ID[:, 2] = deepcopy(inputB_dict["ZZUD"]["NAR"])
+    ID[:, 3] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 1]) - 1  # to 0-based index
+    ID[:, 4] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 2])
+    ID[:, 5] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 3]) - 1  # to 0-based index
+    ID[:, 6] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 4])
+    ID[:, 7] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 0])
+
     return (
         QTR,
         NORR,
@@ -181,6 +193,7 @@ def datax(inputB_dict):
         BN,
         SUSTAT,
         FCTERR,
+        CAPCON,
         CAPOWN,
         NOGEN,
         PROBG,
@@ -194,4 +207,5 @@ def datax(inputB_dict):
         BLPA,
         MXCRIT,
         JCRIT,
+        ID,
     )
