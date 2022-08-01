@@ -19,50 +19,51 @@ def tm2(
     LP,
     BLP,
     BLP0,
-    NN,
-    NL,
     BB,
     ZB,
     LT,
     NR,
-    FLOW,
     NLS,
     BNS,
     LCLOCK,
     JHOUR,
     IOI,
     JFLAG,
-    INDIC,
     PLNDST,
     PCTAVL,
 ):
     """
-    The core part fo the transmsison module used in reliability assessment
+    The core part of the transmsison module used in reliability assessment
 
+    :return: (*tuple*) -- FLOW: vector of line power flows (MW),  shape: (NLINES, )
+                          INDIC: an integer indicator.
+                                 (In fact, not used outside in the original Fortran;
+                                 can be removed later.)
     .. note:: 1) For descriptions of input variables, please refer to `variable
               descriptions.xlsx` in the project Dropbox folder at:
               https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
-              2) arrays are modified in-place.
+              2) arrays BN, BB, ZB are modified in-place.
     """
 
     MULT = 0
+    NN = BN.shape[0]  # == BB.shape[0] == ZB.shape[0]
+    NL = LP.shape[0]  # == BLP.shape[0] == BLP0.shape[0]
     NX = NN - 1
 
     NOAREA = LT.shape[0]
-    IEQ = np.zeros(NOAREA)
+    IEQ = np.zeros(NOAREA, dtype=int)
 
     for i in range(NX):
         ii = i
         j = LT[i]
         IEQ[j] = i
-
     IEQ[NR] = ii + 1
 
-    INJB = np.zeros(20)
-    INJ = np.zeros(20)
-    LOD = np.zeros(20)
-    BT = np.zeros(20, 20)
-    ZT = np.zeros(20, 20)
+    INJB = np.zeros(NN)
+    INJ = np.zeros(NN)
+    LOD = np.zeros(NN)
+    BT = np.zeros((NX, NX))
+    ZT = np.zeros((NX, NX))
 
     for i in range(NN):
         INJB[i] = BN[i, 2] - BN[i, 1] * MULT
@@ -95,7 +96,7 @@ def tm2(
 
             if BIJ != 0.0:
                 ZIJ = -1 / BIJ
-                Z = ximpa(ZB, ZIJ, NII, NJJ, NN)
+                Z = ximpa(ZB, ZIJ, NII, NJJ)
                 admitm(BB, NII, NJJ, BIJ)
                 for i1 in range(NX):
                     for j1 in range(NX):
@@ -104,7 +105,7 @@ def tm2(
             BIJ = -BLP0[i]
             ZIJ = -1 / BIJ
 
-            Z = ximpa(ZB, ZIJ, NII, NJJ, NN)
+            Z = ximpa(ZB, ZIJ, NII, NJJ)
             admitm(BB, NII, NJJ, BIJ)
 
             for i1 in range(NX):
@@ -122,7 +123,7 @@ def tm2(
             continue
 
         ZIJ = -1 / BIJ
-        Z = ximpar(ZB, ZIJ, NII, NN)
+        Z = ximpar(ZB, ZIJ, NII)
         admref(BB, NII, BIJ)  # internally modify BB
 
         for i1 in range(NX):
@@ -132,7 +133,7 @@ def tm2(
         BIJ = -BLP0[i]
         ZIJ = -1 / BIJ
 
-        Z = ximpar(ZB, ZIJ, NII, NN)
+        Z = ximpar(ZB, ZIJ, NII)
         admref(BB, NII, BIJ)  # internally modify BB
 
         for i1 in range(NX):
@@ -183,7 +184,7 @@ def tm2(
             for j in range(NX):
                 BB[i, j] = BT[i, j]
                 ZB[i, j] = ZT[i, j]
-        return
+        return FLOW, INDIC
 
     A = np.zeros((200, 250))
     XOB = np.zeros(250)
@@ -198,31 +199,12 @@ def tm2(
     NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
 
     if NLS != 0:
-        M, N, N1 = connls(
-            A,
-            BB,
-            INJ,
-            INJB,
-            NX,
-            XOB,
-            IBAS,
-            NR,
-            LT,
-            B,
-            BLP,
-            LP,
-            NL,
-            BN,
-            B1,
-            LOD,
-            NLS,
-            XOBI,
-            BS,
-            TAB,
+        M, N, N1, A, XOB, XOBI, IBAS, BS, B, B1, TAB = connls(
+            BB, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS
         )
 
-        NXT = NX + 1
-        N = linp(M, N, A, B, XOB, XOBI, IBAS, BS, NXT, TAB, LCLOCK, JFLAG, N1)
+        # NXT = NX + 1 defined but not used in original Fortran
+        N, TAB = linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1)
         net(B, B1, RES, IBAS, BS, M, N)
 
         NXD1 = NX * 2 + 1
@@ -298,32 +280,12 @@ def tm2(
                     )
                 )
     else:
-        M, N, N1 = conls(
-            A,
-            BB,
-            INJ,
-            NX,
-            XOB,
-            IBAS,
-            NR,
-            LT,
-            B,
-            BLP,
-            LP,
-            NL,
-            M,
-            N,
-            BN,
-            B1,
-            LOD,
-            NLS,
-            XOBI,
-            BS,
-            TAB,
-            N1,
+        M, N, N1, A, XOB, XOBI, IBAS, BS, B, B1, TAB = conls(
+            BB, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS
         )
-        NXT = NX + 1
-        N = linp(M, N, A, B, XOB, XOBI, IBAS, BS, NXT, TAB, LCLOCK, JFLAG, N1)
+
+        # NXT = NX + 1 defined but not used in original Fortran
+        N, TAB = linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1)
         net(B, B1, RES, IBAS, BS, M, N)
 
         NX1 = NX + 1
@@ -390,4 +352,4 @@ def tm2(
             BB[i, j] = BT[i, j]
             ZB[i, j] = ZT[i, j]
 
-    return
+    return FLOW, INDIC
