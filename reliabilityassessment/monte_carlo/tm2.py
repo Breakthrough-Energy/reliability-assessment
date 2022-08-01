@@ -35,8 +35,12 @@ def tm2(
     PCTAVL,
 ):
     """
-    The core part fo the transmsison module used in reliability assessment
+    The core part of the transmsison module used in reliability assessment
 
+    :return: (*tuple*) -- FLOW: vector of line power flows (MW),  shape: (NLINES, )
+                          INDIC: an integer indicator.
+                                 (In fact, not used outside in the original Fortran;
+                                 can be removed later.)
     .. note:: 1) For descriptions of input variables, please refer to `variable
               descriptions.xlsx` in the project Dropbox folder at:
               https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
