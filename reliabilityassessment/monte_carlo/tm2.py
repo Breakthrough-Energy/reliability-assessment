@@ -25,14 +25,12 @@ def tm2(
     ZB,
     LT,
     NR,
-    FLOW,
     NLS,
     BNS,
     LCLOCK,
     JHOUR,
     IOI,
     JFLAG,
-    INDIC,
     PLNDST,
     PCTAVL,
 ):
@@ -183,7 +181,7 @@ def tm2(
             for j in range(NX):
                 BB[i, j] = BT[i, j]
                 ZB[i, j] = ZT[i, j]
-        return
+        return FLOW, INDIC
 
     A = np.zeros((200, 250))
     XOB = np.zeros(250)
@@ -390,4 +388,4 @@ def tm2(
             BB[i, j] = BT[i, j]
             ZB[i, j] = ZT[i, j]
 
-    return
+    return FLOW, INDIC
