@@ -1,108 +1,179 @@
+import numpy as np
 
-def transm(IFLAG,JFLAG):
-    # DOUBLE PRECISION BLP
-    # REAL INJ,INJB,LOD,LODC,INJ1
-    # DIMENSION BLP(100,3),BNS(20,6)       
-    
-    LCLOCK=CLOCK
-    JHOUR=JHOUR
-    IOI=IOI
-    NN=NOAREA
-    NL=NLINES
-    
+from reliabilityassessment.monte_carlo.tm1 import tm1
+from reliabilityassessment.monte_carlo.tm2 import tm2
+
+
+def transm(
+    IFLAG,
+    JFLAG,
+    CLOCK,
+    JHOUR,
+    IOI,
+    BN,
+    BLPA,
+    LP,
+    NR,
+    STMULT,
+    LNSTAT,
+    NLS,
+    TRNSFR,
+    TRNSFJ,
+    SYSCON,
+    CAPREQ,
+    PLNDST,
+    PCTAVL,
+):
+
+    """
+    The main entry function of the transmsison module used in reliability assessment
+
+    .. note:: 1) For descriptions of input and output variables, please refer to `variable
+              descriptions.xlsx` in the project Dropbox folder at:
+              https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
+              2) arrays are modified in-place.
+    """
+
+    # local variables
+    LCLOCK = CLOCK
+    JHOUR = JHOUR
+    IOI = IOI
+    NOAREA = BN.shape[0]
+    NN = NOAREA
+    NLINES = LNSTAT.shape[0]
+    NL = NLINES
+    BLP = np.zeros((NLINES, 3))  # in original Fortran, np.zeros((100,3))
+
     if IFLAG != 1:
         for i in range(NL):
-            BLP[i,0]=BLPA[i,0]
-            BLP[i,1]=BLPA[i,1]
-            BLP[i,2]=BLPA[i,2]
-            
-    # CALL TM1(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR)
-    BLP0, BB, LT, ZB = tm1(BN, LP, BLP, BLP0, NN, NL, BB, ZB, LT, NR)
-    
-    for i in range(NL):
-        L=(LNSTAT(i)-1)*3
-        BLP[i,0]=BLPA[i,L+1]
-        BLP[i,1]=BLPA[i,L+2]*STMULT[i,0]
-        BLP[i,2]=BLPA[i,L+3]*STMULT[i,1]
-        
-    if JFLAG != 1:
-        NLST=NLS
-        NLS=1
-        for i in range(NN):
-            BN[i,2]=TRNSFR[i]+TRNSFJ[i]
-            BN[i,1]=0.
-            BNS[i,0]=BN[i,2]
-            BNS[i,1]=BN[i,1]
-            BNS[i,4]=SYSCON[i]
-            BNS[i,5]=CAPREQ[i]
-            X=SYSCON[i]-CAPREQ[i]
-            
-            if X >= 0:
-                if BN[i,2] < 0:
-                    BN[i,2]=0.
-            else:
-                if X > BN[i,2]:
-                    BN[i,2]=X
+            BLP[i, 0] = BLPA[i, 0]
+            BLP[i, 1] = BLPA[i, 1]
+            BLP[i, 2] = BLPA[i, 2]
 
-     #    CALL TM2(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR,FLOW,NLS,BNS,LCLOCK
-     # *,JHOUR,IOI,JFLAG,INDIC)
-        TM2(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR,FLOW,NLS,BNS,LCLOCK,JHOUR,IOI,JFLAG,INDIC)
-        
-        NLS=NLST
-        KFLAG=1
+    # CALL TM1(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR)
+    BLP0, BB, LT, ZB = tm1(BN, LP, BLP, NR)
+
+    for i in range(NL):
+        L = (LNSTAT[i] - 1) * 3
+        BLP[i, 0] = BLPA[i, L + 1]
+        BLP[i, 1] = BLPA[i, L + 2] * STMULT[i, 0]
+        BLP[i, 2] = BLPA[i, L + 3] * STMULT[i, 1]
+
+    # local variable
+    BNS = np.zeros((NOAREA, 6))  # in original Fortran, np.zeros((20,6))
+
+    if JFLAG != 1:
+        NLST = NLS
+        NLS = 1
         for i in range(NN):
-            SADJ[i]=0.
-            SADJ[i]=SYSCON[i]-CAPREQ[i]-BN[i,1]
+            BN[i, 2] = TRNSFR[i] + TRNSFJ[i]
+            BN[i, 1] = 0.0
+            BNS[i, 0] = BN[i, 2]
+            BNS[i, 1] = BN[i, 1]
+            BNS[i, 4] = SYSCON[i]
+            BNS[i, 5] = CAPREQ[i]
+            X = SYSCON[i] - CAPREQ[i]
+
+            if X >= 0:
+                if BN[i, 2] < 0:
+                    BN[i, 2] = 0.0
+            else:
+                if X > BN[i, 2]:
+                    BN[i, 2] = X
+
+        FLOW, INDIC = tm2(
+            BN,
+            LP,
+            BLP,
+            BLP0,
+            NN,
+            NL,
+            BB,
+            ZB,
+            LT,
+            NR,
+            NLS,
+            BNS,
+            LCLOCK,
+            JHOUR,
+            IOI,
+            JFLAG,
+            PLNDST,
+            PCTAVL,
+        )
+
+        NLS = NLST
+        KFLAG = 1
+
+        SADJ = np.zeros(NN)
+        for i in range(NN):
+            SADJ[i] = 0.0
+            SADJ[i] = SYSCON[i] - CAPREQ[i] - BN[i, 1]
             if SADJ[i] < 0:
-                 KFLAG=0                    
+                KFLAG = 0
 
         if KFLAG == 1:
             return
-        
-        JFLAG=1
+
+        JFLAG = 1
+        CADJ = np.zeros(NN)  # CADJ is locally used
         for i in range(NN):
-            CADJ[i]=BN(i,1)*NLS
-    
+            CADJ[i] = BN(i, 1) * NLS
+
     if NLS != 0:
         for i in range(NN):
-            BN[I,3]=SYSCON[I]-CAPREQ[I]-CADJ[I]
-            BN[I,2]=CAPREQ[I]
-            BNS[I,1]=BN[I,3]
-            BNS[I,2]=BN[I,2]
-            BNS[I,4]=BN[I,4]        
-      
+            BN[i, 3] = SYSCON[i] - CAPREQ[i] - CADJ[i]
+            BN[i, 2] = CAPREQ[i]
+            BNS[i, 1] = BN[i, 3]
+            BNS[i, 2] = BN[i, 2]
+            BNS[i, 4] = BN[i, 4]
+
         for i in range(NL):
-            J=LP[I,2]
-            K=LP[I,3]
-            BLP[I,2]=BLP[I,2]-FLOW[I]
-            BLP[I,3]=BLP[I,3]+FLOW[I]
-            if BLP[I,2] < 0.0:
-                BLP[I,2]=0.
-            if BLP[I,3] < 0.0:
-                BLP[I,3]=0.
-            BN[J,4]=BN[J,4]+FLOW[I]
-            BN[J,5]=BN[J,5]-FLOW[I]
-            BN[K,4]=BN[K,4]-FLOW[I] 
+            j = LP[i, 2]
+            K = LP[i, 3]
+            BLP[i, 2] = BLP[i, 2] - FLOW[i]
+            BLP[i, 3] = BLP[i, 3] + FLOW[i]
+            if BLP[i, 2] < 0.0:
+                BLP[i, 2] = 0.0
+            if BLP[i, 3] < 0.0:
+                BLP[i, 3] = 0.0
+            BN[j, 4] = BN[j, 4] + FLOW[i]
+            BN[j, 5] = BN[j, 5] - FLOW[i]
+            BN[K, 4] = BN[K, 4] - FLOW[i]
     else:
         for i in range(NN):
-            BN[I,3]=SYSCON[I]-CAPREQ[I]-CADJ[I]
-            BN[I,2]=CAPREQ[I]
-            BNS[I,1]=BN[I,3]
-            BNS[I,2]=BN[I,2]
-            BNS[I,4]=BN[I,4]
-   
-    # CALL TM2(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR,FLOW,NLS,BNS,LCLOCK
-    #  *,JHOUR,IOI,JFLAG,INDIC)
-    TM2(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR,FLOW,NLS,BNS,LCLOCK,JHOUR,IOI,JFLAG,INDIC)
-    
-    for i in range(NN):
-        BN[i,3]=BNS[i,3]
-        BN[i,4]=BNS[i,3] # a typo ? 
+            BN[i, 3] = SYSCON[i] - CAPREQ[i] - CADJ[i]
+            BN[i, 2] = CAPREQ[i]
+            BNS[i, 1] = BN[i, 3]
+            BNS[i, 2] = BN[i, 2]
+            BNS[i, 4] = BN[i, 4]
+
+    FLOW, INDIC = tm2(
+        BN,
+        LP,
+        BLP,
+        BLP0,
+        NN,
+        NL,
+        BB,
+        ZB,
+        LT,
+        NR,
+        NLS,
+        BNS,
+        LCLOCK,
+        JHOUR,
+        IOI,
+        JFLAG,
+        PLNDST,
+        PCTAVL,
+    )
 
     for i in range(NN):
-        SADJ[i]=BN[i,1]-SYSCON[i]+CAPREQ[i]+CADJ[i]   
-    
-    return
-        
-        
-        
+        BN[i, 3] = BNS[i, 3]
+        BN[i, 4] = BNS[i, 3]  # a typo ?
+
+    for i in range(NN):
+        SADJ[i] = BN[i, 1] - SYSCON[i] + CAPREQ[i] + CADJ[i]
+
+    return BLP0, BB, LT, ZB, FLOW, SADJ
