@@ -1,0 +1,393 @@
+import numpy as np
+
+from reliabilityassessment.monte_carlo.admitm import admitm
+from reliabilityassessment.monte_carlo.admref import admref
+from reliabilityassessment.monte_carlo.assign import assign
+from reliabilityassessment.monte_carlo.conls import conls
+from reliabilityassessment.monte_carlo.connls import connls
+from reliabilityassessment.monte_carlo.flo import flo
+from reliabilityassessment.monte_carlo.linp import linp
+from reliabilityassessment.monte_carlo.net import net
+from reliabilityassessment.monte_carlo.theta import theta
+from reliabilityassessment.monte_carlo.thetac import thetac
+from reliabilityassessment.monte_carlo.ximpa import ximpa
+from reliabilityassessment.monte_carlo.ximpar import ximpar
+
+
+def tm2(
+    BN,
+    LP,
+    BLP,
+    BLP0,
+    NN,
+    NL,
+    BB,
+    ZB,
+    LT,
+    NR,
+    FLOW,
+    NLS,
+    BNS,
+    LCLOCK,
+    JHOUR,
+    IOI,
+    JFLAG,
+    INDIC,
+    PLNDST,
+    PCTAVL,
+):
+    """
+    The core part fo the transmsison module used in reliability assessment
+
+    .. note:: 1) For descriptions of input variables, please refer to `variable
+              descriptions.xlsx` in the project Dropbox folder at:
+              https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
+              2) arrays are modified in-place.
+    """
+
+    MULT = 0
+    NX = NN - 1
+
+    NOAREA = LT.shape[0]
+    IEQ = np.zeros(NOAREA)
+
+    for i in range(NX):
+        ii = i
+        j = LT[i]
+        IEQ[j] = i
+
+    IEQ[NR] = ii + 1
+
+    INJB = np.zeros(20)
+    INJ = np.zeros(20)
+    LOD = np.zeros(20)
+    BT = np.zeros(20, 20)
+    ZT = np.zeros(20, 20)
+
+    for i in range(NN):
+        INJB[i] = BN[i, 2] - BN[i, 1] * MULT
+        LOD[i] = BN[i, 1]
+
+    for i in range(NN):
+        j = LT[i]
+        INJ[i] = INJB[j]
+
+    for i in range(NX):
+        for j in range(NX):
+            BT[i, j] = BB[i, j]
+            ZT[i, j] = ZB[i, j]
+
+    for i in range(NL):
+
+        D = BLP[i, 0] - BLP0[i]
+
+        IDD = D * 1000.0
+        if IDD == 0:
+            continue
+
+        NI = LP[i, 1]
+        NJ = LP[i, 2]
+
+        if not ((NI == NR) or (NJ == NR)):
+            NII = IEQ[NI]
+            NJJ = IEQ[NJ]
+            BIJ = BLP[i, 0]
+
+            if BIJ != 0.0:
+                ZIJ = -1 / BIJ
+                Z = ximpa(ZB, ZIJ, NII, NJJ, NN)
+                admitm(BB, NII, NJJ, BIJ)
+                for i1 in range(NX):
+                    for j1 in range(NX):
+                        ZB[i1, j1] = Z[i1, j1]
+
+            BIJ = -BLP0[i]
+            ZIJ = -1 / BIJ
+
+            Z = ximpa(ZB, ZIJ, NII, NJJ, NN)
+            admitm(BB, NII, NJJ, BIJ)
+
+            for i1 in range(NX):
+                for j1 in range(NX):
+                    ZB[i1, j1] = Z[i1, j1]
+
+            continue
+
+        if NI == NR:
+            NI = NJ
+        NII = IEQ[NI]
+        BIJ = BLP[i, 0]
+
+        if BIJ == 0.0:
+            continue
+
+        ZIJ = -1 / BIJ
+        Z = ximpar(ZB, ZIJ, NII, NN)
+        admref(BB, NII, BIJ)  # internally modify BB
+
+        for i1 in range(NX):
+            for j1 in range(NX):
+                ZB[i1, j1] = Z[i1, j1]
+
+        BIJ = -BLP0[i]
+        ZIJ = -1 / BIJ
+
+        Z = ximpar(ZB, ZIJ, NII, NN)
+        admref(BB, NII, BIJ)  # internally modify BB
+
+        for i1 in range(NX):
+            for j1 in range(NX):
+                ZB[i1, j1] = Z[i1, j1]
+
+    # Assigns injections at buses so as to balance
+    # Positive and negative injections
+    INJ1, LODC = assign(INJ, LOD, LT, NN, NLS)
+
+    THET = theta(ZB, INJ1)
+    THETC = thetac(THET, LT)
+    SFLOW, FLOW = flo(LP, BLP, THETC)
+
+    INDIC = 0
+
+    for i in range(NL):
+        if FLOW[i] >= 0:
+            if FLOW[i] > BLP[i, 1]:
+                INDIC = 1
+            continue
+        FF = FLOW[i]
+        FF = abs(FF)
+        DIRF = BLP[i, 2]
+        if FF > DIRF:
+            INDIC = 1
+
+    for i in range(NN):
+        if SFLOW[i] >= 0:
+            if SFLOW[i] > BN[i, 3]:
+                INDIC = 1
+            continue
+        FF = SFLOW[i]
+        FF = abs(FF)
+        DIRF = BN[i, 4]
+        if FF > DIRF:
+            INDIC = 1
+
+    if INDIC != 1:
+        for i in range(NN):
+            j = LT[i]
+            BN[j, 1] = INJ1[i]
+            BN[i, 2] = LODC[i]
+        # INL=0 in Fortran, this variable is defined but never used.
+
+        # GO TO 1000
+        for i in range(NX):
+            for j in range(NX):
+                BB[i, j] = BT[i, j]
+                ZB[i, j] = ZT[i, j]
+        return
+
+    A = np.zeros((200, 250))
+    XOB = np.zeros(250)
+    IBAS = np.zeros(250, dtype=int)
+    B = np.zeros(200)
+    B1 = np.zeros(200)
+    XOBI = np.zeros(2, 250)
+    BS = np.zeros(200)
+    TAB = np.zeros(200, 250)
+    RES = np.zeros(250, 3)
+    NUNITS = len(PLNDST)
+    NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
+
+    if NLS != 0:
+        M, N, N1 = connls(
+            A,
+            BB,
+            INJ,
+            INJB,
+            NX,
+            XOB,
+            IBAS,
+            NR,
+            LT,
+            B,
+            BLP,
+            LP,
+            NL,
+            BN,
+            B1,
+            LOD,
+            NLS,
+            XOBI,
+            BS,
+            TAB,
+        )
+
+        NXT = NX + 1
+        N = linp(M, N, A, B, XOB, XOBI, IBAS, BS, NXT, TAB, LCLOCK, JFLAG, N1)
+        net(B, B1, RES, IBAS, BS, M, N)
+
+        NXD1 = NX * 2 + 1
+        NXD2 = NXD1 + NX
+
+        for i in range(NXD1 - 1, NXD2):
+            II = i - NXD1 + 1
+            j = LT(II)
+            BN[j, 1] = -RES[i, 0]
+            BN[j, 2] = -BN[j, 2] + BN[j, 1]
+            if BN[j, 2] < 0:
+                BN[j, 2] = 0
+
+        NXD1 = 4 * NX + 3
+        NXD2 = 4 * NX + 2 + NL
+        j = 0
+
+        for i in range(NXD1 - 1, NXD2):
+            j += 1
+            FLOW[j] = RES[i, 0]
+
+        if IOI != 0:
+            f = open("traout.txt ", "w")  # maybe 'a' ; need later check
+            f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
+
+            # print table of units on outage or derated to traout file
+            # JXX is unit number on outage, derated, or on planned maintenance.
+            # NNTAB[i] is index of unit on outage or on maintenance.
+            # if unit is derated, then NNTAB[i] has - sign.
+
+            JXX = 0
+            for i in range(NUNITS):
+                if PLNDST[i] != 1.0:
+                    JXX += 1
+                    NNTAB[JXX] = i
+                    continue
+                if PCTAVL[i] == 1.0:
+                    continue
+                JXX += 1
+                NNTAB[JXX] = i
+                if PCTAVL[i] != 0.0:
+                    NNTAB[JXX] = -i
+
+            f.write("%4d\n" % (JXX))
+            for i in range[JXX]:
+                f.write("%4d\n " % (NNTAB[i]))
+
+            if JFLAG != 1:
+                for i in range(NN):
+                    f.write(
+                        "\n     %3.0f  %10.2f  %10.2f  %10.2f  %10.2f  \n "
+                        % (BN[i, 0], BNS[i, 0], BN[i, 1], BNS[i, 4], BNS[i, 5])
+                    )
+
+            if JFLAG != 0:
+                for i in range(NN):
+                    f.write(
+                        "\n     %3.0f  %8.0f     %8.0f     %8.0f     %8.0f     %8.0f     \n "
+                        % (BN[i, 0], BN[i, 1], BN[i, 2], BNS[i, 0], BNS[i, 1], BN[i, 3])
+                    )
+
+            for i in range(NL):
+                f.write(
+                    "\n     %3d  %3d  %3d  %8.0f  %8.0f  %8.0f  %8.0f  \n "
+                    % (
+                        LP[i, 0],
+                        LP[i, 1],
+                        LP[i, 2],
+                        BLP[i, 0],
+                        BLP[i, 1],
+                        BLP[i, 2],
+                        FLOW[i],
+                    )
+                )
+    else:
+        M, N, N1 = conls(
+            A,
+            BB,
+            INJ,
+            NX,
+            XOB,
+            IBAS,
+            NR,
+            LT,
+            B,
+            BLP,
+            LP,
+            NL,
+            M,
+            N,
+            BN,
+            B1,
+            LOD,
+            NLS,
+            XOBI,
+            BS,
+            TAB,
+            N1,
+        )
+        NXT = NX + 1
+        N = linp(M, N, A, B, XOB, XOBI, IBAS, BS, NXT, TAB, LCLOCK, JFLAG, N1)
+        net(B, B1, RES, IBAS, BS, M, N)
+
+        NX1 = NX + 1
+        NXD1 = NX * 2 + 2 * NX1 + 1
+        NXD2 = NXD1 + NX
+
+        for i in range(NXD1 - 1, NXD2):
+            II = i - NXD1 + 1
+            j = LT(II)
+            BN[j, 2] = RES[i, 0]
+            III = i + NX1
+            BN[j, 1] = RES[III, 0] - LOD[j] + BN[j, 2]
+
+        NXD1 = 6 * NX1 - 1
+        NXD2 = NXD1 - 1 + NL
+        j = 0
+        for i in range(NXD1 - 1, NXD2):
+            j += 1
+            FLOW[j] = RES[i, 0]
+
+        if IOI != 0:
+            f = open("traout.txt ", "w")  # maybe 'a' ; need later check
+            f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
+            JXX = 0
+            for i in range(NUNITS):
+                if PLNDST[i] != 1.0:
+                    JXX += 1
+                    NNTAB[JXX] = i
+                    continue
+                if PCTAVL[i] == 1.0:
+                    continue
+                JXX += 1
+                NNTAB[JXX] = i
+                if PCTAVL[i] != 0.0:
+                    NNTAB[JXX] = -i
+
+            f.write("%4d\n" % (JXX))
+            for i in range(JXX):
+                f.write("%4d\n " % (NNTAB[i]))
+
+            for i in range(NN):
+                f.write(
+                    "\n     %3.0f  %8.0f     %8.0f     %8.0f     %8.0f     %8.0f     \n "
+                    % (BN[i, 0], BN[i, 1], BN[i, 2], BNS[i, 0], BNS[i, 1], BN[i, 3])
+                )
+
+            for i in range(NL):
+                f.write(
+                    "\n     %3d  %3d  %3d  %8.0f  %8.0f  %8.0f  %8.0f  \n "
+                    % (
+                        LP[i, 0],
+                        LP[i, 1],
+                        LP[i, 2],
+                        BLP[i, 0],
+                        BLP[i, 1],
+                        BLP[i, 2],
+                        FLOW[i],
+                    )
+                )
+
+    # GO TO 1000
+    for i in range(NX):
+        for j in range(NX):
+            BB[i, j] = BT[i, j]
+            ZB[i, j] = ZT[i, j]
+
+    return
