@@ -3,15 +3,14 @@ import numpy as np
 
 def ximpa(ZB, ZIJ, NI, NJ, NN):
     """
-    Modifies ZBUS matrix if ZIJ added between NI,NJ
-    ZB is the input ZBUS matrix; Z is the modified ZBUS matrix
+    Modifies ZBUS matrix if ZIJ added between bus NI,NJ
 
     :param np.array ZB: the input ZBUS matrix  (dim: areas-by-areas)
-    :param int NI: from bus id of the newly added branch
-    :param int NJ: to bus id of the newly added branch
+    :param int ZIJ: the impedance to be added to the system between bus NI,NJ
+    :param int NI: from bus id of the newly added branch (0-based index)
+    :param int NJ: to bus id of the newly added branch (0-based index)
     :param int NN: total bus number
-
-    return Z -- the modified ZBUS matrix (dim: areas-by-areas)
+    :return: (*numpy.ndarray*) -- the modified ZBUS matrix (dim: areas-by-areas)
     """
 
     ZCOL = np.zeros(NN)
@@ -23,6 +22,6 @@ def ximpa(ZB, ZIJ, NI, NJ, NN):
     Z = np.zeros((NN, NN))
     for i in range(NN):
         for j in range(NN):
-            Z[i, j] = ZB[i, j] - [ZCOL[i] * ZCOL[j]] / ZN1
+            Z[i, j] = ZB[i, j] - (ZCOL[i] * ZCOL[j]) / ZN1
 
     return Z
