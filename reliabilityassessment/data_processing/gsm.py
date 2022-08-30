@@ -4,6 +4,10 @@ import numpy as np
 def gsm(N, KT, KP, P1, P2, P3, PA, KA):
     """
     Add a 2-state or a 3-state unit model to the generation capacity-outage model
+    based on the "unit addition algorithm".
+
+    Its high-level idea and illustration can be partially found in these slides:
+    https://www.dropbox.com/s/krcse3mjuh97i88/module_6-1.pdf?dl=0
 
     :param int N: total number of starting states
     :param int KT: rounded (nearest integer) full capacity of the added gen unit
@@ -64,6 +68,9 @@ def gsm(N, KT, KP, P1, P2, P3, PA, KA):
 def _gsm(N, KT, KP, P1, P2, P3, PA, KA):
     """
     Add a 2-state or a 3-state unit model to the generation capacity-outage model
+
+    Its high-level idea and illustration can be partially found in these slides:
+    https://www.dropbox.com/s/krcse3mjuh97i88/module_6-1.pdf?dl=0
 
     :param int N: total number of starting states
     :param int KT: rounded (nearest integer) full capacity of the added gen unit
