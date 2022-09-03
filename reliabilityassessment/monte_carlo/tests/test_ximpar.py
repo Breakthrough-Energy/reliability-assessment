@@ -5,7 +5,7 @@ from reliabilityassessment.monte_carlo.ximpar import ximpar
 
 def test_ximpar():
 
-    NN = 5
+    # NN = 5, the size of Z, ZB matrices (no need now in Python)
     NI = 1 - 1  # be careful: 0-based index in Python
     ZIJ = 0.016667
     ZB = np.array(
@@ -18,7 +18,7 @@ def test_ximpar():
         ]
     )
 
-    Z = ximpar(ZB, ZIJ, NI, NN)
+    Z = ximpar(ZB, ZIJ, NI)
 
     Z_true = np.array(
         [
