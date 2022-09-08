@@ -7,10 +7,9 @@ def rm(M, CB, TAB):
 
     :param int M: the specified range for the matrix (to be multiplied)
     :param numpy.ndarray CB: the input vector (as the be left-multiplier)
-                             its length can be larger than M.
+                             its length could be larger than M.
     :param numpy.ndarray TAB: the input matrix (to be multiplied)
-                             its row/col size can be larger than M.
-
+                             its row/col size could be larger than M.
     :return: (*numpy.ndarray*) -- PY: 1D array with shape (M,)
     """
 
