@@ -2,38 +2,26 @@ import numpy as np
 
 
 def connls(
-    A,
     BC,
     INJ,
     INJB,
     NX,
-    XOB,
-    IBAS,
     NR,
     LT,
-    B,
     BLP,
     LP,
     NL,
     M,
     N,
     BN,
-    B1,
     LOD,
     NLS,
-    XOBI,
-    BS,
-    TAB,
     N1,
 ):
     """
      Update the coefficient-matrcies of constraints, and other quantities, for the LP-based DCOPF
      (load shedding) under the "no-load-sharing" mode (in short, "NLS")
 
-     :param numpy.ndarray A: initial shape (200, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in LP-based DCOPF
-                             (possibly) means the  coefficient matrix of all constraints in LP
      :param numpy.ndarray BC: initial shape (20, 20) (possibly NOAREA-by-NOAREA)
                              the realistic size is determined on-the-fly
                              a matrix used in LP-based DCOPF
@@ -47,22 +35,11 @@ def connls(
                              (possibly) related to the injection at each bus(i.e., "area")
      :param int NX: an integer used in LP-based DCOPF
                     (possibly) related to the variables/constraint dimensions in LP-based DCOPF
-     :param numpy.ndarray XOB: initial shape (250, )
-                             the realistic size is determined on-the-fly
-                             a vector used in linear programming(LP)-based DCOPF
-                             values are either 0 or 1; thus, possibly integer indicators
-     :param numpy.ndarray IBAS: 1D array with initial shape (250, )
-                             the realistic size is determined on-the-fly
-                             a helper vector used in linear programming-based DCOPF
-                             (possibly) means the indices of the "basis-vector" used in LP
      :param int NR: an integer used in LP-based DCOPF
                     (possibly) means the index of the reference bus (area) in power flow computation
      :param numpy.ndarray LT: 1D array with initial shape (250, )
                                LT[I] contains the actual node index corresponding to node I
                                of the reduced admittance matrix here;  shape (NOAREA,)"
-     :param numpy.ndarray B: 1D array with initial shape (200, )
-                             the realistic size is determined on-the-fly
-                             a vector used in linear programming(LP)-based DCOPF
      :param numpy.ndarray BLP: 2D array with shape (NLINES, 3)
                                BLP[I, 0]: admittance of the line at the I-th entry of LP
                                BLP[I, 1]: capacity (MW)
@@ -84,46 +61,70 @@ def connls(
                               BN[I, 2]: area net injection, overridden by load
                                         curtailment after calling :py:func: `tm2`
                               BN[I, 3]: area constraint on total power flow
-     :param numpy.ndarray B1: 1D array with initial shape (200, )
-                             the realistic size is determined on-the-fly
-                             a helper vector used in linear programming-based DCOPF
      :param numpy.ndarray LOD: 1D array with shape (NLINES, 3)
                                vector of loads
      :param int NLS: an indicator of loss sharing mode,
                      0    LOSS SHARING
                      1    NO LOSS SHARING
-     :param numpy.ndarray XOBI: initial shape (2, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in linear programming(LP)-based DCOPF
-                             values are either 0 or 1; thus possibly integer indicators
-     :param numpy.ndarray BS: 1D array with initial shape (200, )
-                             the realistic size is determined on-the-fly
-                             a helper vector used in linear programming-based DCOPF
-     :param numpy.ndarray TAB: initial shape (200, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in linear programming(LP)-based DCOPF
      :param int N1: an integer used in LP-based DCOPF
 
      :return: (*tuple*) -- a tuple of three scalars, M, N, N1;
-                           and modify several arrays in place.
+
+                           A:  array with initial shape (200, 250),
+                               the realistic size is determined on-the-fly
+                               a matrix used in LP-based DCOPF
+                               (possibly) means the  coefficient matrix of all constraints in LP
+
+                           XOB: initial shape (250, )
+                                the realistic size is determined on-the-fly
+                                a vector used in linear programming(LP)-based DCOPF
+                                values are either 0 or 1; thus, possibly integer indicators
+
+                           XOBI: initial shape (2, 250)
+                                 the realistic size is determined on-the-fly
+                                 a matrix used in linear programming(LP)-based DCOPF
+                                 values are either 0 or 1; thus possibly integer indicators
+
+                           IBAS: 1D integer array with initial shape (250, )
+                                 the realistic size is determined on-the-fly
+                                 a helper vector used in linear programming-based DCOPF
+                                 (possibly) means the indices of the "basis-vector" used in LP
+                           BS: 1D array with initial shape (200, )
+                               the realistic size is determined on-the-fly
+                               a helper vector used in linear programming-based DCOPF
+
+                           B: 1D array with initial shape (200, )
+                              the realistic size is determined on-the-fly
+                              a vector used in linear programming(LP)-based DCOPF
+
+                           B1: 1D array with initial shape (200, )
+                               the realistic size is determined on-the-fly
+                               a helper vector used in linear programming-based DCOPF
+
+                           TAB: initial shape (200, 250)
+                                the realistic size is determined on-the-fly
+                                a matrix used in linear programming(LP)-based DCOPF
+
+                           And modify several arrays in place.
     """
 
     NMAX2 = 200
     NMAX1 = 250
     IEQ = np.zeros(NX)  # originally in Fortran np.zeros(20)
 
-    for i in range(NMAX1):
-        IBAS[i] = 0.0
-        XOB[i] = 0.0
-        XOBI[0, i] = 0.0
-        XOBI[1, i] = 0.0
-        for j in range(NMAX2):
-            A[j, i] = 0.0
+    IBAS = np.zeros(NMAX1, dtype=int)
+    XOB = np.zeros(NMAX1)
+    XOBI = np.zeros((2, NMAX1))
+    A = np.zeros((NMAX2, NMAX1))
+    B = np.zeros(NMAX2)
+    B1 = np.zeros(
+        NMAX2
+    )  # in Fortran, B1 is by default 'int' type, which is no need here.
+    BS = np.zeros(NMAX2)
+    TAB = np.zeros((NMAX2, NMAX1))
 
     for i in range(NMAX2):
-        B[i] = 0
         B1[i] = 0
-        BS[i] = 0
 
     for i in range(NX):
         II = i
@@ -291,4 +292,4 @@ def connls(
 
     N1 = N - NX1
 
-    return M, N, N1
+    return M, N, N1, A, XOB, XOBI, IBAS, BS, B, B1, TAB
