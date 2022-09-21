@@ -112,9 +112,6 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     BS = np.zeros(NMAX2)
     TAB = np.zeros((NMAX2, NMAX1))
 
-    for i in range(NMAX2):
-        B1[i] = 0
-
     for i in range(NX):
         II = i
         j = LT[i]
