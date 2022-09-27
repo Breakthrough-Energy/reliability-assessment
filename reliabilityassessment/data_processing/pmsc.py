@@ -50,8 +50,12 @@ def pmsc(
                                  shape (NOAREA,)
     :param numpy.ndarray INHBT1: beginning week of the forbidden (inhibt) period of each area
                                  shape (NOAREA,)
-    :param numpy.ndarray INHBT2: ending week of the forbidden (inhibt) period of each area
-                                 shape (NOAREA,)
+    :param numpy.ndarray NAMU: name string of each generator unit
+                               (in Fortran, it is double-typed as also 'int' but not used)
+                               shape (NUNITS,)
+    :param numpy.ndarray NUMP: name string of each generator plant
+                               (in Fortran, it is double-typed as also 'int' but not used)
+                               shape (NUNITS,)
 
     Annotations for certain intermediate (local) variables/arrays:
 
@@ -79,8 +83,8 @@ def pmsc(
     INDEX = np.zeros((INUO, 2))  # maybe use "-1" for intialization
     INDEX1 = np.zeros(INUO)  # maybe use "-1" for intialization
     P = np.ones(INUO)
-    NR0 = np.zeros(NUNITS)
-    ID1 = np.zeros((NUNITS, 8))
+    NR0 = np.zeros(NUNITS, dtype=int)
+    ID1 = np.zeros((NUNITS, 8), dtype=int)
     CAPLOS = np.zeros(NUNITS)
     RD = np.zeros((NUNITS, 3))
     DURLOS = np.zeros((NUNITS, 2))
@@ -103,7 +107,11 @@ def pmsc(
     NPSU = np.zeros(NUNITS)
     SCHLOS = np.zeros(NUNITS)  # SCHEDULED LOSS DUE TO MAINTENANCE;
 
-    NGU = 0
+    # Note taht 'NGU' means the total number of gen units used in this function
+    # but 0 in original Fortran code, it also uses sometimes as "index" for arrays
+    # since Fortran is 1-based indexing.
+    NGU = -1
+
     for i in range(NUNITS):
         if ID[i, 2] != IA:
             continue
@@ -124,19 +132,19 @@ def pmsc(
         NU3 = RATES[i, 2]
         NU4 = RATES[i, 3]
         CAPLOS[NGU] = max(NU1, NU2, NU3, NU4)
-        RD[NGU, 1] = 1.0 - PROBG(i, 1)
+        RD[NGU, 1] = 1.0 - PROBG[i, 1]
         RD[NGU, 0] = PROBG[i, 1] - PROBG[i, 0]
         RD[NGU, 2] = 1 - DERATE[i]
 
-        NGU += 1
+    NGU += 1  # restoring its literal meaning, i.e.the total number of gen units used in this function
 
     if NGU == 0:
-        return
+        return ITAB
 
     for i in range(NGU):
         DURLOS[i, 0] = ID1[i, 4]
         DURLOS[i, 1] = ID1[i, 6]
-        ID1[i, 3] = ID1(i, 3) * 168 - 168
+        ID1[i, 3] = ID1[i, 3] * 168 - 168
         ID1[i, 4] = ID1[i, 4] * 168
         ID1[i, 5] = ID1[i, 5] * 168 - 168
         ID1[i, 6] = ID1[i, 6] * 168
@@ -154,11 +162,10 @@ def pmsc(
     CAP1 = CAP / 20
     CAP2 = CAP / 5
     G = PKLOAD[IA]
-    M = NGU  # M IS THE TOTAL NUMBER OF GENERATING UNITS.
+    M = NGU  # M is the total number of generating units considerred in this function
     i1 = 0
-
     # arrange the sequence of units such that for a given plant the units are
-    # arranged in the descending order of (capacity*planned maintenance duration
+    # arranged in the descending order of capacity*planned maintenance duration
     for i in range(N):
         while True:
             IC = 0  # (possibly) a flag varaiable
@@ -180,11 +187,10 @@ def pmsc(
                 break
 
             i1 += 1
-
             for j in range(8):
                 IDT[i1, j] = ID1[JT, j]
 
-            ID1[JT, 1] = 0
+            ID1[JT, 1] = -1  # plant index
             for j in range(3):
                 RDT[i1, j] = RD[JT, j]
 
@@ -254,16 +260,17 @@ def pmsc(
         for i in range(52):
             if i % 13 == 0:
                 f.write("\n")
-            f.write(" \f", LOAD[i])
+            f.write(" \f" % (LOAD[i]))
 
-    NPS = 0
+    NPS = -1  # 0 in Fortran
     for i in range(M):
         if ID1[i, 7] == 0:
             break
         NPS += 1
         NPSU[NPS] = ID1[i, 0]
+    NPS += 1  # restoring the meainig of certain length
 
-    i = 0
+    i = -1  # 0 in Fortran
     LTEM = 0
     for j in range(M):  # goto flag #52
         R = 1 - P[j] + P[j] * np.exp(CAPLOS[j] / XM)
@@ -276,19 +283,28 @@ def pmsc(
             MWTOT[j] = 0
             MWI[j] = LOCREW[j]
 
-        if NPS != 0:
+        if NPS > 0:  # in Fortran " NPS != 0 "
+            gotoflag11 = False
             for ii in range(NPS):
                 IN1 = NPSU[ii]
                 if ID1[j, 0] == IN1:
+                    gotoflag11 = True
                     break
+
+            if gotoflag11 is False:
+                MWEEK[j] = SCHLOS[j] * (DURLOS[j, 0] + DURLOS[j, 1])
+                MWTOT[i] += MWEEK[j]
+                continue
 
             if ID1[j, 0] != IN1:
                 MWEEK[j] = SCHLOS[j] * (DURLOS[j, 0] + DURLOS[j, 1])
                 MWTOT[i] += MWEEK[j]
                 continue
 
-            if ID1[j, 3] != 0 or ID1[j, 4] != 0:  # maybe use "!= -1"
-                M1 = ID1[j, 3] / 168 + 1  # maybe remvoe "+1" here
+            if ID1[j, 3] != -1 or ID1[j, 4] != 0:  # ID1[j, 3] != 0 in Fotran
+                M1 = (
+                    ID1[j, 3] // 168 + 1
+                )  # maybe remvoe "+1" here; ID1[j, 3] / 168 + 1 in Fortran
                 M2 = M1 + DURLOS[j, 0] - 1
                 IPN = i
                 if M2 > 51:
@@ -303,8 +319,10 @@ def pmsc(
             else:
                 INDEX1[j] = 0  # originally in Fortran "1"
 
-            if ID1[j, 5] != 0 or ID1[j, 6] != 0:
-                M3 = ID1[j, 5] / 168 + 1
+            if ID1[j, 5] != -1 or ID1[j, 6] != 0:
+                M3 = (
+                    ID1[j, 5] // 168 + 1
+                )  # maybe remvoe "+1" here; ID1[j, 5] / 168 + 1 in Fortran
                 M4 = M3 + DURLOS[j, 1] - 1
                 if M4 > 51:  # M2 > 52: need to check
                     M4 = 51
@@ -434,10 +452,10 @@ def pmsc(
             MAX1 = MWTOT[K]
             i = K
 
-        # CREATE MWEEK(J)
-        K1 = MWI(i)
+        # Create MWEEK(J)
+        K1 = MWI[i]
 
-        for K2 in range(INUO):
+        for K2 in range(M):  # in original Fortran "in range(INUO)"
             MWEEK[K2] = 0
 
         for K2 in range(M):
@@ -450,14 +468,14 @@ def pmsc(
             continue
 
         MWTOT[i] = 0
-        # SET THE INDEX FOR MWEEK(J), J=N1,N2
+        # Set the index for MWEEK(J), J=N1,N2
 
         N1 = 0  # in Fortran, 1; need to check
         N2 = -1  # in Fortran,0; need to check
         for j in range(M):
-            if MWEEK(j) != 0:
+            if MWEEK[j] != 0:
                 N2 = j
-            if MWEEK(j) == 0 and N2 == -1:
+            if MWEEK[j] == 0 and N2 == -1:
                 N1 += 1
 
         # Schedule all generators within the same plant
@@ -465,12 +483,12 @@ def pmsc(
         while gotoFlag18:
             gotoFlag18 = False
 
-            for JA in range(N1, N2 + 1):  # flag 30
+            for JA in range(N1, N2):  # flag 30 ; maybe N2 + 1
                 j = JA
                 J4 = JA
 
-                # SET INDEX FOR SCHEDULING WITHIN THE FLEXIBLE MAINTENANCE PERIOD,
-                # BETWEEN MIN. AND MAX. RANGE
+                # Set index for scheduling within the flexible maintenance period,
+                # between min. and max. range
                 if MWEEK[JA] == 0:
                     continue
 
@@ -482,7 +500,7 @@ def pmsc(
                     I5 = 2
                     if ID1[j, 4] > ID1[j, 6]:
                         I5 = 1
-                    if ID1[j, 4] == 0 or ID1(j, 6) == 0:
+                    if ID1[j, 4] == 0 or ID1[j, 6] == 0:
                         I5 = 0
 
                     DURL = DURLOS[j, 0]
@@ -553,17 +571,25 @@ def pmsc(
                             I5 = 0
                             continue  # GO TO 19
 
-                        # IC is the index to check whether the schedule is feasible.
+                        # IC is the flag to check whether the schedule is feasible.
                         if IC == 0:
                             while True:
                                 J4 -= 1
-                                if J4 <= 0:
+                                if J4 <= -1:  # <=0 in Fotran
                                     IU0 = ID1[JA, 0]
                                     IU0 = NR0[IU0]
-                                    IBG1N = ID1[JA, 3] / 168 + 1
-                                    IBG2N = ID1[JA, 5] / 168 + 1
-                                    ID1R = ID1[JA, 4] / 168
-                                    ID2R = ID1[JA, 6] / 168
+                                    IBG1N = (
+                                        ID1[JA, 3] // 168 + 1
+                                    )  # maybe remvoe "+1" here; ID1[JA, 3] / 168 + 1 in Fortran
+                                    IBG2N = (
+                                        ID1[JA, 5] // 168 + 1
+                                    )  # maybe remvoe "+1" here; ID1[JA, 5] / 168 + 1 in Fortran
+                                    ID1R = (
+                                        ID1[JA, 4] // 168
+                                    )  # ID1[JA, 4] / 168 in Fortran
+                                    ID2R = (
+                                        ID1[JA, 6] // 168
+                                    )  # ID1[JA, 6] / 168 in Fortran
 
                                     f.write(
                                         "          SCHEDULE FOR  GENERATOR ** %s %s **  IS NOT FEASIBLE"
@@ -571,8 +597,8 @@ def pmsc(
                                         "          BEGINING FIRST OUTAGE = %2d   DURATION = %2d\n"
                                         "          BEGINING SECOND OUTAGE = %2d   DURATION = %2d\n"
                                         % (
-                                            NAMU(IU0),
-                                            NUMP(IU0),
+                                            NAMU[IU0],
+                                            NUMP[IU0],
                                             IBG1N,
                                             ID1R,
                                             IBG2N,
@@ -587,8 +613,8 @@ def pmsc(
                                     gotoFlag18 = True  # GO TO 18
                                     break
 
-                                # CANCEL THE PREVIOUS SCHEDULED GENERATOR, TRY TO SCHEDULE THE
-                                # NON-FEASIBLE ONE. INTERCHANGE ORDER OF THE SCHEDULING.
+                                # Cancel the previous scheduled generator, try to schedule the
+                                # Non-feasible one. Interchange order of the scheduling.
                                 if MWEEK[J4] == 0:
                                     continue
 
@@ -675,7 +701,7 @@ def pmsc(
                             break
 
                         while True:
-                            J4 = J4 + 1
+                            J4 += 1
                             if J4 > JA:
                                 gotoFlag30 = True
                                 break  # GO TO 30
@@ -723,18 +749,18 @@ def pmsc(
 
             for L in range(MC1, MC2 + 1):
                 WEEKS[L] = A
-                if INDEX1(JB) == 0:
+                if INDEX1[JB] == 0:
                     continue
                 WEEKS[L] = AB
 
         if INDEX(JB, 2) != 0:
-            MC1 = INDEX(JB, 2)
-            MC2 = MC1 + DURLOS(JB, 2) - 1
+            MC1 = INDEX[JB, 2]
+            MC2 = MC1 + DURLOS[JB, 2] - 1
             if MC2 > 51:
                 MC2 = 51
             for L in range(MC1, MC2 + 1):
                 WEEKS[L] = A
-                if INDEX1(JB) == 0:
+                if INDEX1[JB] == 0:
                     continue
                 WEEKS[L] = AB
 
@@ -746,7 +772,7 @@ def pmsc(
 
             for KI in range(4):
                 for KJ in range(13):
-                    f.write("%s " % (WEEKS((KI - 1) * 13 + KJ)))
+                    f.write("%s " % (WEEKS[(KI - 1) * 13 + KJ]))
                 f.write("|")
 
         for L in range(52):
@@ -900,7 +926,11 @@ def pmsc(
     for i in range(NGU):
         IND = ID1[i, 0]
         IND = NR0[IND]
-        ID[IND, 3] = ID1[i, 3] / 168 + 1
-        ID[IND, 5] = ID1[i, 5] / 168 + 1
+        ID[IND, 3] = (
+            ID1[i, 3] // 168 + 1
+        )  # maybe remvoe "+1" here; ID1[i, 3] / 168 + 1 in Fortran
+        ID[IND, 5] = (
+            ID1[i, 5] // 168 + 1
+        )  # maybe remvoe "+1" here; ID1[i, 3] / 168 + 1 in Fortran
 
     return ITAB
