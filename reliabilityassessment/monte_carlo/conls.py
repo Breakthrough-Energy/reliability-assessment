@@ -83,8 +83,12 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
                            And modify several arrays in place.
     """
 
-    NMAX2 = 200
+    NX1 = NX + 1
+    NP1 = 3 * NX + 1
+    NP = 2 * NX + 1
+    NP2 = NP1 + NX1
     NMAX1 = 250
+    NMAX2 = 200
 
     # Index-realted array must be initilized "-1"!
     IEQ = (-1) * np.ones(NX + 1, dtype=int)  # originally in Fortran np.zeros(20)
@@ -92,11 +96,6 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
 
     # Index-realted array must be initilized "-1"!
     IBAS = (-1) * np.ones(NMAX1, dtype=int)
-
-    NX1 = NX + 1
-    NP1 = 3 * NX + 1
-    NP = 2 * NX + 1
-    NP2 = NP1 + NX1
 
     XOB = np.zeros(NMAX1)
     XOBI = np.zeros((2, NMAX1))
@@ -143,7 +142,7 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
             A[NX1 - 1, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
             A[NX1 - 1, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
 
-    A[NX1 - 1, NX + NP - 1] = 1  # A[NX1, NX + NP] in original Fortran
+    A[NX1 - 1, NX + NP - 1] = 1.0  # A[NX1, NX + NP] in original Fortran
     B[NX1 - 1] = -LOD[NR]  # B[NX1] in original Fortran
     A[NX1 - 1, NP1 + NX1 - 1] = 1.0  # A[NX1, NP1 + NX1] in original Fortran
     for i in range(NP2):
@@ -153,12 +152,12 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     for i in range(NX1):
         XOB[NXD + i] = 1.0
     for i in range(NX1):
-        A[i + NX1, NP2 + i] = 1
-        A[i + NX1, NXD + i] = 1
+        A[i + NX1, NP2 + i] = 1.0
+        A[i + NX1, NXD + i] = 1.0
         j = LT[i]
         B[i + NX1] = LOD[j]
 
-    NX2 = NX1 + NX1
+    NX2 = 2 * NX1
     NP2 = 2 * NX + 2 * NX1
     for i in range(NX1):
         A[i + NX2, NP1 + i] = 1.0
@@ -191,8 +190,8 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
             A[I1, J52] = BLP[i, 0]
             A[I2, J51] = BLP[i, 0]
             A[I2, J52] = -BLP[i, 0]
-        A[I1, NP22 + i] = 1
-        A[I2, NP3 + i] = 1
+        A[I1, NP22 + i] = 1.0
+        A[I2, NP3 + i] = 1.0
         B[I1] = BLP[i, 1]
         B[I2] = BLP[i, 2]
 
@@ -202,7 +201,7 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     N = NXL
 
     for i in range(NX1):
-        for j in range(NX1):
+        for j in range(NXD):
             K = LT[i]
             A[i + M, j] = A[i, j]
             B[i + M] = BN[K, 3]
@@ -217,7 +216,7 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     for i in range(M):
         B1[i] = B[i]
     for i in range(NX1):
-        if B[i] > 0:
+        if B[i] > 0.0:
             B[i] = 0.0
 
     for i in range(M):
@@ -235,8 +234,8 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
         XOBI[1, i] = XOB[i]
 
     N += NX1
-    NXD2 = NXD1 + NX1 + NX1
-    II = 0
+    NXD2 = NXD1 + 2 * NX1
+    II = -1
 
     for i in range(NXD2 - 1, N):
         II += 1
@@ -245,7 +244,7 @@ def conls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NX2 = NX1 + 1
     j = -1
     for i in range(NX2 - 1, M):
-        j = j + 1
+        j += 1
         for K in range(N):
             TAB[j, K] = A[i, K]
         BS[j] = B[i]
