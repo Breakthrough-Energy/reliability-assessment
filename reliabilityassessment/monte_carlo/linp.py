@@ -7,7 +7,7 @@ from reliabilityassessment.monte_carlo.rc import rc
 from reliabilityassessment.monte_carlo.rm import rm
 
 
-def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
+def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
     """
     A customized version of linear programming (LP).
     (please note its inptus, outputs and internal logic may not be exaclty the same as
@@ -36,21 +36,20 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
     :param numpy.ndarray BS: 1D array with initial shape (200, )
                              the realistic size is determined on-the-fly
                              a helper vector used in linear programming-based DCOPF
-    :param numpy.ndarray TAB: initial shape (200, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in linear programming(LP)-based DCOPF
     :param float LCLOCK: the simulation time clock
     :param int N1: an integer used in LP-based DCOPF
 
-    :return: (*int*) N -- see above definition.
-
+    :return: (*tuple*) N -- see above definition.
+                       TAB -- numpy.ndarray TAB: initial shape (200, 250)
+                              the realistic size is determined on-the-fly
+                              a matrix used in linear programming(LP)-based DCOPF
     .. note:: arrays are modified in place.
     """
 
     BS1 = np.zeros(200)
     IBASF = np.zeros(250, dtype=int)
     CB = np.zeros(200)
-    TABT = np.zeros(200, 250)
+    TABT = np.zeros((200, 250))
 
     for i in range(M):
         BS1[i] = BS[i]
@@ -62,9 +61,12 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
         IBASF[i] = 0
 
     IPH = 1
-    for i in range(200):
-        for j in range(250):
-            TAB[i, j] = 0
+
+    # In original Fortran code:
+    # for i in range(200):
+    #     for j in range(250):
+    #         TAB[i, j] = 0
+    TAB = np.zeros((M, M))
 
     for i in range(M):
         k = IBAS[i]
@@ -113,8 +115,8 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
                 for j in range(M):
                     TABT[j, i] = A[j, K]
 
-            IPVT = dgeco(TABT, 200, M)
-            dgedi(TABT, 200, M, IPVT, 2)
+            IPVT = dgeco(TABT, M)
+            dgedi(TABT, M, IPVT)
 
             PY = rm(M, CB, TABT)
 
@@ -139,7 +141,7 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
             for i in range(M):
                 BS[i] = 0.0
                 for j in range(M):
-                    BS[i] = BS[i] + TABT[i, j] * BS1[j]
+                    BS[i] += TABT[i, j] * BS1[j]
                     TAB[i, j] = TABT[i, j]
 
             IR = 1
@@ -180,13 +182,13 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
                 if i == IPIV:
                     continue
                 for j in range(M):
-                    TAB[i, j] = TAB[i, j] - TAB[IPIV, j] * P[i] / P[IPIV]
-                BS[i] = BS[i] - BS[IPIV] * P[i] / P[IPIV]
+                    TAB[i, j] -= TAB[IPIV, j] * P[i] / P[IPIV]
+                BS[i] -= BS[IPIV] * P[i] / P[IPIV]
 
             for i in range(M):
-                TAB[IPIV, i] = TAB[IPIV, i] / P[IPIV]
+                TAB[IPIV, i] /= P[IPIV]
 
-            BS[IPIV] = BS[IPIV] / P[IPIV]
+            BS[IPIV] /= P[IPIV]
             CB[IPIV] = XOB[IND]
             K1 = IBAS[IPIV]
             IBASF[K1] = 0
@@ -203,12 +205,12 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, TAB, LCLOCK, N1):
                 break  # GO TO 2000 (exit)
             # N -= NXT # this comment exists in the original Fortran code.
             for i in range(N):
-                XOB[i] = XOBI[2, i]
-            for i in range(N):
+                XOB[i] = XOBI[1, i]
+            for i in range(M):
                 K = IBAS[i]
                 CB[i] = XOB[K]
             IPH = 2
         # GO TO 110 while loop
 
     # 2000 (exit)
-    return N
+    return N, TAB
