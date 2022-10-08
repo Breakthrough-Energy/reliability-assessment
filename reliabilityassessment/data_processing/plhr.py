@@ -3,21 +3,17 @@ import numpy as np
 
 def plhr(HRLOAD):
     """
-    Find the pool (i.e., "all areas") peak hours.
+    Find peak hours for all areas.
 
-    :param array HRLOAD: 2D array of hourly load data
-                         (0-dim: area index, 1-dim: hour index (1~8760 hr))
-    :return: (*np.array*) MXPLHR -- array of the peak hour for the pool
+    :param numpy.ndarray HRLOAD: 2D array of hourly load data (0-dim: area,
+        1-dim: hour, 1~8760)
+    :return: (*numpy.ndarray*) -- MXPLHR, integer array of peak hour for all areas
+        with shape (365,)
 
-    Note: the hardcoded number "365" and "24" are OK in this code package.
-    Because for Monte Carlo Simulation in reliability analysis area, researchers do not
-    try to simulate "real-life year", but purely for statistic purpose. In fact,
-    each reliability index is eventually an averaged number. So, the leap year is not
-    a concern in this area.
-
-    In other words, the reliability indices is an overall measure of the studied
-    system. It is not defined for any specific year. For example, researchers will NOT say
-    "a reliability index for the year 202O equals XX, for the year 2021 it equals YY, ...".
+    .. note:: Number of days in a year and number of hours for each day is hardcoded
+        by 365 and 24, given the Monte Carlo simulation in reliability analysis
+        simulates a statistic year and calculates average reliability index,
+        which gives a general measure of the studied system.
     """
 
     # sum across all areas

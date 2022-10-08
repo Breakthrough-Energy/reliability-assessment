@@ -10,14 +10,15 @@ def _dpeak(HRLOAD, hour_within_day=24):
 
     return (*tuple*) -- a tuple of multiple arrays, i.e.,
                     DYLOAD: 2D array, daily peak load amount (MW)
-                    MAXHR: 2D array, daily peak load hour index
-                    (not in the range of 1 to 24 but in the range 1 to 8760;
-                    also note that python index starts from 0)
+                    MAXHR: 2D array, the hour-index of the daily peak load for each day of each area
+                    (in the range of 0 to 8759; note that the python index starts from 0)
+                    MAXDAY: 1D array, the day-index of the daily peak load for each area
     """
     NOAREA = HRLOAD.shape[0]
     day_within_year = HRLOAD.shape[1] // hour_within_day
     DYLOAD = np.zeros((NOAREA, day_within_year))
     MAXHR = np.zeros((NOAREA, day_within_year), dtype=int)
+    MAXDAY = np.zeros(NOAREA, dtype=int)
 
     for areaIdx in range(NOAREA):
         for dayIdx in range(day_within_year):
@@ -29,7 +30,15 @@ def _dpeak(HRLOAD, hour_within_day=24):
                 XMAX = HRLOAD[areaIdx, j1]
                 MAXHR[areaIdx, dayIdx] = j1
             DYLOAD[areaIdx, dayIdx] = XMAX
-    return MAXHR, DYLOAD
+
+    for areaIdx in range(NOAREA):
+        XMAX = float("-inf")
+        for dayIdx in range(day_within_year):
+            if DYLOAD[areaIdx, dayIdx] > XMAX:
+                XMAX = DYLOAD[areaIdx, dayIdx]
+                MAXDAY[areaIdx] = dayIdx
+
+    return MAXHR, DYLOAD, MAXDAY
 
 
 def dpeak(HRLOAD, hour_within_day=24):
@@ -41,9 +50,9 @@ def dpeak(HRLOAD, hour_within_day=24):
 
     return (*tuple*) -- a tuple of multiple arrays, i.e.,
                     DYLOAD: 2D array, daily peak load amount (MW)
-                    MAXHR: 2D array, daily peak load hour index
-                    (not in the range of 1 to 24 but in the range 1 to 8760;
-                    also note that python index starts from 0)
+                    MAXHR: 2D array, the hour-index of the daily peak load for each day of each area
+                    (in the range of 0 to 8759; note that the python index starts from 0)
+                    MAXDAY: 1D array, the day-index of the daily peak load for each area
     """
     NOAREA = HRLOAD.shape[0]
 
@@ -54,5 +63,6 @@ def dpeak(HRLOAD, hour_within_day=24):
     #  i.e., HRLOAD .shape[1] / hour_within_day
     DYLOAD = reshaped.max(axis=1)
     MAXHR = reshaped.argmax(axis=1) + hour_within_day * np.arange(day_within_year)
+    MAXDAY = DYLOAD.argmax(axis=1)
 
-    return MAXHR, DYLOAD
+    return MAXHR, DYLOAD, MAXDAY

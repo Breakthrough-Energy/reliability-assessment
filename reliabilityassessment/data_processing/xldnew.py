@@ -36,6 +36,10 @@ def xldnew(FileNameAndPath, PKLOAD):
             hourIdx += 12
 
     # Normalize and re-scale the annual load data of each area
-    HRLOAD = HRLOAD / np.amax(HRLOAD, axis=1, initial=0.001)[:, np.newaxis] * PKLOAD
+    HRLOAD = (
+        HRLOAD
+        / np.amax(HRLOAD, axis=1, initial=0.001)[:, np.newaxis]
+        * PKLOAD[:, np.newaxis]
+    )
 
     return HRLOAD

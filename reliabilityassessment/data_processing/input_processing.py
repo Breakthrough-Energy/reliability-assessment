@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-import numpy as np
-
 from reliabilityassessment.data_processing.datax import datax
 from reliabilityassessment.data_processing.dpeak import dpeak
 from reliabilityassessment.data_processing.plhr import plhr
@@ -14,19 +12,18 @@ from reliabilityassessment.data_processing.xports import xports
 
 
 def input_processing(inputB_dict_nameToInt, filePathToLEEI, NAMU, NUMP):
-
     """
-    Applying furhter preprocessing logic on the loaded data and create/update certain arrays.
+    Apply further pre-processing on the loaded data and create/update certain arrays.
 
-    :param dict inputB_dict_nameToInt: a compound python dictionary stores
-                             all the parsed data from the INPUTB file.
-    :param string filePathToLEEI: a file path to file 'LEEI'
-    :param list NAMU: list of (string type) gen unit name
-    :param list NUMP: list of (string type) gen plant name
+    :param dict inputB_dict_nameToInt: a compound dictionary stores all the parsed
+        data from the INPUTB file
+    :param str filePathToLEEI: path to file 'LEEI'
+    :param list NAMU: list of strings, gen unit names
+    :param list NUMP: list of strings, gen plant names
+    :return: (*tuple*) -- a series of numpy arrays
 
-    :return: (*tuple*)  a series of numpy ndarrays;
-                        please refer to the 'variable description list.xlsx' file at
-                        https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
+    .. note:: detailed variable info see ``variable description list.xlsx`` at
+        https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
     """
 
     (
@@ -62,11 +59,6 @@ def input_processing(inputB_dict_nameToInt, filePathToLEEI, NAMU, NUMP):
 
     RATES = deepcopy(inputB_dict_nameToInt["ZZUD"]["HRLOAD"][0:4, :].T)
 
-    NUNITS = len(CAPCON)
-    # maybe we can explicitly input & return the varaible NUINTS?
-    # since it is heavily used in many funcitons
-    JPLOUT = np.zeros((52, NUNITS))
-
     # Read the hourly load data from the file 'LEEI'
     HRLOAD = xldnew(filePathToLEEI, PKLOAD)
 
@@ -86,7 +78,7 @@ def input_processing(inputB_dict_nameToInt, filePathToLEEI, NAMU, NUMP):
     xports(JENT, INTCH, HRLOAD)
 
     # Calculate the total owned cap and interchange at peak
-    resca(SUSTAT[:, 1], MAXDAY, QTR, CAPOWN, RATES, JENT, INTCH)
+    resca(SUSTAT, MAXDAY, QTR, CAPOWN, RATES, JENT, INTCH)
 
     # Prepare jplout - table of planned outages of units
     # * return values are subjected to change *
@@ -124,8 +116,8 @@ def input_processing(inputB_dict_nameToInt, filePathToLEEI, NAMU, NUMP):
         BN,
         SUSTAT,
         FCTERR,
-        CAPOWN,
         CAPCON,
+        CAPOWN,
         NOGEN,
         PROBG,
         DERATE,

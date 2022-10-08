@@ -25,12 +25,13 @@ def test_resca():
 
     MAXDAY = np.array([1, 92, 183])
     SUSTAT = np.random.random((NOAREA, 6))
+    SUSTAT = np.vstack([SUSTAT, [0, 0, 0, 0, 0, 0]])
     QTR = np.array([13 * 168 + 0.5, 13 * 2 * 168 + 0.5, 13 * 3 * 168 + 0.5])
     RATES = np.random.random((NUNITS, 3))
     CAPOWN = np.array([[1.0, 0.5, 0, 0, 0], [0, 0.5, 1.0, 0.4, 0], [0, 0, 0, 0.6, 1.0]])
 
     SUSTAT_copy = copy.deepcopy(SUSTAT)
-    SUSTAT_1_truth = np.array([111.84484222, 1.46481165, 2.36289247])
+    SUSTAT_1_truth = np.array([111.84484222, 1.46481165, 2.36289247, 0.0])
 
     _resca(SUSTAT, MAXDAY, QTR, CAPOWN, RATES, JENT, INTCH)
     np.testing.assert_array_almost_equal(SUSTAT[:, 1], SUSTAT_1_truth)

@@ -34,7 +34,7 @@ def resca(SUSTAT, MAXDAY, QTR, CAPOWN, RATES, JENT, INTCH):
     .. note:: SUSTAT is modified in place.
     """
     NUINTS = CAPOWN.shape[1]
-    NOAREA = SUSTAT.shape[0]
+    NOAREA = SUSTAT.shape[0] - 1
     for i in range(NOAREA):
         IDAY = MAXDAY[i]
         IPER = np.argmax(QTR > IDAY * 24)
@@ -78,7 +78,7 @@ def _resca(SUSTAT, MAXDAY, QTR, CAPOWN, RATES, JENT, INTCH):
     .. note:: SUSTAT is modified in place.
     """
 
-    NOAREA = SUSTAT.shape[0]
+    NOAREA = SUSTAT.shape[0] - 1
     for i in range(NOAREA):
         IDAY = MAXDAY[i]
         IHR = IDAY * 24
