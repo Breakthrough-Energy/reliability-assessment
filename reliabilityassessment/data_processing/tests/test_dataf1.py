@@ -3,9 +3,7 @@ from pathlib import Path
 import numpy as np
 from numpy import loadtxt
 
-from reliabilityassessment.data_processing.input_processing import input_processing
-from reliabilityassessment.data_processing.pind import pind
-from reliabilityassessment.data_processing.readInputB import readInputB
+from reliabilityassessment.data_processing.dataf1 import dataf1
 
 TEST_DIR = Path(__file__).parent.absolute()
 
@@ -40,22 +38,17 @@ def smaint_mock(
     return JPLOUT, ITAB
 
 
-def test_input_processing(mocker):
+def test_dataf1(mocker):
 
     mocker.patch(
         "reliabilityassessment.data_processing.input_processing.smaint",
         side_effect=smaint_mock,
     )
 
-    filepath = [
+    filepaths = [
         Path(TEST_DIR, "testdata_input_processing"),
         Path(TEST_DIR, "testdata_input_processing/LEEI"),
     ]
-
-    inputB_dict = readInputB(filepath[0])
-    NAMU = [e[:5].strip("'") for e in inputB_dict["ZZUD"]["NAT"]]
-    NUMP = [e[5:].strip("'") for e in inputB_dict["ZZUD"]["NAT"]]
-    inputB_dict_nameToInt = pind(inputB_dict)
 
     (
         QTR,
@@ -95,7 +88,7 @@ def test_input_processing(mocker):
         MXPLHR,
         JPLOUT,
         ITAB,
-    ) = input_processing(inputB_dict_nameToInt, filepath[1], NAMU, NUMP)
+    ) = dataf1(filepaths)
 
     NORR_true = 1
     NFCST_true = 1
