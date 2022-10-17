@@ -40,15 +40,19 @@ def datax(inputB_dict):
     MINRAN = deepcopy(
         inputB_dict["ZZLD"]["ID"][:, 0]
     )  # BEG WK: Beginning week of the outage window
+    MINRAN -= 1  # 0-based index in Python!
     MAXRAN = deepcopy(
         inputB_dict["ZZLD"]["ID"][:, 1]
     )  # END WK: Ending week of the outage window
+    MAXRAN -= 1  # 0-based index in Python!
     INHBT1 = deepcopy(
         inputB_dict["ZZLD"]["ID"][:, 2]
     )  # BEG WK: Beginning week of the Forbidden Period.
+    INHBT1 -= 1  # 0-based index in Python!
     INHBT2 = deepcopy(
         inputB_dict["ZZLD"]["ID"][:, 3]
     )  # END WK: Ending week of the Forbidden Period.
+    INHBT2 -= 1  # 0-based index in Python!
 
     # BN: a helper array storing area related info.
     BN = np.zeros((NOAREA, 5))
@@ -64,9 +68,10 @@ def datax(inputB_dict):
     BN[:, 3] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 2])  # Sum of Flows Constraint.
     BN[:, 4] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 2])  # Sum of Flows Constraint.
 
-    # SUSTAT: Annual peak in the area, in MW.
-    SUSTAT = np.zeros((NOAREA, 6))
-    SUSTAT[:, 0] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 0])
+    # SUSTAT: An area-related 2D array holding annual peak (MW) and certain statistics
+    # Note: its last row is kept for the usage of final total statistics.
+    SUSTAT = np.zeros((NOAREA + 1, 6))
+    SUSTAT[:NOAREA, 0] = deepcopy(inputB_dict["ZZLD"]["RATES"][:, 0])
 
     # FCTERR: tiers of load-power forecasting errors
     FCTERR = np.zeros((NOAREA, 5))  #
@@ -83,7 +88,7 @@ def datax(inputB_dict):
 
     NUNITS = len(inputB_dict["ZZUD"]["SNRI"])
     CAPOWN = np.zeros((NOAREA, NUNITS))  # capacity ownership shares
-    CAPCON = np.zeros((NUNITS,))  # capacity ownrship condition
+    CAPCON = np.zeros((NUNITS,), dtype=int)  # capacity ownrship condition
     NOGEN = np.zeros((NOAREA,), dtype=int)  # number of gen units
     PROBG = np.zeros((NUNITS, 2))  # sampling probabilities of gen.unit capacities
     DERATE = np.zeros((NUNITS,))  # derated unit power
@@ -101,7 +106,8 @@ def datax(inputB_dict):
     # https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
 
     # JENT(J1,J2)-- matrix indicating areas which have interchange
-    # if 0, none; if positive, the pointer L used in INTCH(L,N).
+    # if "-1", means none (use "0" here will cause bug since "0-based array index" in Python)
+    # otherwise, means the integer index L used in INTCH(L,N).
     JENT = -1 * np.ones((NOAREA, NOAREA), dtype=int)
     MAX_CONTRACTS = 60  # the maximum possible count of fixed contracts; can be adjusted
 
@@ -165,7 +171,7 @@ def datax(inputB_dict):
     # https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
 
     MXCRIT = 0  # total (maximum) number of critical units
-    JCRIT = np.zeros((500,))  # critical (affecting) unit id
+    JCRIT = -1 * np.ones(MXCRIT)  # critical (affecting) unit id
 
     # Create array 'ID':
     NUNITS = len(PROBG)

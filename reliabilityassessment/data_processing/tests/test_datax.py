@@ -60,26 +60,28 @@ def test_datax():
     FU_ = np.array([0.0, 0.0])
     np.testing.assert_array_equal(FU_, FU)
 
-    MINRAN_ = np.array([1, 1], dtype=int)
+    MINRAN_ = -1 + np.array([1, 1], dtype=int)  # 0-based inbdex in Python!
     np.testing.assert_array_equal(MINRAN_, MINRAN)
-    MAXRAN_ = np.array([52, 52], dtype=int)
+    MAXRAN_ = -1 + np.array([52, 52], dtype=int)  # 0-based inbdex in Python!
     np.testing.assert_array_equal(MAXRAN_, MAXRAN)
 
-    INHBT1_ = np.array([31, 31], dtype=int)
+    INHBT1_ = -1 + np.array([31, 31], dtype=int)  # 0-based inbdex in Python!
     np.testing.assert_array_equal(INHBT1_, INHBT1)
-    INHBT2_ = np.array([32, 32], dtype=int)
+    INHBT2_ = -1 + np.array([32, 32], dtype=int)  # 0-based inbdex in Python!
     np.testing.assert_array_equal(INHBT2_, INHBT2)
 
     BN_ = np.array([[0, 0, 0, 30000.0, 30000.0], [1, 0, 0, 30000.0, 30000.0]])
     np.testing.assert_array_equal(BN_, BN)
 
-    SUSTAT_ = np.array([[3000.0, 0, 0, 0, 0, 0], [3000.0, 0, 0, 0, 0, 0]])
+    SUSTAT_ = np.array(
+        [[3000.0, 0, 0, 0, 0, 0], [3000.0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+    )
     np.testing.assert_array_equal(SUSTAT_, SUSTAT)
 
     FCTERR_ = np.array([[1.0, 1.0, 1.0, 1.0, 1.0], [1.0, 1.0, 1.0, 1.0, 1.0]])
     np.testing.assert_array_equal(FCTERR_, FCTERR)
 
-    CAPCON_ = np.array([0, 1])
+    CAPCON_ = np.array([0, 1], dtype=int)
     np.testing.assert_array_equal(CAPCON_, CAPCON)
 
     CAPOWN_ = np.array([[1, 0], [0, 1]])
@@ -141,7 +143,7 @@ def test_datax():
     MXCRIT_ = 0
     assert MXCRIT_ == MXCRIT
 
-    JCRIT_ = np.zeros((500,))
+    JCRIT_ = []
     np.testing.assert_array_equal(JCRIT_, JCRIT)
 
     ID_ = np.array([[0, 0, 0, -1, 0, -1, 0, 0], [1, 1, 1, -1, 0, -1, 0, 0]], dtype=int)
