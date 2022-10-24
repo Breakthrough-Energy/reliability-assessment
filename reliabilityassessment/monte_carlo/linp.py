@@ -10,71 +10,42 @@ from reliabilityassessment.monte_carlo.rm import rm
 def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
     """
     A customized version of linear programming (LP).
-    (please note its inptus, outputs and internal logic may not be exaclty the same as
-     that of the standard LP APIs in SciPy/NumPy or MATLAB)
 
-    :param int M: used in linear programming(LP)-based DCOPF
-                   (possibly) means the total number of constraints
-    :param int N: used in linear programming(LP)-based DCOPF
-                   (possibly) means the total number of "decision variables" in the LP
-    :param numpy.ndarray A: initial shape (200, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in LP-based DCOPF
-                             (possibly) means the  coefficient matrix of all constraints in LP
-    :param numpy.ndarray XOB: initial shape (250, )
-                             the realistic size is determined on-the-fly
-                             a vector used in linear programming(LP)-based DCOPF
-                             values are either 0 or 1; thus, possibly integer indicators
-    :param numpy.ndarray XOBI: initial shape (2, 250)
-                             the realistic size is determined on-the-fly
-                             a matrix used in linear programming(LP)-based DCOPF
-                             values are either 0 or 1; thus possibly integer indicators
-    :param numpy.ndarray IBAS: 1D array with initial shape (250, )
-                             the realistic size is determined on-the-fly
-                             a helper vector used in linear programming-based DCOPF
-                             (possibly) means the indices of the "basis-vector" used in LP
-    :param numpy.ndarray BS: 1D array with initial shape (200, )
-                             the realistic size is determined on-the-fly
-                             a helper vector used in linear programming-based DCOPF
+    :param int M: total number of constraints (possibly)
+    :param int N: total number of decision variables (possibly)
+    :param numpy.ndarray A: coefficient matrix of all constraints (possibly) with
+        initial shape (200, 250), the actual size is determined on-the-fly
+    :param numpy.ndarray XOB: 1D binary vector with initial shape (250, ), the actual
+        size is determined on-the-fly (possibly (N, ))
+    :param numpy.ndarray XOBI: 2D binary vector with initial shape (2, 250),
+        the actual size is determined on-the-fly (possibly (2, N))
+    :param numpy.ndarray IBAS: indices of basis-vector (possibly) with initial shape
+        (250, ), the actual size is determined on-the-fly (possibly (M, ))
+    :param numpy.ndarray BS: 1D array with initial shape (200, ) the actual size is
+        determined on-the-fly (possibly shape (M, ))
     :param float LCLOCK: the simulation time clock
     :param int N1: an integer used in LP-based DCOPF
+    :return: (*tuple*) -- updated N and TAB, a matrix used in LP with initial shape
+        (200, 250), the actual size is determined on-the-fly
 
-    :return: (*tuple*) N -- see above definition.
-                       TAB -- numpy.ndarray TAB: initial shape (200, 250)
-                              the realistic size is determined on-the-fly
-                              a matrix used in linear programming(LP)-based DCOPF
-    .. note:: arrays are modified in place.
+    .. note:: 1. Arrays are modified in place.
+              2. Inputs, outputs and internal logic may not be exactly the same as
+                 that in standard LP APIs in SciPy/NumPy or MATLAB.
     """
 
-    BS1 = np.zeros(200)
-    IBASF = np.zeros(250, dtype=int)
-    CB = np.zeros(200)
-    TABT = np.zeros((200, 250))
-
-    for i in range(M):
-        BS1[i] = BS[i]
+    IBASF = np.zeros(N, dtype=int)  # np.zeros(250, dtype=int) in original Fortran
+    CB = np.zeros(M)  # np.zeros(200) in original Fortran
+    BS1 = BS[:M].copy()  # np.zeros(200) in original Fortran
 
     IR = 0
     INV = 0
-    for i in range(N):
-        XOB[i] = XOBI[0, i]
-        IBASF[i] = 0
+    XOB[:N] = XOBI[0, :N].copy()
 
     IPH = 1
+    TAB = np.identity(M)  # size was (200, 250) in original Fortran
 
-    # In original Fortran code:
-    # for i in range(200):
-    #     for j in range(250):
-    #         TAB[i, j] = 0
-    TAB = np.zeros((M, M))
-
-    for i in range(M):
-        k = IBAS[i]
-        IBASF[k] = 1
-        for j in range(M):
-            TAB[i, j] = 0.0
-        TAB[i, i] = 1
-        CB[i] = XOB[k]
+    IBASF[IBAS[:M]] = 1
+    CB[:M] = XOB[IBAS[:M]]
 
     while True:  # 110  while loop
         N = N1
@@ -83,24 +54,14 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
         gotoFlag1000 = False
         while True:  # 111 while loop
             CM = 0.0
-            for i in range(N):
-                if IBASF[i] == 1:
-                    continue
-
-                PROD = rc(M, PY, A, i)
-
-                CC = XOB[i] - PROD
-                CABA = abs(CC)
-                if CABA < 0.1e-6:
+            for i in np.where(IBASF[:N] != 1)[0]:
+                CC = XOB[i] - rc(M, PY, A, i)
+                if abs(CC) < 1e-7:
                     CC = 0.0
-                DIFF = CC - CM
-                DIFF = abs(DIFF)
-                if DIFF < 0.1e-06:
+                if abs(CC - CM) < 1e-7:
                     continue
                 if CC < CM:
-                    IND = i
-                if CC < CM:
-                    CM = CC
+                    IND, CM = i, CC
 
             if CM < 0:
                 break  # GO TO 400
@@ -109,40 +70,29 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
                 gotoFlag1000 = True
                 break  # GO TO 1000
 
-            for i in range(M):
-                IMAX = 0
-                K = IBAS[i]
-                for j in range(M):
-                    TABT[j, i] = A[j, K]
+            IMAX = 0
+            TABT = A[:M, IBAS[:M]]
 
             IPVT = dgeco(TABT, M)
             dgedi(TABT, M, IPVT)
 
             PY = rm(M, CB, TABT)
 
-            for i in range(N):
-                if IBASF[i] == 0:
-                    continue
-                PROD = rc(M, PY, A, i)
-                CC = XOB[i] - PROD
-                CC = abs(CC)
-                if CC < 1e-8:
+            for i in np.where(IBASF[:N] != 0)[0]:
+                CC = abs(XOB[i] - rc(M, PY, A, i))
+                if CC < 1e-08:
                     continue
                 IMAX = 500
 
-            if IMAX != 0:
+            if IMAX != 0:  # i.e. == 500
                 f = open("extra.txt", "w")
                 f.write("\n     INVERSIONS = %2d LCLOCK = %6d\n" % (INV, LCLOCK))
                 f.close()
-
-            if IMAX == 500:
                 INV += 1
 
-            for i in range(M):
-                BS[i] = 0.0
-                for j in range(M):
-                    BS[i] += TABT[i, j] * BS1[j]
-                    TAB[i, j] = TABT[i, j]
+            BS[:M] = 0.0
+            BS += TABT @ BS1
+            TAB = TABT.copy()
 
             IR = 1
             # GO TO 111 while loop
@@ -153,40 +103,24 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
             P = mc(M, IND, TAB, A)
             ICOUN = 0
 
-            for i in range(M):
-                if P[i] <= 0.1e-06:
-                    continue
-                BNUM = BS[i]
-                BAB = abs(BNUM)
-                if BAB < 0.1e-12:
-                    BNUM = 0.0
+            RAT1 = -1.0  # this initial value was commnented in original Fortran
+            for i in np.where(P[:M] > 1e-07)[0]:
+                BNUM = BS[i] if abs(BS[i]) >= 1e-13 else 0.0
                 RAT = BNUM / P[i]
-                ICOUN = ICOUN + 1
-
-                if ICOUN == 1:
-                    RAT1 = RAT
+                ICOUN += 1
+                if ICOUN == 1 or RAT < RAT1:
+                    RAT1, IPIV = RAT, i
+                    continue
+                if IPH != 2 and BS[i] == 0 and XOB[IBAS[i]] == 1:
                     IPIV = i
-                    continue
-                if RAT < RAT1:
-                    IPIV = i
-                    RAT1 = RAT
-                    continue
-                if IPH != 2 and BS[i] == 0:
-                    K = IBAS[i]
-                    if XOB[K] == 1:
-                        IPIV = i
 
-            for i in range(M):
-                if P[i] == 0:
-                    continue
+            for i in np.where(P[:M] != 0)[0]:
                 if i == IPIV:
                     continue
-                for j in range(M):
-                    TAB[i, j] -= TAB[IPIV, j] * P[i] / P[IPIV]
+                TAB[i, :M] -= TAB[IPIV, :M] * P[i] / P[IPIV]
                 BS[i] -= BS[IPIV] * P[i] / P[IPIV]
 
-            for i in range(M):
-                TAB[IPIV, i] /= P[IPIV]
+            TAB[IPIV, :M] /= P[IPIV]
 
             BS[IPIV] /= P[IPIV]
             CB[IPIV] = XOB[IND]
@@ -194,21 +128,13 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
             IBASF[K1] = 0
             IBASF[IND] = 1
             IBAS[IPIV] = IND
-            SUMO = 0.0
-
-            for i in range(M):
-                K = IBAS[i]
-                SUMO += BS[i] * XOB[K]
             # GO TO 110 while loop
         else:  # 1000  CONTINUE
             if IPH == 2:
                 break  # GO TO 2000 (exit)
             # N -= NXT # this comment exists in the original Fortran code.
-            for i in range(N):
-                XOB[i] = XOBI[1, i]
-            for i in range(M):
-                K = IBAS[i]
-                CB[i] = XOB[K]
+            XOB[:N] = XOBI[1, :N].copy()
+            CB[:M] = XOB[IBAS[:M]]
             IPH = 2
         # GO TO 110 while loop
 
