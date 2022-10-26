@@ -113,11 +113,10 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     TAB = np.zeros((NMAX2, NMAX1))
 
     for i in range(NX):
-        II = i
         j = LT[i]
         IEQ[j] = i
 
-    IEQ[NR] = II + 1
+    IEQ[NR] = NX
     NXD = 2 * NX
 
     for i in range(NX):
@@ -136,25 +135,25 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
             K = LP[i, 1]
             J1 = IEQ[K]
             I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX1 - 1, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX1 - 1, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
+            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
+            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
 
         if LP[i, 1] == NR:
             K = LP[i, 2]
             J1 = IEQ[K]
             I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX1 - 1, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX1 - 1, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
+            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
+            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
 
     NP = 2 * NX + 1  # check here; maybe no need +1?
-    A[NX1 - 1, NX + NP - 1] = 1  # A[NX1, NX + NP] in original Fortran
-    B[NX1 - 1] = INJB[NR]  # B[NX1] in original Fortran
+    A[NX, NX + NP - 1] = 1  # A[NX1, NX + NP] in original Fortran
+    B[NX] = INJB[NR]  # B[NX1] in original Fortran
     NP1 = 3 * NX + 1
 
     for i in range(NP1):
-        A[NX1 - 1, i] = -A[NX1 - 1, i]  # A[NX1, i] in original Fortran
+        A[NX, i] = -A[NX, i]  # A[NX1, i] in original Fortran
 
-    if B[NX1 - 1] <= 0:  # B[NX1] in original Fortran
+    if B[NX] <= 0:  # B[NX1] in original Fortran
         XOB[NP1 - 1] = 1.0  # XOB[NP1] in original Fortran
 
     NXD = 2 * NX
@@ -164,15 +163,15 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
 
     NP1 = 3 * NX + 1
 
+    for i in range(NX1):
+        A[i + NX1, NP1 + i] = 1
+        A[i + NX1, NXD + i] = 1
+
     if NLS != 0:
         for i in range(NX1):
-            A[i + NX1, NP1 + i] = 1
-            A[i + NX1, NXD + i] = 1
             B[i + NX1] = abs(B[i])
     else:
         for i in range(NX1):
-            A[i + NX1, NP1 + i] = 1
-            A[i + NX1, NXD + i] = 1
             if B[i + NX1] <= 0:
                 j = LT[i]
                 B[i + NX1] = LOD[j]
@@ -180,7 +179,7 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
                 j = LT[i]
                 B[i + NX1] += LOD[j]
 
-    NX2 = NX1 + NX1
+    NX2 = 2 * NX1
     NP2 = 2 * NX + 2 * NX1
     NP3 = NP2 + NL
 
