@@ -3,7 +3,7 @@ import numpy as np
 
 def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     """
-     Update the coefficient-matrcies of constraints, and other quantities, for the LP-based DCOPF
+     Update the coefficient-matrices of constraints, and other quantities, for the LP-based DCOPF
      (load shedding) under the "no-load-sharing" mode (in short, "NLS")
 
      :param numpy.ndarray BC: shape (NOAREA, NOAREA)
@@ -69,7 +69,7 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
                                  a matrix used in linear programming(LP)-based DCOPF
                                  values are either 0 or 1; 'float' type in original Fortran code.
 
-                           IBAS: 1D integer array with initial shape (250, )
+                           IBAS: 1D integer array with initial shape (250, ) (possibly (M,))
                                  the realistic size is determined on-the-fly
                                  a helper vector used in linear programming-based DCOPF
                                  (possibly) means the indices of the "basis-vector" used in LP
@@ -81,11 +81,11 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
                               the realistic size is determined on-the-fly
                               a vector used in linear programming(LP)-based DCOPF
 
-                           B1: 1D array with initial shape (200, )
+                           B1: 1D array with initial shape (200, )  (possibly (M,))
                                the realistic size is determined on-the-fly
                                a helper vector used in linear programming-based DCOPF
 
-                           TAB: initial shape (200, 250)
+                           TAB: initial shape (200, 250) (possibly (M, N))
                                 the realistic size is determined on-the-fly
                                 a matrix used in linear programming(LP)-based DCOPF
 
@@ -95,22 +95,15 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NMAX2 = 200
     NMAX1 = 250
 
-    # Index-realted array must be initilized "-1"!
+    # Index-related array must be initialized "-1"!
     IEQ = (-1) * np.ones(NX + 1, dtype=int)  # originally in Fortran np.zeros(20)
     # maybe also Ok to initialize it by np.zeros(NOAREA) (check later)
-
-    # Index-realted array must be initilized "-1"!
-    IBAS = (-1) * np.ones(NMAX1, dtype=int)
 
     XOB = np.zeros(NMAX1)
     XOBI = np.zeros((2, NMAX1))
     A = np.zeros((NMAX2, NMAX1))
     B = np.zeros(NMAX2)
-    B1 = np.zeros(
-        NMAX2
-    )  # in Fortran, B1 is by default 'int' type, which is no need here.
     BS = np.zeros(NMAX2)
-    TAB = np.zeros((NMAX2, NMAX1))
 
     for i in range(NX):
         j = LT[i]
@@ -227,6 +220,9 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     M += 2 * NX1
     N += 2 * NX1
 
+    B1 = np.zeros(
+        M
+    )  # in Fortran, B1 is by default 'int' type with size 'NMAX2', which is no need here.
     for i in range(M):
         B1[i] = B[i]
 
@@ -252,13 +248,16 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NXD2 = NXD1 + NX1
     II = -1  # II = 0 in original Fortran
 
+    # Index-related array must be initialized "-1"!
+    IBAS = (-1) * np.ones(M, dtype=int)  # size = NMAX1 in original Fortran
     for i in range(NXD2 - 1, N):
         II += 1
         IBAS[II] = i
 
+    TAB = np.zeros((M, N))  # np.zeros((NMAX2, NMAX1)) in original Fortran
+
     NX2 = NX1 + 1
     j = -1  # j = 0 in original Fortran
-
     for i in range(NX2 - 1, M):
         j += 1
         for K in range(N):

@@ -58,7 +58,8 @@ def test_connls():
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/IBAS")
     IBAS_true = loadtxt(FileNameAndPath).astype(int)
     IBAS_true -= 1  # 0-based index in Python!
-    np.testing.assert_array_almost_equal(IBAS, IBAS_true)
+    IBAS_true = IBAS_true[:M]
+    np.testing.assert_array_equal(IBAS, IBAS_true)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/BS")
     BS_true = loadtxt(FileNameAndPath)
@@ -70,10 +71,12 @@ def test_connls():
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/B1")
     B1_true = loadtxt(FileNameAndPath)
+    B1_true = B1_true[:M]
     np.testing.assert_array_almost_equal(B1, B1_true, decimal=5)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/TAB")
     TAB_true = loadtxt(FileNameAndPath)
+    TAB_true = TAB_true[:M, :N]
     np.testing.assert_array_almost_equal(TAB, TAB_true, decimal=5)
 
     # -----------------------Test case 2 ----------------------
@@ -120,7 +123,8 @@ def test_connls():
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/IBAS")
     IBAS_true = loadtxt(FileNameAndPath).astype(int)
     IBAS_true -= 1  # 0-based index in Python!
-    np.testing.assert_array_almost_equal(IBAS, IBAS_true)
+    IBAS_true = IBAS_true[:M]
+    np.testing.assert_array_equal(IBAS, IBAS_true)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/BS")
     BS_true = loadtxt(FileNameAndPath)
@@ -132,10 +136,12 @@ def test_connls():
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/B1")
     B1_true = loadtxt(FileNameAndPath)
+    B1_true = B1_true[:M]
     np.testing.assert_array_almost_equal(B1, B1_true, decimal=5)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/TAB")
     TAB_true = loadtxt(FileNameAndPath)
+    TAB_true = TAB_true[:M, :N]
     np.testing.assert_array_almost_equal(TAB, TAB_true, decimal=5)
 
     # -----------------------Test case 3 ----------------------
@@ -182,7 +188,8 @@ def test_connls():
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/IBAS")
     IBAS_true = loadtxt(FileNameAndPath).astype(int)
     IBAS_true -= 1  # 0-based index in Python!
-    np.testing.assert_array_almost_equal(IBAS, IBAS_true)
+    IBAS_true = IBAS_true[:M]
+    np.testing.assert_array_equal(IBAS, IBAS_true)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/BS")
     BS_true = loadtxt(FileNameAndPath)
@@ -194,10 +201,12 @@ def test_connls():
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/B1")
     B1_true = loadtxt(FileNameAndPath)
+    B1_true = B1_true[:M]
     np.testing.assert_array_almost_equal(B1, B1_true, decimal=5)
 
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/TAB")
     TAB_true = loadtxt(FileNameAndPath)
+    TAB_true = TAB_true[:M, :N]
     np.testing.assert_array_almost_equal(TAB, TAB_true, decimal=5)
 
     return
