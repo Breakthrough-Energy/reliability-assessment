@@ -33,7 +33,7 @@ def tm2(
     PCTAVL,
 ):
     """
-    The core part of the transmsison module used in reliability assessment
+    The core part of the transmission module used in reliability assessment
 
     :return: (*tuple*) -- FLOW: vector of line power flows (MW),  shape: (NLINES, )
                           INDIC: an integer indicator.
@@ -186,14 +186,6 @@ def tm2(
                 ZB[i, j] = ZT[i, j]
         return FLOW, INDIC
 
-    A = np.zeros((200, 250))
-    XOB = np.zeros(250)
-    IBAS = np.zeros(250, dtype=int)
-    B = np.zeros(200)
-    B1 = np.zeros(200)
-    XOBI = np.zeros(2, 250)
-    BS = np.zeros(200)
-    TAB = np.zeros(200, 250)
     RES = np.zeros(250, 3)
     NUNITS = len(PLNDST)
     NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
@@ -231,9 +223,9 @@ def tm2(
             f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
 
             # print table of units on outage or derated to traout file
-            # JXX is unit number on outage, derated, or on planned maintenance.
+            # JXX is the unit number on outage, derated, or on planned maintenance.
             # NNTAB[i] is index of unit on outage or on maintenance.
-            # if unit is derated, then NNTAB[i] has - sign.
+            # if unit is derated, then NNTAB[i] has a “-” sign.
 
             JXX = 0
             for i in range(NUNITS):
