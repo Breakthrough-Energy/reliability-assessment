@@ -33,7 +33,7 @@ def tm2(
     PCTAVL,
 ):
     """
-    The core part of the transmsison module used in reliability assessment
+    The core part of the transmission module used in reliability assessment
 
     :return: (*tuple*) -- FLOW: vector of line power flows (MW),  shape: (NLINES, )
                           INDIC: an integer indicator.
@@ -59,29 +59,17 @@ def tm2(
         IEQ[j] = i
     IEQ[NR] = ii + 1
 
-    INJB = np.zeros(NN)
-    INJ = np.zeros(NN)
-    LOD = np.zeros(NN)
-    BT = np.zeros((NX, NX))
-    ZT = np.zeros((NX, NX))
+    INJB = (BN[:NN, 2] - BN[:NN, 1] * MULT).copy()
+    # To BE: maybe no need for the above 'copy()'?
 
-    for i in range(NN):
-        INJB[i] = BN[i, 2] - BN[i, 1] * MULT
-        LOD[i] = BN[i, 1]
-
-    for i in range(NN):
-        j = LT[i]
-        INJ[i] = INJB[j]
-
-    for i in range(NX):
-        for j in range(NX):
-            BT[i, j] = BB[i, j]
-            ZT[i, j] = ZB[i, j]
+    LOD = BN[:NN, 1].copy()
+    INJ = INJB[LT[:NN]]
+    BT = BB[:NX, :NX].copy()
+    ZT = ZB[:NX, :NX].copy()
 
     for i in range(NL):
 
         D = BLP[i, 0] - BLP0[i]
-
         IDD = D * 1000.0
         if IDD == 0:
             continue
@@ -186,14 +174,6 @@ def tm2(
                 ZB[i, j] = ZT[i, j]
         return FLOW, INDIC
 
-    A = np.zeros((200, 250))
-    XOB = np.zeros(250)
-    IBAS = np.zeros(250, dtype=int)
-    B = np.zeros(200)
-    B1 = np.zeros(200)
-    XOBI = np.zeros(2, 250)
-    BS = np.zeros(200)
-    TAB = np.zeros(200, 250)
     RES = np.zeros(250, 3)
     NUNITS = len(PLNDST)
     NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
@@ -231,9 +211,9 @@ def tm2(
             f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
 
             # print table of units on outage or derated to traout file
-            # JXX is unit number on outage, derated, or on planned maintenance.
+            # JXX is the unit number on outage, derated, or on planned maintenance.
             # NNTAB[i] is index of unit on outage or on maintenance.
-            # if unit is derated, then NNTAB[i] has - sign.
+            # if unit is derated, then NNTAB[i] has a “-” sign.
 
             JXX = 0
             for i in range(NUNITS):
