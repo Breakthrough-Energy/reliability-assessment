@@ -59,29 +59,17 @@ def tm2(
         IEQ[j] = i
     IEQ[NR] = ii + 1
 
-    INJB = np.zeros(NN)
-    INJ = np.zeros(NN)
-    LOD = np.zeros(NN)
-    BT = np.zeros((NX, NX))
-    ZT = np.zeros((NX, NX))
+    INJB = (BN[:NN, 2] - BN[:NN, 1] * MULT).copy()
+    # To BE: maybe no need for the above 'copy()'?
 
-    for i in range(NN):
-        INJB[i] = BN[i, 2] - BN[i, 1] * MULT
-        LOD[i] = BN[i, 1]
-
-    for i in range(NN):
-        j = LT[i]
-        INJ[i] = INJB[j]
-
-    for i in range(NX):
-        for j in range(NX):
-            BT[i, j] = BB[i, j]
-            ZT[i, j] = ZB[i, j]
+    LOD = BN[:NN, 1].copy()
+    INJ = INJB[LT[:NN]]
+    BT = BB[:NX, :NX].copy()
+    ZT = ZB[:NX, :NX].copy()
 
     for i in range(NL):
 
         D = BLP[i, 0] - BLP0[i]
-
         IDD = D * 1000.0
         if IDD == 0:
             continue
