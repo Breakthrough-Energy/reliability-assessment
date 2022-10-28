@@ -9,13 +9,16 @@ def tm1(BN, LP, BLP, NR):
     Calculate nodal admittance matrix, Y Matrix (B Matrix in DC power flow), and
     its inverse
 
-    :param numpy.ndarray BN: 2D array with shape (NOAREA, 4)
-                             BN[I, 0]: area (bus/node) number
-                             BN[I, 1]: area load, overridden by net injection after
-                                       calling :py:func: `tm2`
-                             BN[I, 2]: area net injection, overridden by load
-                                       curtailment after calling :py:func: `tm2`
-                             BN[I, 3]: area constraint on total power flow
+    :param numpy.ndarray BN: 2D array with shape (NOAREA, 5)
+                             BN[I, 0]: area (i.e., bus) number
+                             BN[I, 1]: load (MW) at area I; will be overridden by net
+                                       injection after calling :py:func: `tm2`
+                             BN[I, 2]: net injection (generation)(MW) at area I; will be
+                                       overridden by load curtailment after calling
+                                       :py:func: `tm2`
+                             BN[I, 3]: max power flow (MW) allowed at area I
+                             BN[I, 4]: a helper value to store modified
+                                       "constraint on sum of flows" at the area I
     :param numpy.ndarray LP: 2D array with shape (NLINES, 3)
                              LP[I, 0]: line number, set to I
                              LP[I, 1]: starting node
@@ -34,9 +37,13 @@ def tm1(BN, LP, BLP, NR):
                           ZB: 2D array with shape (NOAREA, NOAREA)
                               inverse matrix of reduced B matrix, ``BB``
     """
+    NOAREA = BN.shape[0]
+    NX = NOAREA - 1
     BLP0 = BLP[:, 0].copy()
     BB = admitb(LP, BLP)  # generate B matrix
     BB, LT = admitr(BB, BN, NR)  # generate B matrix without ref bus
-    ZB = np.linalg.inv(BB)
+
+    ZB = np.linalg.inv(BB[:NX, :NX])
+    ZB = np.pad(ZB, ((0, 1), (0, 1)))
 
     return BLP0, BB, LT, ZB
