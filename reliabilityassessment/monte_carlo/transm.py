@@ -49,15 +49,14 @@ def transm(
             BLP[i, 0] = BLPA[i, 0]
             BLP[i, 1] = BLPA[i, 1]
             BLP[i, 2] = BLPA[i, 2]
-
-    # CALL TM1(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR)
-    BLP0, BB, LT, ZB = tm1(BN, LP, BLP, NR)
+        # CALL TM1(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR)
+        BLP0, BB, LT, ZB = tm1(BN, LP, BLP, NR)
 
     for i in range(NL):
-        L = (LNSTAT[i] - 1) * 3
-        BLP[i, 0] = BLPA[i, L + 1]
-        BLP[i, 1] = BLPA[i, L + 2] * STMULT[i, 0]
-        BLP[i, 2] = BLPA[i, L + 3] * STMULT[i, 1]
+        L = (LNSTAT[i] - 1) * 3  # LNSTAT[i] is 1-based value
+        BLP[i, 0] = BLPA[i, L + 0]
+        BLP[i, 1] = BLPA[i, L + 1] * STMULT[i, 0]
+        BLP[i, 2] = BLPA[i, L + 2] * STMULT[i, 1]
 
     # local variable
     BNS = np.zeros((NOAREA, 6))  # in original Fortran, np.zeros((20,6))
@@ -86,8 +85,6 @@ def transm(
             LP,
             BLP,
             BLP0,
-            NN,
-            NL,
             BB,
             ZB,
             LT,
@@ -107,54 +104,52 @@ def transm(
 
         SADJ = np.zeros(NN)
         for i in range(NN):
-            SADJ[i] = 0.0
             SADJ[i] = SYSCON[i] - CAPREQ[i] - BN[i, 1]
             if SADJ[i] < 0:
                 KFLAG = 0
 
         if KFLAG == 1:
-            return
+            return BLP0, BB, LT, ZB, FLOW, SADJ
 
         JFLAG = 1
         CADJ = np.zeros(NN)  # CADJ is locally used
         for i in range(NN):
-            CADJ[i] = BN(i, 1) * NLS
+            CADJ[i] = BN[i, 1] * NLS
 
     if NLS != 0:
         for i in range(NN):
-            BN[i, 3] = SYSCON[i] - CAPREQ[i] - CADJ[i]
-            BN[i, 2] = CAPREQ[i]
-            BNS[i, 1] = BN[i, 3]
-            BNS[i, 2] = BN[i, 2]
-            BNS[i, 4] = BN[i, 4]
+            BN[i, 2] = SYSCON[i] - CAPREQ[i] - CADJ[i]
+            BN[i, 1] = CAPREQ[i]
+            BNS[i, 0] = BN[i, 2]
+            BNS[i, 1] = BN[i, 1]
+            BNS[i, 3] = BN[i, 3]
 
         for i in range(NL):
-            j = LP[i, 2]
-            K = LP[i, 3]
-            BLP[i, 2] = BLP[i, 2] - FLOW[i]
-            BLP[i, 3] = BLP[i, 3] + FLOW[i]
+            j = LP[i, 1]
+            K = LP[i, 2]
+            BLP[i, 1] -= FLOW[i]
+            BLP[i, 2] += FLOW[i]
+            if BLP[i, 1] < 0.0:
+                BLP[i, 1] = 0.0
             if BLP[i, 2] < 0.0:
                 BLP[i, 2] = 0.0
-            if BLP[i, 3] < 0.0:
-                BLP[i, 3] = 0.0
-            BN[j, 4] = BN[j, 4] + FLOW[i]
-            BN[j, 5] = BN[j, 5] - FLOW[i]
-            BN[K, 4] = BN[K, 4] - FLOW[i]
+            BN[j, 3] += FLOW[i]
+            BN[j, 4] -= FLOW[i]
+            BN[K, 3] -= FLOW[i]
+            BN[K, 4] += FLOW[i]
     else:
         for i in range(NN):
-            BN[i, 3] = SYSCON[i] - CAPREQ[i] - CADJ[i]
-            BN[i, 2] = CAPREQ[i]
-            BNS[i, 1] = BN[i, 3]
-            BNS[i, 2] = BN[i, 2]
-            BNS[i, 4] = BN[i, 4]
+            BN[i, 2] = SYSCON[i] - CAPREQ[i] - CADJ[i]
+            BN[i, 1] = CAPREQ[i]
+            BNS[i, 0] = BN[i, 2]
+            BNS[i, 1] = BN[i, 1]
+            BNS[i, 3] = BN[i, 3]
 
     FLOW, INDIC = tm2(
         BN,
         LP,
         BLP,
         BLP0,
-        NN,
-        NL,
         BB,
         ZB,
         LT,
