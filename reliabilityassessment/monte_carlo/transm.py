@@ -12,6 +12,10 @@ def transm(
     IOI,
     BN,
     BLPA,
+    BLP0,
+    BB,
+    LT,
+    ZB,
     LP,
     NR,
     STMULT,
@@ -109,21 +113,21 @@ def transm(
                 KFLAG = 0
 
         if KFLAG == 1:
-            return BLP0, BB, LT, ZB, FLOW, SADJ
+            return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
 
         JFLAG = 1
         CADJ = np.zeros(NN)  # CADJ is locally used
         for i in range(NN):
             CADJ[i] = BN[i, 1] * NLS
 
-    if NLS != 0:
-        for i in range(NN):
-            BN[i, 2] = SYSCON[i] - CAPREQ[i] - CADJ[i]
-            BN[i, 1] = CAPREQ[i]
-            BNS[i, 0] = BN[i, 2]
-            BNS[i, 1] = BN[i, 1]
-            BNS[i, 3] = BN[i, 3]
+    for i in range(NN):
+        BN[i, 2] = SYSCON[i] - CAPREQ[i] - CADJ[i]
+        BN[i, 1] = CAPREQ[i]
+        BNS[i, 0] = BN[i, 2]
+        BNS[i, 1] = BN[i, 1]
+        BNS[i, 3] = BN[i, 3]
 
+    if NLS != 0:
         for i in range(NL):
             j = LP[i, 1]
             K = LP[i, 2]
@@ -137,13 +141,6 @@ def transm(
             BN[j, 4] -= FLOW[i]
             BN[K, 3] -= FLOW[i]
             BN[K, 4] += FLOW[i]
-    else:
-        for i in range(NN):
-            BN[i, 2] = SYSCON[i] - CAPREQ[i] - CADJ[i]
-            BN[i, 1] = CAPREQ[i]
-            BNS[i, 0] = BN[i, 2]
-            BNS[i, 1] = BN[i, 1]
-            BNS[i, 3] = BN[i, 3]
 
     FLOW, INDIC = tm2(
         BN,
@@ -171,4 +168,4 @@ def transm(
     for i in range(NN):
         SADJ[i] = BN[i, 1] - SYSCON[i] + CAPREQ[i] + CADJ[i]
 
-    return BLP0, BB, LT, ZB, FLOW, SADJ
+    return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
