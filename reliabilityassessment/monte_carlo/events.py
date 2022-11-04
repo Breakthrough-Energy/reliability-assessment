@@ -5,7 +5,7 @@ from reliabilityassessment.monte_carlo.year import year
 
 
 def events(
-    number,
+    NUMBER,
     RFLAG,
     CLOCK,
     ATRIB,
@@ -24,35 +24,35 @@ def events(
     Simulation schedule for different time-scale of events
 
     :param: IERR int -- error indicator
-    :param: number int -- Simulaiton type indicator
+    :param: NUMBER int -- Simulaiton type indicator
     :return: N/A
     """
 
     IERR = 0  # indicator/flag of run time error
-    print("Events called with argument = %d" % (number))
+    print("Events called with argument = %d" % (NUMBER))
 
-    assert number in (1, 2, 3, 4), "The argument 'number' is invalid! Program aborted."
+    assert NUMBER in (1, 2, 3, 4), "The argument 'NUMBER' is invalid! Program aborted."
 
-    if number == 1:
+    if NUMBER == 1:
         # simulate hourly event
-        JHOURT = hour()
+        JHOURT = hour()  # !the version of 'hour' is not complete
         JHOUR = JHOURT
         return
-    elif number == 2:
+    elif NUMBER == 2:
         # simulate weekly event
         IPOINT, MFA, NUMINQ = week(
             CLOCK, ATRIB, MFA, NUMINQ, IPOINT, EVNTS, PLNDST, JHOUR, JPLOUT
         )
         return
-    elif number == 3:
+    elif NUMBER == 3:
         # simulate quarterly event
         IQ, IPOINT, MFA, NUMINQ, RATING = quartr(
             IQ, RATES, CLOCK, ATRIB, NHRSYR, MFA, NUMINQ, IPOINT, EVNTS
         )
         return
-    else:  # number == 4:
+    else:  # NUMBER == 4:
         # simulate yearly event
-        IERR = year(IERR, RFLAG)
+        IERR = year(IERR, RFLAG)  # !the version of 'year' is not complete
         if IERR == 1:
-            print("Error Iin subroutine year")
+            print("Error in subroutine year")
         return
