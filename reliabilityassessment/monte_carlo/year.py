@@ -748,7 +748,7 @@ def year(
                 else:
                     SUM = SGNSPP[NOERR]
 
-    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST)
+    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, IYEAR, CVTEST, SUM, XLAST, SSQ)
     NOERR = 1
 
     if IYEAR == INTVT:
@@ -813,9 +813,11 @@ def year(
             LSFLG,
         )
 
-    IFIN = FINISH / 8760
+        INTVT += INTV
 
-    if IYEAR != INTVT:
+    else:  # if IYEAR != INTVT
+        assert type(IYEAR) is int
+        IFIN = int(FINISH / 8760)
         if IYEAR == IFIN:
             intm(
                 ATRIB,
@@ -877,10 +879,8 @@ def year(
                 WOLSHA,
                 LSFLG,
             )
-    else:
-        INTVT += INTV
 
-    if RFLAG == 1:
+    if RFLAG == 1 or CLOCK >= FINISH:
         ITAB, SUSTAT = report(
             IYEAR,
             ITAB,
@@ -949,75 +949,5 @@ def year(
             FH,
             SH,
         )
-    else:
-        if CLOCK >= FINISH:
-            ITAB, SUSTAT = report(
-                IYEAR,
-                ITAB,
-                INDX,
-                SUSTAT,
-                DPLOLE,
-                EUES,
-                HLOLE,
-                LSTEP,
-                NAMA,
-                NFCST,
-                SGNGHA,
-                SGNGHP,
-                SGNGPA,
-                SGNGPP,
-                SGNSHA,
-                SGNSHP,
-                SGNSPA,
-                SGNSPP,
-                SGNTHA,
-                SGNTHP,
-                SGNTPA,
-                SGNTPP,
-                SOLGHA,
-                SOLGHP,
-                SOLGPA,
-                SOLGPP,
-                SOLSHA,
-                SOLSHP,
-                SOLSPA,
-                SOLSPP,
-                SOLTHA,
-                SOLTHP,
-                SOLTPA,
-                SOLTPP,
-                SWLGHA,
-                SWLGHP,
-                SWLGPA,
-                SWLGPP,
-                SWLSHA,
-                SWLSHP,
-                SWLSPA,
-                SWLSPP,
-                SWLTHA,
-                SWLTHP,
-                SWLTPA,
-                SWLTPP,
-                SWNGHA,
-                SWNGHP,
-                SWNGPA,
-                SWNGPP,
-                SWNSHA,
-                SWNSHP,
-                SWNSPA,
-                SWNSPP,
-                SWNTHA,
-                SWNTHP,
-                SWNTPA,
-                SWNTPP,
-                XNEWA,
-                XNEWP,
-                XG,
-                XT,
-                XS,
-                XA,
-                FH,
-                SH,
-            )
 
     return ATRIB, IPOINT, MFA, NUMINQ, SSQ, XLAST, RFLAG, INTVT, ITAB, SUSTAT
