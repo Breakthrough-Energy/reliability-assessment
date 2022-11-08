@@ -20,9 +20,6 @@ def gstate(PROBG, RATING, DERATE, PLNDST, rng=np.random.default_rng()):
     NUNITS = len(PROBG)
     print("Enter function gstate, total number of Gen units is %d" % (NUNITS))
 
-    PCTAVL = np.zeros((NUNITS, 1))
-    AVAIL = np.zeros((NUNITS, 1))
-
     # Vectorized operation utilizing the bisect API
     aux = {i: {0: 1, 1: d, 2: 0} for i, d in enumerate(DERATE)}
     PCTAVL = np.array(
