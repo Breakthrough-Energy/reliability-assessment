@@ -96,9 +96,7 @@ def conls(BC, INJ, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     B = np.zeros(NMAX2)
     BS = np.zeros(NMAX2)
 
-    for i in range(NX):
-        j = LT[i]
-        IEQ[j] = i
+    IEQ[LT[:NX]] = range(NX)
 
     IEQ[NR] = NX
     NXD = 2 * NX
@@ -117,28 +115,20 @@ def conls(BC, INJ, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NX1 = NX + 1
     NL = BLP.shape[0]
     for i in range(NL):
-        if LP[i, 2] == NR:
-            K = LP[i, 1]
-            J1 = IEQ[K]
-            I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
-        if LP[i, 1] == NR:
-            K = LP[i, 2]
-            J1 = IEQ[K]
-            I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
+        for j in range(1, 3):
+            if LP[i, j] == NR:
+                I1 = IEQ[LP[i, 3 - j]] * 2
+                A[NX, I1] += BLP[i, 0]
+                A[NX, I1 + 1] -= BLP[i, 0]
 
     A[NX, NX + NP - 1] = 1.0  # A[NX1, NX + NP] in original Fortran
     B[NX] = -LOD[NR]  # B[NX1] in original Fortran
     A[NX, NP1 + NX] = 1.0  # A[NX1, NP1 + NX1] in original Fortran
-    for i in range(NP2):
-        A[NX, i] = -A[NX, i]  # A[NX1, i] in original Fortran
+    A[NX, :NP2] = -A[NX, :NP2]
 
     NXD = 2 * NX
-    for i in range(NX1):
-        XOB[NXD + i] = 1.0
+    XOB[NXD : NXD + NX1] = 1.0
+
     for i in range(NX1):
         A[i + NX1, NP2 + i] = 1.0
         A[i + NX1, NXD + i] = 1.0
@@ -204,25 +194,19 @@ def conls(BC, INJ, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     B1 = np.zeros(
         M
     )  # in Fortran, B1 is by default 'int' type with size 'NMAX2', which is no need here.
-    for i in range(M):
-        B1[i] = B[i]
-    for i in range(NX1):
-        if B[i] > 0.0:
-            B[i] = 0.0
+    B1[:M] = B[:M]
 
-    for i in range(M):
-        if B[i] >= 0:
-            continue
-        for j in range(N):
-            A[i, j] = -A[i, j]
-        B[i] = -B[i]
+    B[:NX1] = B[:NX1].clip(max=0.0)
 
-    for i in range(NX1):
-        A[i, i + N] = 1.0
-        XOBI[0, i + N] = 1.0
+    A[np.where(B[:M] < 0), :N] *= -1
+    B[:M] = abs(B[:M])
 
-    for i in range(N):
-        XOBI[1, i] = XOB[i]
+    # for i in range(NX1):
+    #     A[i, i + N] = 1.0
+    #     XOBI[0, i + N] = 1.0
+    A[tuple([np.arange(NX1), np.arange(N, N + NX1)])] = 1.0
+    XOBI[0, N : N + NX1] = 1.0
+    XOBI[1, :N] = XOB[:N]
 
     N += NX1
     NXD2 = NXD1 + 2 * NX1
@@ -241,19 +225,15 @@ def conls(BC, INJ, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     j = -1
     for i in range(NX2 - 1, M):
         j += 1
-        for K in range(N):
-            TAB[j, K] = A[i, K]
+        TAB[j, :N] = A[i, :N]
         BS[j] = B[i]
 
     for i in range(NX1):
         j += 1
-        for K in range(N):
-            TAB[j, K] = A[i, K]
+        TAB[j, :N] = A[i, :N]
         BS[j] = B[i]
 
-    for i in range(M):
-        for j in range(N):
-            A[i, j] = TAB[i, j]
+    A[:M, :N] = TAB[:M, :N]
 
     N1 = N - NX1
 
