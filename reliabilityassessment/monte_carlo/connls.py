@@ -141,10 +141,9 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NP = 2 * NX + 1  # check here; maybe no need +1?
     A[NX, NX + NP - 1] = 1  # A[NX1, NX + NP] in original Fortran
     B[NX] = INJB[NR]  # B[NX1] in original Fortran
-    NP1 = 3 * NX + 1
 
-    for i in range(NP1):
-        A[NX, i] = -A[NX, i]  # A[NX1, i] in original Fortran
+    NP1 = 3 * NX + 1
+    A[NX, :NP1] = -A[NX, :NP1]
 
     if B[NX] <= 0:  # B[NX1] in original Fortran
         XOB[NP1 - 1] = 1.0  # XOB[NP1] in original Fortran
@@ -223,8 +222,7 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     B1 = np.zeros(
         M
     )  # in Fortran, B1 is by default 'int' type with size 'NMAX2', which is no need here.
-    for i in range(M):
-        B1[i] = B[i]
+    B1[:M] = B[:M]
 
     for i in range(NX1):
         if B[i] > 0:
@@ -233,16 +231,14 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     for i in range(M):
         if B[i] >= 0:
             continue
-        for j in range(N):
-            A[i, j] = -A[i, j]
+        A[i, :N] = -A[i, :N]
         B[i] = -B[i]
 
     for i in range(NX1):
         A[i, i + N] = 1.0
         XOBI[0, i + N] = 1.0
 
-    for i in range(N):
-        XOBI[1, i] = XOB[i]
+    XOBI[1, :N] = XOB[:N]
 
     N += NX1
     NXD2 = NXD1 + NX1
@@ -260,19 +256,15 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     j = -1  # j = 0 in original Fortran
     for i in range(NX2 - 1, M):
         j += 1
-        for K in range(N):
-            TAB[j, K] = A[i, K]
+        TAB[j, :N] = A[i, :N]
         BS[j] = B[i]
 
     for i in range(NX1):
         j += 1
-        for K in range(N):
-            TAB[j, K] = A[i, K]
+        TAB[j, :N] = A[i, :N]
         BS[j] = B[i]
 
-    for i in range(M):
-        for j in range(N):
-            A[i, j] = TAB[i, j]
+    A[:M, :N] = TAB[:M, :N]
 
     N1 = N - NX1
 
