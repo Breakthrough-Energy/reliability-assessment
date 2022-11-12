@@ -113,7 +113,7 @@ def transm(
                 KFLAG = 0
 
         if KFLAG == 1:
-            return BLP0, BB, LT, ZB, FLOW, SADJ
+            return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
 
         JFLAG = 1
         CADJ = np.zeros(NN)  # CADJ is locally used
@@ -168,4 +168,4 @@ def transm(
     for i in range(NN):
         SADJ[i] = BN[i, 1] - SYSCON[i] + CAPREQ[i] + CADJ[i]
 
-    return BLP0, BB, LT, ZB, FLOW, SADJ
+    return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
