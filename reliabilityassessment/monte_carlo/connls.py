@@ -105,9 +105,7 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     B = np.zeros(NMAX2)
     BS = np.zeros(NMAX2)
 
-    for i in range(NX):
-        j = LT[i]
-        IEQ[j] = i
+    IEQ[LT[:NX]] = range(NX)
 
     IEQ[NR] = NX
     NXD = 2 * NX
@@ -124,19 +122,11 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     NX1 = NX + 1
     NL = BLP.shape[0]
     for i in range(NL):
-        if LP[i, 2] == NR:
-            K = LP[i, 1]
-            J1 = IEQ[K]
-            I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
-
-        if LP[i, 1] == NR:
-            K = LP[i, 2]
-            J1 = IEQ[K]
-            I1 = J1 * 2  # J1 * 2 - 1 in original Fortran
-            A[NX, I1] += BLP[i, 0]  # A[NX1, I1] in original Fortran
-            A[NX, I1 + 1] -= BLP[i, 0]  # A[NX1, I1 + 1] in original Fortran
+        for j in range(1, 3):
+            if LP[i, j] == NR:
+                I1 = IEQ[LP[i, 3 - j]] * 2
+                A[NX, I1] += BLP[i, 0]
+                A[NX, I1 + 1] -= BLP[i, 0]
 
     NP = 2 * NX + 1  # check here; maybe no need +1?
     A[NX, NX + NP - 1] = 1  # A[NX1, NX + NP] in original Fortran
@@ -160,16 +150,9 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
         A[i + NX1, NXD + i] = 1
 
     if NLS != 0:
-        for i in range(NX1):
-            B[i + NX1] = abs(B[i])
+        B[NX1 : NX1 + NX1] = abs(B[:NX1])
     else:
-        for i in range(NX1):
-            if B[i + NX1] <= 0:
-                j = LT[i]
-                B[i + NX1] = LOD[j]
-            else:
-                j = LT[i]
-                B[i + NX1] += LOD[j]
+        B[NX1 : NX1 + NX1] = B[NX1 : NX1 + NX1].clip(min=0) + LOD[LT[:NX1]]
 
     NX2 = 2 * NX1
     NP2 = 2 * NX + 2 * NX1
@@ -224,15 +207,10 @@ def connls(BC, INJ, INJB, NX, NR, LT, BLP, LP, BN, LOD, NLS):
     )  # in Fortran, B1 is by default 'int' type with size 'NMAX2', which is no need here.
     B1[:M] = B[:M]
 
-    for i in range(NX1):
-        if B[i] > 0:
-            B[i] = 0.0
+    B[:NX1] = B[:NX1].clip(max=0.0)
 
-    for i in range(M):
-        if B[i] >= 0:
-            continue
-        A[i, :N] = -A[i, :N]
-        B[i] = -B[i]
+    A[np.where(B[:M] < 0), :N] *= -1
+    B[:M] = abs(B[:M])
 
     for i in range(NX1):
         A[i, i + N] = 1.0
