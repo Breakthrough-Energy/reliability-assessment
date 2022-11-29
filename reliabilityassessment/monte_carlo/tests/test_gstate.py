@@ -8,8 +8,8 @@ def test_gstate():
     NUNITS = 2
     PROBG = np.array(
         [
-            [0.2, 0.5, 1.0],
-            [0.1, 0.7, 1.0],
+            [0.2, 0.5],
+            [0.1, 0.7],
         ]
     )
     RATING = np.array([150, 250])
