@@ -174,7 +174,7 @@ def tm2(
                 ZB[i, j] = ZT[i, j]
         return FLOW, INDIC
 
-    RES = np.zeros(250, 3)
+    RES = np.zeros((250, 3))  # may use "N" as its size (check later)
     NUNITS = len(PLNDST)
     NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
 
@@ -192,7 +192,7 @@ def tm2(
 
         for i in range(NXD1 - 1, NXD2):
             II = i - NXD1 + 1
-            j = LT(II)
+            j = LT[II]
             BN[j, 1] = -RES[i, 0]
             BN[j, 2] = -BN[j, 2] + BN[j, 1]
             if BN[j, 2] < 0:
@@ -200,7 +200,7 @@ def tm2(
 
         NXD1 = 4 * NX + 3
         NXD2 = 4 * NX + 2 + NL
-        j = 0
+        j = -1
 
         for i in range(NXD1 - 1, NXD2):
             j += 1
@@ -274,7 +274,7 @@ def tm2(
 
         for i in range(NXD1 - 1, NXD2):
             II = i - NXD1 + 1
-            j = LT(II)
+            j = LT[II]
             BN[j, 2] = RES[i, 0]
             III = i + NX1
             BN[j, 1] = RES[III, 0] - LOD[j] + BN[j, 2]
