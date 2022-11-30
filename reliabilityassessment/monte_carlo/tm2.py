@@ -53,14 +53,10 @@ def tm2(
     NOAREA = LT.shape[0]
     IEQ = np.zeros(NOAREA, dtype=int)
 
-    for i in range(NX):
-        ii = i
-        j = LT[i]
-        IEQ[j] = i
-    IEQ[NR] = ii + 1
+    IEQ[LT[:NX]] = range(NX)
+    IEQ[NR] = NX
 
-    INJB = (BN[:NN, 2] - BN[:NN, 1] * MULT).copy()
-    # To BE: maybe no need for the above 'copy()'?
+    INJB = BN[:NN, 2] - BN[:NN, 1] * MULT
 
     LOD = BN[:NN, 1].copy()
     INJ = INJB[LT[:NN]]
@@ -68,10 +64,13 @@ def tm2(
     ZT = ZB[:NX, :NX].copy()
 
     for i in range(NL):
-
-        D = BLP[i, 0] - BLP0[i]
-        IDD = D * 1000.0
-        if IDD == 0:
+        # D = BLP[i, 0] - BLP0[i]
+        # IDD = D * 1000.0
+        # if IDD == 0:
+        #     continue
+        # D and IDD are not used elsewhere in the original Fortran code,
+        # so the above lines are replaced by the follows.
+        if BLP[i, 0] == BLP0[i]:
             continue
 
         NI = LP[i, 1]
@@ -95,10 +94,7 @@ def tm2(
 
             Z = ximpa(ZB, ZIJ, NII, NJJ)
             admitm(BB, NII, NJJ, BIJ)
-
-            for i1 in range(NX):
-                for j1 in range(NX):
-                    ZB[i1, j1] = Z[i1, j1]
+            ZB[:NX, :NX] = Z[:NX, :NX].copy()
 
             continue
 
@@ -110,23 +106,11 @@ def tm2(
         if BIJ == 0.0:
             continue
 
-        ZIJ = -1 / BIJ
-        Z = ximpar(ZB, ZIJ, NII)
-        admref(BB, NII, BIJ)  # internally modify BB
-
-        for i1 in range(NX):
-            for j1 in range(NX):
-                ZB[i1, j1] = Z[i1, j1]
-
-        BIJ = -BLP0[i]
-        ZIJ = -1 / BIJ
-
-        Z = ximpar(ZB, ZIJ, NII)
-        admref(BB, NII, BIJ)  # internally modify BB
-
-        for i1 in range(NX):
-            for j1 in range(NX):
-                ZB[i1, j1] = Z[i1, j1]
+        for bij in [BIJ, -BLP0[i]]:
+            ZIJ = -1 / bij
+            Z = ximpar(ZB, ZIJ, NII)
+            admref(BB, NII, BIJ)
+            ZB[:NX, :NX] = Z[:NX, :NX].copy()
 
     # Assigns injections at buses so as to balance
     # Positive and negative injections
@@ -161,20 +145,23 @@ def tm2(
             INDIC = 1
 
     if INDIC != 1:
+        # Not sure whether BN[i, 2] should be BN[j, 2] or not (check later)
+        # If yes, we can simplify the for-loop as :
+        # BN[LT[:NN], 1] = INJ1[:NN].copy()
+        # BN[:NN, 2] = LODC[:NN].copy()
         for i in range(NN):
             j = LT[i]
             BN[j, 1] = INJ1[i]
             BN[i, 2] = LODC[i]
+
         # INL=0 in Fortran, this variable is defined but never used.
 
         # GO TO 1000
-        for i in range(NX):
-            for j in range(NX):
-                BB[i, j] = BT[i, j]
-                ZB[i, j] = ZT[i, j]
+        BB[:NX, :NX] = BT[:NX, :NX].copy()
+        ZB[:NX, :NX] = ZT[:NX, :NX].copy()
         return FLOW, INDIC
 
-    RES = np.zeros(250, 3)
+    RES = np.zeros((250, 3))  # may use "N" as its size (check later)
     NUNITS = len(PLNDST)
     NNTAB = np.zeros(NUNITS)  # in Fortran, np.zeros(600)
 
@@ -192,7 +179,7 @@ def tm2(
 
         for i in range(NXD1 - 1, NXD2):
             II = i - NXD1 + 1
-            j = LT(II)
+            j = LT[II]
             BN[j, 1] = -RES[i, 0]
             BN[j, 2] = -BN[j, 2] + BN[j, 1]
             if BN[j, 2] < 0:
@@ -200,14 +187,11 @@ def tm2(
 
         NXD1 = 4 * NX + 3
         NXD2 = 4 * NX + 2 + NL
-        j = 0
 
-        for i in range(NXD1 - 1, NXD2):
-            j += 1
-            FLOW[j] = RES[i, 0]
+        FLOW[0 : NXD2 - NXD1 + 1] = RES[NXD1 - 1 : NXD2, 0].copy()
 
         if IOI != 0:
-            f = open("traout.txt ", "w")  # maybe 'a' ; need later check
+            f = open("traout.txt ", "a")  # or maybe just 'w' ; will later check
             f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
 
             # print table of units on outage or derated to traout file
@@ -274,18 +258,19 @@ def tm2(
 
         for i in range(NXD1 - 1, NXD2):
             II = i - NXD1 + 1
-            j = LT(II)
+            j = LT[II]
             BN[j, 2] = RES[i, 0]
             III = i + NX1
             BN[j, 1] = RES[III, 0] - LOD[j] + BN[j, 2]
 
         NXD1 = 6 * NX1 - 1
         NXD2 = NXD1 - 1 + NL
-        j = 0
-        for i in range(NXD1 - 1, NXD2):
-            j += 1
-            FLOW[j] = RES[i, 0]
 
+        FLOW[0 : NXD2 - NXD1 + 1] = RES[NXD1 - 1 : NXD2, 0].copy()
+
+        # This block is very similar to a previous code block,
+        # except the JFLAG logic in file writing. Maybe we can put it in a
+        # function to reduce duplicated code. (may consider in the future)
         if IOI != 0:
             f = open("traout.txt ", "w")  # maybe 'a' ; need later check
             f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
@@ -327,9 +312,7 @@ def tm2(
                 )
 
     # GO TO 1000
-    for i in range(NX):
-        for j in range(NX):
-            BB[i, j] = BT[i, j]
-            ZB[i, j] = ZT[i, j]
+    BB[:NX, :NX] = BT[:NX, :NX].copy()
+    ZB[:NX, :NX] = BT[:NX, :NX].copy()
 
     return FLOW, INDIC
