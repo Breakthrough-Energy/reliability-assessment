@@ -40,40 +40,38 @@ def pmsc(
     :param numpy.ndarray PROBG: 2D array of accumulated probability for each capacity
         tier of each unit
     :param numpy.ndarray DERATE: array of the derated capacity of each unit
-    :param np.arrays PKLOAD: array of user-defined annual peak of each area.
+    :param np.ndarray PKLOAD: array of user-defined annual peak of each area.
     :param numpy.ndarray WPEAK: 2D array, weekly peak load amount (MW)
-                                1st dim: areaIdx, 2nd dim: weekIdx
+        1st dim: areaIdx, 2nd dim: weekIdx
     :param int IREPM: indicator for whether printing the reuslt of maintenance not
-    :param numpy.ndarray MINRAN: beginning week of the maintenance (outage) window of each area
-                                 shape (NOAREA,)
-    :param numpy.ndarray MAXRAN: ending week of maintenance (outage) window of each area
-                                 shape (NOAREA,)
-    :param numpy.ndarray INHBT1: beginning week of the forbidden (inhibt) period of each area
-                                 shape (NOAREA,)
-    :param numpy.ndarray NAMU: name string of each generator unit
-                               (in Fortran, it is double-typed as also 'int' but not used)
-                               shape (NUNITS,)
-    :param numpy.ndarray NUMP: name string of each generator plant
-                               (in Fortran, it is double-typed as also 'int' but not used)
-                               shape (NUNITS,)
+    :param numpy.ndarray MINRAN: beginning week of the maintenance (outage) window of
+        each area with shape (NOAREA,)
+    :param numpy.ndarray MAXRAN: ending week of maintenance (outage) window of
+        each area with shape (NOAREA,)
+    :param numpy.ndarray INHBT1: beginning week of the forbidden (inhibt) period of
+        each area with shape (NOAREA,)
+    :param numpy.ndarray INHBT2: ending week of the forbidden (inhibt) period of
+        each area with shape (NOAREA,)
+    :param numpy.ndarray NAMU: name string of each generator unit with shape (NUNITS,)
+        (in Fortran, it is double-typed as also 'int' but not used)
+    :param numpy.ndarray NUMP: name string of each generator plant with shape (NUNITS,)
+        (in Fortran, it is double-typed as also 'int' but not used)
+    :return: (*int*) -- ITAB
 
-    Annotations for certain intermediate (local) variables/arrays:
-
-               SCHLOS   SCHEDULED LOSS DUE TO MAINTENANCE
-               DURLOS   LOSS DUE TO MAINTENANCE
-               SDLOLP   SCHEDULED LOSS X DURATION X PROB. OF FORCED OUT
-               LOCREW   LOCATION & CREW
-               LOAD     WEEKLY PEAK LOAD
-               WEEKS    ASSIGNED TIME FOR MAINTENANCE
-               CULOLP   CUMMLOLP
-
-    :return: (*int*) ITAB
-             and also in-place modify the (global) array 'ID'
+    .. note:: 1. Global array 'ID' is modified in-place
+              2. Annotations for certain intermediate (local) variables/arrays:
+                    SCHLOS   SCHEDULED LOSS DUE TO MAINTENANCE
+                    DURLOS   LOSS DUE TO MAINTENANCE
+                    SDLOLP   SCHEDULED LOSS X DURATION X PROB. OF FORCED OUT
+                    LOCREW   LOCATION & CREW
+                    LOAD     WEEKLY PEAK LOAD
+                    WEEKS    ASSIGNED TIME FOR MAINTENANCE
+                    CULOLP   CUMMLOLP
     """
 
     ITC = ITAB
-    INUO = 500
-    INPO = 150
+    INUO = 500  # the possible maximum number of units
+    INPO = 150  # the possible maximum number of plants
 
     N = 0  # N is the highest plant number
 
@@ -107,7 +105,7 @@ def pmsc(
     NPSU = np.zeros(NUNITS)
     SCHLOS = np.zeros(NUNITS)  # SCHEDULED LOSS DUE TO MAINTENANCE;
 
-    # Note taht 'NGU' means the total number of gen units used in this function
+    # Note that 'NGU' means the total number of gen units used in this function
     # but 0 in original Fortran code, it also uses sometimes as "index" for arrays
     # since Fortran is 1-based indexing.
     NGU = -1
@@ -117,21 +115,13 @@ def pmsc(
             continue
 
         NGU += 1
-
-        if ID[i, 1] > N:
-            N = ID[i, 1]
+        N = max(N, ID[i, 1])
 
         NR0[NGU] = ID[i, 0]
         ID1[NGU, 0] = NGU
+        ID1[NGU, 1:8] = ID[i, 1:8]
 
-        for j in range(1, 8):
-            ID1[NGU, j] = ID[i, j]
-
-        NU1 = RATES[i, 0]
-        NU2 = RATES[i, 1]
-        NU3 = RATES[i, 2]
-        NU4 = RATES[i, 3]
-        CAPLOS[NGU] = max(NU1, NU2, NU3, NU4)
+        CAPLOS[NGU] = max(RATES[i, :4])
         RD[NGU, 1] = 1.0 - PROBG[i, 1]
         RD[NGU, 0] = PROBG[i, 1] - PROBG[i, 0]
         RD[NGU, 2] = 1 - DERATE[i]
@@ -141,14 +131,10 @@ def pmsc(
     if NGU == 0:
         return ITAB
 
-    for i in range(NGU):
-        DURLOS[i, 0] = ID1[i, 4]
-        DURLOS[i, 1] = ID1[i, 6]
-        ID1[i, 3] = ID1[i, 3] * 168 - 168
-        ID1[i, 4] = ID1[i, 4] * 168
-        ID1[i, 5] = ID1[i, 5] * 168 - 168
-        ID1[i, 6] = ID1[i, 6] * 168
-        LOCREW[i] = ID1[i, 1]
+    DURLOS[:NGU, :2] = ID1[:NGU, [4, 6]].copy()
+    ID1[:NGU, [4, 6]] *= 168
+    ID1[:NGU, [3, 5]] = ID1[:NGU, [3, 5]] * 168 - 168
+    LOCREW[:NGU] = ID1[:NGU, 1].copy()
 
     # G: approximately peak load. This number is used to ensure that load plus capacity on planned maintenance
     # does not exceed this value during any week of the year
@@ -156,9 +142,8 @@ def pmsc(
     # IOPT:          0 if departure rates are used
     # 	             1 if dfor and for are used
     #                >1 if dafor is used
-    CAP = 0.0
-    for i in range(NGU):
-        CAP += CAPLOS[i]
+
+    CAP = sum(CAPLOS[:NGU])
     CAP1 = CAP / 20
     CAP2 = CAP / 5
     G = PKLOAD[IA]
@@ -171,44 +156,31 @@ def pmsc(
             IC = 0  # (possibly) a flag varaiable
             CMAX = -5.0
 
-            for j in range(M):
-                if ID1[j, 1] != i:
-                    continue
+            for j in np.where(ID1[:M, 1] == i)[0]:
                 IC = 1
-                IDUR1 = DURLOS[j, 0]
-                IDUR2 = DURLOS[j, 1]
-                IDUR = max(IDUR1, IDUR2)
-                CDUR = CAPLOS[j] * IDUR
+                CDUR = CAPLOS[j] * max(DURLOS[j, :2])
                 if CDUR > CMAX:
-                    JT = j
-                    CMAX = CDUR
+                    CMAX, JT = CDUR, j
 
             if IC == 0:
                 break
 
             i1 += 1
-            for j in range(8):
-                IDT[i1, j] = ID1[JT, j]
+            IDT[i1, :8] = ID1[JT, :8].copy()
 
             ID1[JT, 1] = -1  # plant index
-            for j in range(3):
-                RDT[i1, j] = RD[JT, j]
+            RDT[i1, :3] = RD[JT, :3].copy()
 
             CAPLO[i1] = CAPLOS[JT]
             DURLO[i1, 0] = DURLOS[JT, 0]
             DURLO[i1, 1] = DURLOS[JT, 1]
             LOCRE[i1] = LOCREW[JT]
 
-    for i1 in range(M):
-        for j in range(8):
-            ID1[i1, j] = IDT[i1, j]
-        for j in range(3):
-            RD[i1, j] = RDT[i1, j]
-
-        CAPLOS[i1] = CAPLO[i1]
-        DURLOS[i1, 0] = DURLO[i1, 0]
-        DURLOS[i1, 1] = DURLO[i1, 1]
-        LOCREW[i1] = LOCRE[i1]
+    ID1[:M, :8] = IDT[:M, :8].copy()
+    RD[:M, :3] = RDT[:M, :3].copy()
+    CAPLOS[:M] = CAPLO[:M].copy()
+    DURLOS[:M, :2] = DURLO[:M, :2].copy()
+    LOCREW[:M] = LOCRE[:M].copy()
 
     ID1[M, 0] = 2000
 
@@ -242,17 +214,13 @@ def pmsc(
     # To save computing time the data is arranged by maintenance-crew units.
     # All generating units in a particular location-crew is arranged
     # in sequence based on the largest schedule maintenance x duration
-    for i in range(52):
-        WEEKS[i] = B
-        for ii in range(INPO):
-            CHECK[ii, i] = 0.0
-        LOAD[i] = WPEAK[IA, i]
-        EFLOAD[i] = LOAD[i]
+    WEEKS[:52] = B
+    CHECK[:INPO, :52] = 0.0
+    LOAD[:52] = WPEAK[IA, :52].copy()
+    EFLOAD[:52] = LOAD[:52].copy()
 
-    for i in range(N):
-        MWTOT[i] = 0
-        for j in range(M):
-            MWEEK[j] = 0
+    MWTOT[:N] = 0
+    MWEEK[:M] = 0
 
     f = open("output.txt", "a")  # can put earlier
     if IREPM != 0:
@@ -307,13 +275,11 @@ def pmsc(
                 )  # maybe remvoe "+1" here; ID1[j, 3] / 168 + 1 in Fortran
                 M2 = M1 + DURLOS[j, 0] - 1
                 IPN = i
-                if M2 > 51:
-                    M2 = 51
+                M2 = min(M2, 51)  # maybe 52; need to check
                 if M2 != -1:  # originally in Fortran "if M2 != 0"
-                    for j2 in range(M1, M2 + 1):
-                        CHECK[IPN, j2] = LOCREW[j]
-                        EFLOAD[j2] += SCHLOS[j]
-                        LOAD[j2] += CAPLOS[j]
+                    CHECK[IPN, M1 : M2 + 1] = LOCREW[j]
+                    EFLOAD[M1 : M2 + 1] += SCHLOS[j]
+                    LOAD[M1 : M2 + 1] += CAPLOS[j]
                     INDEX[j, 0] = M1
                     INDEX1[j] = 0  # originally in Fortran "1"
             else:
@@ -324,13 +290,11 @@ def pmsc(
                     ID1[j, 5] // 168 + 1
                 )  # maybe remvoe "+1" here; ID1[j, 5] / 168 + 1 in Fortran
                 M4 = M3 + DURLOS[j, 1] - 1
-                if M4 > 51:  # M2 > 52: need to check
-                    M4 = 51
+                M4 = min(M4, 51)  # maybe 52; need to check
                 if M4 != -1:  # originally in Fortran "if M4 != 0"
-                    for j2 in range(M3, M4 + 1):
-                        CHECK[IPN, j2] = LOCREW[j]
-                        EFLOAD[j2] += SCHLOS[j]
-                        LOAD[j2] += CAPLOS[j]
+                    CHECK[IPN, M3 : M4 + 1] = LOCREW[j]
+                    EFLOAD[M3 : M4 + 1] += SCHLOS[j]
+                    LOAD[M3 : M4 + 1] += CAPLOS[j]
                     INDEX[j, 1] = M3
             continue
 
@@ -344,61 +308,61 @@ def pmsc(
     if IREPM != 0:
         # 323
         f.write("\n ")
-        for KI in range(50):
+        for _ in range(50):
             f.write(" ")
         f.write(" \n PLANNED MAINTENANCE SCHEDULE FOR AREA %3d \n" % (IA))
         f.write("\n")
 
         # 523
         f.write("\n ")
-        for KI in range(51):
+        for _ in range(51):
             f.write(" ")
-        for KI in range(32):
+        for _ in range(32):
             f.write("-")
         f.write("\n")
 
         # 190
         f.write("\n ")
-        for KI in range(63):
+        for _ in range(63):
             f.write(" ")
         f.write("TABLE %4d \n\n" % (ITC))
 
         # 801
         f.write("\n  ")
-        for KI in range(123):
+        for _ in range(123):
             f.write("-")
         f.write("\n  |      |      |")
 
         # 802
         f.write("\n |      |      |")
-        for KI in range(107):
+        for _ in range(107):
             f.write(" ")
         f.write("|")
 
         # 803
         f.write("\n |      |      |")
-        for KI in range(50):
+        for _ in range(50):
             f.write(" ")
         f.write("MONTHS")
-        for KI in range(51):
+        for _ in range(51):
             f.write(" ")
         f.write("|")
 
         # 802
         f.write("\n |      |      |")
-        for KI in range(107):
+        for _ in range(107):
             f.write(" ")
         f.write("|")
 
         # 811
         f.write("\n |      |      |")
-        for KI in range(107):
+        for _ in range(107):
             f.write("-")
         f.write("|")
 
         # 804
         f.write("\n  |      |      |")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(26):
                 f.write(" ")
             f.write("|")
@@ -411,7 +375,7 @@ def pmsc(
 
         # 806
         f.write("\n  | NAME | (MW) |")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(26):
                 f.write(" ")
             f.write("|")
@@ -430,19 +394,20 @@ def pmsc(
 
         # 801
         f.write("\n  ")
-        for KI in range(123):
+        for _ in range(123):
             f.write("-")
         f.write("\n  |      |      |")
 
         # 804
         f.write("\n  |      |      |")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(26):
                 f.write(" ")
             f.write("|")
 
     # schedule first the plant with the largest total schedule MW loss x duration.
     # Find the largest MWTOT(i)
+    i = N
     for LM in range(N):  # 89
         MAX1 = 0
 
@@ -454,13 +419,9 @@ def pmsc(
 
         # Create MWEEK(J)
         K1 = MWI[i]
+        MWEEK[:M] = 0  # in original Fortran "in range(INUO)"
 
-        for K2 in range(M):  # in original Fortran "in range(INUO)"
-            MWEEK[K2] = 0
-
-        for K2 in range(M):
-            if ID1[K2, 1] != K1:
-                continue
+        for K2 in np.where(ID1[:M, 1] == K1)[0]:
             MWEEK[K2] = SCHLOS[K2] * (DURLOS[K2, 0] + DURLOS[K2, 1])
 
         # Clear the MWTOT(i), since no longer required
@@ -524,8 +485,7 @@ def pmsc(
                         IX = 53 - DURL - 1  # originally in Fortran "53-DURL"
                         if I1 <= 0:
                             I1 = 1
-                        if IX > IT:
-                            IX = IT
+                        IX = min(IX, IT)
                         ITE = 10**6
                         IC = 0
 
@@ -545,9 +505,10 @@ def pmsc(
                             if breakFlag:
                                 continue
 
-                            for L in range(J1, IS + 1):
+                            if IS + 1 > J1:
                                 IC = 1
-                                IR += EFLOAD[L]
+                            IR += sum(EFLOAD[J1 : IS + 1])
+
                             if ITE < IR:
                                 continue
                             ITE = IR
@@ -623,25 +584,15 @@ def pmsc(
                                 else:
                                     break
 
-                                if INDEX[J4, 0] != 0:
-                                    NC1 = INDEX[J4, 0]
-                                    NC2 = NC1 + DURLOS[J4, 1] - 1
-                                    for J2 in range(NC1, NC2 + 1):
-                                        CHECK[i, J2] = 0
-                                        LOAD[J2] -= CAPLOS[J4]
-                                        EFLOAD[J2] -= SCHLOS[J4]
-                                        WEEKS[J2] = B
-                                    INDEX[J4, 0] = 0  # maybe -1
-
-                                if INDEX[J4, 1] != 0:  # maybe -1
-                                    NC1 = INDEX[J4, 1]
-                                    NC2 = NC1 + DURLOS[J4, 1] - 1
-                                    for J2 in range(NC1, NC2 + 1):
-                                        CHECK[i, J2] = 0
-                                        LOAD[J2] -= CAPLOS[J4]
-                                        EFLOAD[J2] -= SCHLOS[J4]
-                                        WEEKS[J2] = B
-                                    INDEX[J4, 1] = 0
+                                for ci in [0, 1]:
+                                    if INDEX[J4, ci] != 0:  # maybe -1
+                                        NC1 = INDEX[J4, ci]
+                                        NC2 = NC1 + DURLOS[J4, ci] - 1
+                                        CHECK[i, NC1 : NC2 + 1] = 0
+                                        LOAD[NC1 : NC2 + 1] -= CAPLOS[J4]
+                                        EFLOAD[NC1 : NC2 + 1] -= SCHLOS[J4]
+                                        WEEKS[NC1 : NC2 + 1] = B
+                                        INDEX[J4, ci] = 0
 
                                 gotoFlag191 = True
                                 break
@@ -673,20 +624,18 @@ def pmsc(
                         M2 = M3 + IM3
 
                         if M2 >= M3 and M3 != 0:
-                            for J2 in range(M3, M2 + 1):
-                                CHECK[i, J2] = LOCREW[j]
-                                EFLOAD[J2] += SCHLOS[j]
-                                LOAD[J2] += CAPLOS[j]
+                            CHECK[i, M3 : M2 + 1] = LOCREW[j]
+                            EFLOAD[M3 : M2 + 1] += SCHLOS[j]
+                            LOAD[M3 : M2 + 1] += CAPLOS[j]
 
                         INDEX[j, 1] = M4
                         ID1[j, 5] = (M4 - 1) * 168
                         M2 = M4 + IM4
 
                         if M2 >= M4 and M4 != 0:
-                            for J2 in range(M4, M2 + 1):
-                                CHECK[i, J2] = LOCREW[j]
-                                EFLOAD[J2] += SCHLOS[j]
-                                LOAD[J2] += CAPLOS[j]
+                            CHECK[i, M4 : M2 + 1] = LOCREW[j]
+                            EFLOAD[M4 : M2 + 1] += SCHLOS[j]
+                            LOAD[M4 : M2 + 1] += CAPLOS[j]
 
                         while True:
                             J4 += 1
@@ -741,28 +690,13 @@ def pmsc(
         JB = i
         if INDEX[JB, 0] == 0 and INDEX[JB, 1] == 0:
             continue
-        if INDEX[JB, 0] != 0:
-            MC1 = INDEX[JB, 0]
-            MC2 = MC1 + DURLOS[JB, 0] - 1
-            if MC2 > 51:
-                MC2 = 51
 
-            for L in range(MC1, MC2 + 1):
-                WEEKS[L] = A
-                if INDEX1[JB] == 0:
-                    continue
-                WEEKS[L] = AB
-
-        if INDEX(JB, 2) != 0:
-            MC1 = INDEX[JB, 2]
-            MC2 = MC1 + DURLOS[JB, 2] - 1
-            if MC2 > 51:
-                MC2 = 51
-            for L in range(MC1, MC2 + 1):
-                WEEKS[L] = A
-                if INDEX1[JB] == 0:
-                    continue
-                WEEKS[L] = AB
+        for ci in [0, 1]:
+            if INDEX[JB, ci] != 0:
+                MC1 = INDEX[JB, ci]
+                MC2 = MC1 + DURLOS[JB, ci] - 1
+                MC2 = min(MC2, 51)
+                WEEKS[MC1 : MC2 + 1] = A if INDEX1[JB] == 0 else AB
 
         IU0 = ID1[JB, 0]
         IU0 = NR0[IU0]
@@ -775,8 +709,7 @@ def pmsc(
                     f.write("%s " % (WEEKS[(KI - 1) * 13 + KJ]))
                 f.write("|")
 
-        for L in range(52):
-            WEEKS[L] = B
+        WEEKS[:52] = B
 
         NTI += 1
         if NTI <= NMAX:
@@ -785,58 +718,58 @@ def pmsc(
         NMAX += 40
         if IREPM != 0:
             f.write("\n  |      |      |")
-            for KI in range(4):
+            for _ in range(4):
                 for KJ in range(26):
                     f.write(" ")
                 f.write("|")
 
             # 801
             f.write("\n  ")
-            for KI in range(123):
+            for _ in range(123):
                 f.write("-")
             f.write("\n  |      |      |")
 
             # 190
-            for KI in range(63):
+            for _ in range(63):
                 f.write("\n ")
             f.write("TABLE %4d \n\n" % (ITC))
 
             # 801
             f.write("\n  ")
-            for KI in range(123):
+            for _ in range(123):
                 f.write("-")
             f.write("\n  |      |      |")
 
             # 802
             f.write("\n |      |      |")
-            for KI in range(107):
+            for _ in range(107):
                 f.write(" ")
             f.write("|")
 
             # 803
             f.write("\n |      |      |")
-            for KI in range(50):
+            for _ in range(50):
                 f.write(" ")
             f.write("MONTHS")
-            for KI in range(51):
+            for _ in range(51):
                 f.write(" ")
             f.write("|")
 
             # 802
             f.write("\n |      |      |")
-            for KI in range(107):
+            for _ in range(107):
                 f.write(" ")
             f.write("|")
 
             # 801
             f.write("\n  ")
-            for KI in range(123):
+            for _ in range(123):
                 f.write("-")
             f.write("\n  |      |      |")
 
             # 804
             f.write("\n  |      |      |")
-            for KI in range(4):
+            for _ in range(4):
                 for KJ in range(26):
                     f.write(" ")
                 f.write("|")
@@ -849,7 +782,7 @@ def pmsc(
 
             # 806
             f.write("\n  | NAME | (MW) |")
-            for KI in range(4):
+            for _ in range(4):
                 for KJ in range(26):
                     f.write(" ")
                 f.write("|")
@@ -862,20 +795,20 @@ def pmsc(
 
             # 804
             f.write("\n  |      |      |")
-            for KI in range(4):
+            for _ in range(4):
                 for KJ in range(26):
                     f.write(" ")
                 f.write("|")
 
             # 801
             f.write("\n  ")
-            for KI in range(123):
+            for _ in range(123):
                 f.write("-")
             f.write("\n  |      |      |")
 
             # 804
             f.write("\n  |      |      |")
-            for KI in range(4):
+            for _ in range(4):
                 for KJ in range(26):
                     f.write(" ")
                 f.write("|")
@@ -883,29 +816,29 @@ def pmsc(
     if IREPM != 0:
         # 804
         f.write("\n  |      |      |")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(26):
                 f.write(" ")
             f.write("|")
 
         # 801
         f.write("\n  ")
-        for KI in range(123):
+        for _ in range(123):
             f.write("-")
         f.write("\n  |      |      |")
 
         # 258
         f.write("\n 1")
-        for KI in range(10):
+        for _ in range(10):
             f.write("\n")
-        for KI in range(4):
+        for _ in range(4):
             f.write(
                 "\t\t\t\t     WEEKLY PEAK LOAD + EFFECTIVE CAPACITY (MW) ON MAINTENANCE \n"
             )
 
         # 290
         f.write("0\n")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(13):
                 f.write("  %6d" % (EFLOAD[KJ]))
             f.write("\n")
@@ -915,7 +848,7 @@ def pmsc(
 
         # 290
         f.write("0\n")
-        for KI in range(4):
+        for _ in range(4):
             for KJ in range(13):
                 f.write("  %6d" % (LOAD[KJ]))
             f.write("\n")
