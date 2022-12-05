@@ -62,21 +62,16 @@ def report(
     SWNTPP,
     XNEWA,
     XNEWP,
-    XG,
-    XT,
-    XS,
-    XA,
-    FH,
-    SH,
 ):
 
     """
-    Post-processing the simulation results and writing to the final output file
+    Post-process the simulation results and write to the final output file
 
-    .. note:: The inputs and outputs are massive scalars, 1D and 2D numpy.ndarrays.
+    .. note:: 1. The inputs and outputs are massive scalars, 1D and 2D numpy.ndarrays.
              For descriptions of input and output variables, please refer to `variable descriptions.xlsx.`
              in the project Dropbox folder: https://www.dropbox.com/s/eahg8x584s9pg4j/variable%20descriptions.xlsx?dl=0
-             For arrays LOLGHA to WOLTPP:
+             2. Modify array SUSTAT in-place
+             3. For arrays LOLGHA to WOLTPP:
                     please refer to the following naming rules for those
                     6-digit statistic-related quantities:
                     The first three digits identify the type of statistic
@@ -99,6 +94,8 @@ def report(
                         LOLTHP  is the annual loss of load, transmission, hourly, pool
     """
 
+    XG, XT, XS, XA, FH, SH = "GC", "TC", "GT", "AV", "ERCO", "T"
+
     f = open("output.txt", "a")
 
     ITAB += 1
@@ -118,7 +115,7 @@ def report(
         f.write("\n                   (DAYS/YR)   MW")
 
     XYEAR = IYEAR
-    NOAREA = SUSTAT.shape[0]
+    NOAREA = SUSTAT.shape[0] - 1
     for J in range(NOAREA):
         if NFCST != 1:
             for N in range(NFCST):
@@ -152,10 +149,10 @@ def report(
                 else:
                     XMGN = 0.0
 
-                XLOL = SOLTHA(J, N) / XYEAR
-                EUE = SGNTHA(J, N) / XYEAR
-                if SOLTPA(J, N) > 0:
-                    XMGNP = SGNTPA(J, N) / SOLTPA(J, N)
+                XLOL = SOLTHA[J, N] / XYEAR
+                EUE = SGNTHA[J, N] / XYEAR
+                if SOLTPA[J, N] > 0:
+                    XMGNP = SGNTPA[J, N] / SOLTPA[J, N]
                 else:
                     XMGNP = 0.0
 
@@ -172,7 +169,7 @@ def report(
                         % (J, N, XLOLP, XMGNP, XT)
                     )
 
-                if SOLSHA(J, N) > 0.0:
+                if SOLSHA[J, N] > 0.0:
                     XMGN = SGNSHA[J, N] / SOLSHA[J, N]
                 else:
                     XMGN = 0.0
@@ -180,7 +177,7 @@ def report(
                 XLOL = SOLSHA[J, N] / XYEAR
                 EUE = SGNSHA[J, N] / XYEAR
 
-                if SOLSPA(J, N) > 0:
+                if SOLSPA[J, N] > 0:
                     XMGNP = SGNSPA[J, N] / SOLSPA[J, N]
                 else:
                     XMGNP = 0.0
@@ -224,7 +221,7 @@ def report(
                 % (J, XA, XLOLP, XMGNP, XG)
             )
 
-        if SWLTHA(J) > 0.0:
+        if SWLTHA[J] > 0.0:
             XMGN = SWNTHA[J] / SWLTHA[J]
         else:
             XMGN = 0.0
@@ -232,7 +229,7 @@ def report(
         XLOL = SWLTHA[J] / XYEAR
         EUE = SWNTHA[J] / XYEAR
 
-        if SWLTPA(J) > 0.0:
+        if SWLTPA[J] > 0.0:
             XMGNP = SWNTPA[J] / SWLTPA[J]
         else:
             XMGNP = 0.0
@@ -251,7 +248,7 @@ def report(
                 % (J, XA, XLOLP, XMGNP, XT)
             )
 
-        if SWLSHA(J) > 0.0:
+        if SWLSHA[J] > 0.0:
             XMGN = SWNSHA[J] / SWLSHA[J]
         else:
             XMGN = 0.0
@@ -316,7 +313,7 @@ def report(
                     % (N, XLOLP, XMGNP, XG)
                 )
 
-            if SOLTHP(N) > 0:
+            if SOLTHP[N] > 0:
                 XMGN = SGNTHP[N] / SOLTHP[N]
             else:
                 XMGN = 0.0
@@ -483,23 +480,27 @@ def report(
 
     for i in range(NOAREA):
         if SUSTAT[i, 0] > 0:
-            SUSTAT[i, 2] = (SUSTAT[i, 1] - SUSTAT[i, 0]) / SUSTAT[i, 0] * 100.0
+            SUSTAT[i, 2] = (SUSTAT[i, 1] - SUSTAT[i, 0]) / SUSTAT[i, 0] * 100
 
         if INDX != 1:
             SSHL = 0.0
             SSEU = 0.0
             SSLO = 0.0
-            if SUSTAT(i, 4) > 0:
-                SSHL = SSQA(i, 1) / SUSTAT(i, 4) * 100
-            if SUSTAT(i, 6) > 0:
-                SSEU = SSQA(i, 2) / SUSTAT(i, 6) * 100
-            if SUSTAT(i, 5) > 0:
-                SSLO = SSQA(i, 3) / SUSTAT(i, 5) * 100
+            if SUSTAT[i, 3] > 0:
+                SSHL = SSQA[i, 0] / SUSTAT[i, 3] * 100
+            if SUSTAT[i, 5] > 0:
+                SSEU = SSQA[i, 1] / SUSTAT[i, 5] * 100
+            if SUSTAT[i, 4] > 0:
+                SSLO = SSQA[i, 2] / SUSTAT[i, 4] * 100
 
             f.write(
-                "          %s     %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"(
+                "          %s     %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
+                % (
                     NAMA[i],
-                    SUSTAT[i, 0:4],
+                    SUSTAT[i, 0],
+                    SUSTAT[i, 1],
+                    SUSTAT[i, 2],
+                    SUSTAT[i, 3],
                     SSHL,
                     SUSTAT[i, 5],
                     SSEU,
@@ -509,8 +510,8 @@ def report(
             )
         else:
             SSLO = 0
-            if SUSTAT(i, 5) > 0:
-                SSLO = SSQA(i, 3) / SUSTAT(i, 5) * 100
+            if SUSTAT[i, 4] > 0:
+                SSLO = SSQA[i, 2] / SUSTAT[i, 4] * 100
             f.write(
                 "          %s     %7.0f     %8.0f     %5.1f     %7.3f   %7.3f"
                 % (
@@ -527,21 +528,19 @@ def report(
         SUSTAT[NO1, 0] += SUSTAT[i, 0]
         SUSTAT[NO1, 1] += SUSTAT[i, 1]
 
-    if SUSTAT[NOAREA, 0] > 0:
-        SUSTAT[NO1, 2] = (
-            (SUSTAT[NOAREA, 1] - SUSTAT[NOAREA, 0]) / SUSTAT[NOAREA, 0] * 100
-        )
+    if SUSTAT[i, 0] > 0:
+        SUSTAT[NO1, 2] = (SUSTAT[i, 1] - SUSTAT[i, 0]) / SUSTAT[i, 0] * 100
 
     if INDX != 1:
         SSHL = 0.0
         SSEU = 0.0
         SSLO = 0.0
-        if SUSTAT(NO1, 4) > 0:
-            SSHL = SSQP(1) / SUSTAT(NO1, 4) * 100.0
-        if SUSTAT(NO1, 6) > 0:
-            SSEU = SSQP(2) / SUSTAT(NO1, 6) * 100.0
-        if SUSTAT(NO1, 5) > 0:
-            SSLO = SSQP(3) / SUSTAT(NO1, 5) * 100.0
+        if SUSTAT[NO1, 3] > 0:
+            SSHL = SSQP[0] / SUSTAT[NO1, 3] * 100.0
+        if SUSTAT[NO1, 5] > 0:
+            SSEU = SSQP[1] / SUSTAT[NO1, 5] * 100.0
+        if SUSTAT[NO1, 4] > 0:
+            SSLO = SSQP[2] / SUSTAT[NO1, 4] * 100.0
         f.write(
             "\n          %s %s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
             % (
@@ -560,8 +559,8 @@ def report(
         )
     else:
         SSLO = 0.0
-        if SUSTAT(NO1, 5) > 0:
-            SSLO = SSQP(3) / SUSTAT(NO1, 5) * 100.0
+        if SUSTAT[NO1, 4] > 0:
+            SSLO = SSQP[2] / SUSTAT[NO1, 4] * 100.0
         f.write(
             "\n          %s %s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f"
             % (
@@ -575,7 +574,7 @@ def report(
             )
         )
 
-    SUMHL, SUMDP, SUMEUE = np.zeros((NOAREA,))
+    SUMHL, SUMDP, SUMEUE = np.zeros(NOAREA), np.zeros(NOAREA), np.zeros(NOAREA)
     for j in range(22):
         for i in range(NOAREA):
             SUMHL[i] += HLOLE[i, j]
@@ -621,4 +620,4 @@ def report(
             )
 
     f.close()  # close "output" file
-    return ITAB, SUSTAT
+    return ITAB
