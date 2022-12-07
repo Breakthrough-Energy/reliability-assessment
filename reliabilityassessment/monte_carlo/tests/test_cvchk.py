@@ -10,7 +10,7 @@ def test_cvchk():
     SSQ = 3.0
     IYEAR = 4
     CVTEST = 0.05
-    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST)
+    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, IYEAR, CVTEST, SUM, XLAST, SSQ)
     assert RFLAG == 0
     assert SSQ == 4.0
     assert XLAST == 3.0
@@ -22,7 +22,7 @@ def test_cvchk():
     SSQ = 3.0
     IYEAR = 4
     CVTEST = 0.05
-    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST)
+    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, IYEAR, CVTEST, SUM, XLAST, SSQ)
     assert RFLAG == 1
     assert SSQ == 4.0
     assert XLAST == 3.0
@@ -34,7 +34,7 @@ def test_cvchk():
     SSQ = 3.0
     IYEAR = 5
     CVTEST = 0.05
-    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST)
+    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, IYEAR, CVTEST, SUM, XLAST, SSQ)
     assert RFLAG == 0
     assert SSQ == 4.0
     assert XLAST == 3.0
@@ -46,7 +46,7 @@ def test_cvchk():
     SSQ = 0.3
     IYEAR = 5
     CVTEST = 0.5
-    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, SUM, XLAST, SSQ, IYEAR, CVTEST)
+    RFLAG, SSQ, XLAST = cvchk(CLOCK, FINISH, IYEAR, CVTEST, SUM, XLAST, SSQ)
     assert RFLAG == 1
     assert SSQ == 0.3
     assert XLAST == 1.0
