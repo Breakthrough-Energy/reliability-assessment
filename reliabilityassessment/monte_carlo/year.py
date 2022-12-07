@@ -652,8 +652,11 @@ def year(
     MGNTPP[:NFCST] = 0
     MGNGPP[:NFCST] = 0
 
-    if IYEAR <= 5:  # maybe use < 5; check back later
-        f.write("  KVs = %4d %4d %4d %4d %4d" % (KWHERE, KVWHEN, KVSTAT, KVTYPE, KVLOC))
+    if IYEAR <= 5:
+        print(
+            "\n  KVs = %4d %4d %4d %4d %4d"
+            % (KWHERE, KVWHEN, KVSTAT, KVTYPE, KVLOC + 1)
+        )
 
     f.close()  # close the file "output"
 

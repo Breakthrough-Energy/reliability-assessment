@@ -241,14 +241,6 @@ def contrl(
             CLOCK = ATRIB[0]
             NUMBER = int(ATRIB[1])  # simulation type
 
-            # # print for debug
-            # if NUMBER == 4:
-            #     print("\n%d-th YEAR" % (int(CLOCK / 8760)))
-            #     print("CLOCK = %.1f" % (CLOCK))
-            #     print("NUMBER = %d" % (NUMBER))
-            #     print("Will enter into 'events' call: \n")
-            #     input(" PRESS ANY KEY TO CONITNUE...")
-
             (RFLAG, IPOINT, MFA, NUMINQ, SSQ, XLAST, INTVT, ITAB, IQ, JHOUR,) = events(
                 NUMBER,
                 RFLAG,
