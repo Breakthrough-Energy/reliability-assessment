@@ -1,3 +1,6 @@
+import sys
+
+
 def remove(NUMINQ, ATRIB, EVNTS, IPOINT):
     """
     Remove an event from event list
@@ -5,11 +8,11 @@ def remove(NUMINQ, ATRIB, EVNTS, IPOINT):
     :param int NUMINQ: up-to-date total number of event entries (inquires)
     :param numpy.ndarray ATRIB: events attribute vector of length 2
                                 ATRIB[0] -- global simulation clock (in unit: hour)
-                                ATRIB[1] -- int, simulation type
-                                 0: hourly
-                                 1: weekly
-                                 2: quarterly
-                                 3: yearly
+                                ATRIB[1] -- int, simulation event type
+                                 1: hourly
+                                 2: weekly
+                                 3: quarterly
+                                 4: yearly
     :param numpy.ndarray EVNTS: 1D array of events
     :param int IPOINT: pointer of the first (already/previously stored) entry;
         initial value = -1
@@ -19,11 +22,11 @@ def remove(NUMINQ, ATRIB, EVNTS, IPOINT):
     .. note:: ATRIB and EVNTS are modified in place
     """
 
-    print("Remove an event from the event list")
+    # print("Remove an event from the event list")
 
     if NUMINQ <= 0:
         print("Error in 'remove', the event list is empty!")
-        exit(1)  # abort the whole program
+        sys.exit()  # abort the whole program
     elif IPOINT < 0:
         print("Error in 'remove', IPOINT is negative!")
         return  # just return
@@ -41,6 +44,6 @@ def remove(NUMINQ, ATRIB, EVNTS, IPOINT):
 
         # First (still existing) (i.e. unvisited) position pointer;
         # item is always removed from this position (when called)
-        IPOINT = EVNTS[IPOINT]
+        IPOINT = int(EVNTS[IPOINT])
 
         return MFA, NUMINQ, IPOINT
