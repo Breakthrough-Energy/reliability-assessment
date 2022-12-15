@@ -15,48 +15,48 @@ def test_initl():
 
     ATRIB, CLOCK, IPOINT, MFA, NUMINQ = _initl(JSTEP, EVNTS, IPOINT, MFA, NUMINQ, QTR)
 
-    ATRIB_truth = np.array([1.0, 0.0])
+    ATRIB_truth = np.array([1.0, 1])
     np.testing.assert_array_almost_equal(ATRIB_truth, ATRIB)
 
     assert CLOCK == 0.0
-    assert IPOINT == 0
+    assert IPOINT == 20
     assert MFA == 28
     assert NUMINQ == 7
 
     EVNTS_truth = np.array(
         [
-            20.0,
+            24,
             0.5,
-            2.0,
-            0.0,
-            8.0,
+            3,
+            0,
+            8,
             2184.5,
-            2.0,
-            0.0,
-            12.0,
+            3,
+            0,
+            12,
             4368.5,
-            2.0,
-            0.0,
-            16.0,
+            3,
+            0,
+            16,
             6552.5,
-            2.0,
-            0.0,
-            -1.0,
+            3,
+            0,
+            -1,
             8760.0,
-            3.0,
-            0.0,
-            24.0,
+            4,
+            0,
+            0,
             0.5,
+            2,
+            0,
+            4,
             1.0,
-            0.0,
-            4.0,
-            1.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     )
 
