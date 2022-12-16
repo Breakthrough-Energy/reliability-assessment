@@ -29,6 +29,7 @@ def test_conls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case1/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case1/LOD")
     LOD = loadtxt(FileNameAndPath)
 
@@ -92,6 +93,7 @@ def test_conls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case2/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case2/LOD")
     LOD = loadtxt(FileNameAndPath)
 
@@ -155,6 +157,7 @@ def test_conls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case3/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_conls/case3/LOD")
     LOD = loadtxt(FileNameAndPath)
 

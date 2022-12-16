@@ -91,7 +91,7 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
                 INV += 1
 
             BS[:M] = 0.0
-            BS += TABT @ BS1
+            BS[:M] += TABT @ BS1
             TAB = TABT.copy()
 
             IR = 1

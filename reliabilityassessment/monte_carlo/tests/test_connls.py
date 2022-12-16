@@ -31,6 +31,7 @@ def test_connls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case1/LOD")
     LOD = loadtxt(FileNameAndPath)
 
@@ -96,6 +97,7 @@ def test_connls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case2/LOD")
     LOD = loadtxt(FileNameAndPath)
 
@@ -161,6 +163,7 @@ def test_connls():
     LP -= 1  # 0-based index in Python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/BN")
     BN = loadtxt(FileNameAndPath)
+    BN[:, 0] -= 1  # 0-based index in python!
     FileNameAndPath = Path(TEST_DIR, "testdata_connls/case3/LOD")
     LOD = loadtxt(FileNameAndPath)
 
