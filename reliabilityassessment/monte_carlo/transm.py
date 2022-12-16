@@ -54,7 +54,7 @@ def transm(
             BLP[i, 1] = BLPA[i, 1]
             BLP[i, 2] = BLPA[i, 2]
         # CALL TM1(BN,LP,BLP,BLP0,NN,NL,BB,ZB,LT,NR)
-        BLP0, BB, LT, ZB = tm1(BN, LP, BLP, NR)
+        BLP0[:], BB[:, :], LT[:], ZB[:, :] = tm1(BN, LP, BLP, NR)
 
     for i in range(NL):
         L = (LNSTAT[i] - 1) * 3  # LNSTAT[i] is 1-based value
@@ -113,7 +113,7 @@ def transm(
                 KFLAG = 0
 
         if KFLAG == 1:
-            return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
+            return JFLAG, FLOW, SADJ
 
         JFLAG = 1
         CADJ = np.zeros(NN)  # CADJ is locally used
@@ -168,4 +168,4 @@ def transm(
     for i in range(NN):
         SADJ[i] = BN[i, 1] - SYSCON[i] + CAPREQ[i] + CADJ[i]
 
-    return JFLAG, BLP0, BB, LT, ZB, FLOW, SADJ
+    return JFLAG, FLOW, SADJ
