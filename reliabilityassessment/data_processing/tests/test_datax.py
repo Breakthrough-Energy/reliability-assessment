@@ -47,7 +47,7 @@ def test_datax():
     QTR_ = np.array([13 * 168 + 0.5, 26 * 168 + 0.5, 39 * 168 + 0.5])
     np.testing.assert_array_equal(QTR_, QTR)
 
-    NORR_ = 1
+    NORR_ = 1 - 1  # 0-based index in Python
     assert NORR_ == NORR
     NFCST_ = 1
     assert NFCST_ == NFCST

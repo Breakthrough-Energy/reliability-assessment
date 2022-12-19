@@ -58,9 +58,11 @@ def datax(inputB_dict):
     BN = np.zeros((NOAREA, 5))
 
     if FU.any():
-        NORR, NFCST = 3, 5
+        NORR = 3 - 1  # 0-based index in Python
+        NFCST = 5
     else:
-        NORR = NFCST = 1
+        NORR = 1 - 1  # 0-based index in Python
+        NFCST = 1
 
     BN[:, 0] = [i for i in range(NOAREA)]
     BN[:, 1] = 0
