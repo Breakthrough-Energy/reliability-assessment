@@ -83,7 +83,7 @@ def input_processing(inputB_dict_nameToInt, filePathToLEEI, NAMU, NUMP):
     # Prepare jplout - table of planned outages of units
     # * return values are subjected to change *
     IREPM = inputB_dict_nameToInt["ZZMC"]["IREPM"]
-    ITAB = 0
+    ITAB = 6
     JPLOUT, ITAB = smaint(
         NOAREA,
         ID,

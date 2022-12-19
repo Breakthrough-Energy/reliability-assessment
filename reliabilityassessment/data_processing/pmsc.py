@@ -82,7 +82,7 @@ def pmsc(
     INDEX1 = np.zeros(INUO)  # maybe use "-1" for intialization
     P = np.ones(INUO)
     NR0 = np.zeros(NUNITS, dtype=int)
-    ID1 = np.zeros((NUNITS, 8), dtype=int)
+    ID1 = np.zeros((1 + NUNITS, 8), dtype=int)
     CAPLOS = np.zeros(NUNITS)
     RD = np.zeros((NUNITS, 3))
     DURLOS = np.zeros((NUNITS, 2))
