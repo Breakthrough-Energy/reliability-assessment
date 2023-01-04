@@ -27,8 +27,6 @@ def year(
     BB,
     LT,
     ZB,
-    IGSEED,
-    ILSEED,
     INTV,
     INTVT,
     IOJ,
@@ -40,24 +38,12 @@ def year(
     LSTEP,
     NFCST,
     NORR,
-    FH,
-    IERR,
     INDX,
     ITAB,
-    IYEAR,
-    SH,
-    XA,
-    XG,
-    XS,
-    XT,
     LOLGHA,
     LOLGHP,
     LOLGPA,
     LOLGPP,
-    LOLSHA,
-    LOLSHP,
-    LOLSPA,
-    LOLSPP,
     LOLTHA,
     LOLTHP,
     LOLTPA,
@@ -66,10 +52,6 @@ def year(
     MGNGHP,
     MGNGPA,
     MGNGPP,
-    MGNSHA,
-    MGNSHP,
-    MGNSPA,
-    MGNSPP,
     MGNTHA,
     MGNTHP,
     MGNTPA,
@@ -122,33 +104,11 @@ def year(
     SWNTHP,
     SWNTPA,
     SWNTPP,
-    WGNGHA,
-    WGNGHP,
-    WGNGPA,
-    WGNGPP,
-    WGNSHA,
-    WGNSHP,
-    WGNSPA,
-    WGNSPP,
-    WGNTHA,
-    WGNTHP,
-    WGNTPA,
-    WGNTPP,
-    WOLGHA,
-    WOLGHP,
-    WOLGPA,
-    WOLGPP,
-    WOLSHA,
-    WOLSHP,
-    WOLSPA,
-    WOLSPP,
-    WOLTHA,
-    WOLTHP,
-    WOLTPA,
-    WOLTPP,
+    XNEWA,
+    XNEWP,
 ):
     """
-    Update related reliability statistics for yearly simulation
+    Update and summarize all reliability statistics when this 'simulation-year' event is triggered
 
     .. note:: The inputs and outputs are massive scalars, 1D and 2D numpy.ndarrays.
              For descriptions of input and output variables, please refer to `variable descriptions.xlsx.`
@@ -179,7 +139,11 @@ def year(
                         LOLTHP  is annual loss of load, transmission, hourly, pool
     """
 
-    XPROB = np.zeros((5))
+    XG, XT, XS, XA = "GC", "TC", "GT", "AV"
+
+    # XPROB = np.zeros((NFCST)); NFCST is 5
+    # DATA XPROB /.0668,.2417,.383,.2417,.0668/
+    XPROB = np.array([0.0668, 0.2417, 0.383, 0.2417, 0.0668])
 
     if NFCST == 1:
         XPROB[0] = 1.0
@@ -189,101 +153,114 @@ def year(
     ATRIB[1] = 4
     NUMINQ, MFA, IPOINT = filem(MFA, ATRIB, NUMINQ, IPOINT, EVNTS)
 
-    IYEAR = (CLOCK + 1) / 8760
+    IYEAR = int((CLOCK + 1) / 8760)
     NOAREA = EUES.shape[0]
-    for N in range(NFCST):
-        for IAR in range(NOAREA):
-            # Compute LOLES, sum for final report, take weighted avg
 
-            # Area LOLE for forecast N is sum of trans & gen LOLES
-            LOLSHA[IAR, N] = LOLTHA[IAR, N] + LOLGHA[IAR, N]
-            # Cumulative sum of hourly area LOLES for this forecast is next
-            SOLSHA[IAR, N] += float(LOLSHA[IAR, N])
-            # Cumulative sum of hourly area LOLES assigned to transmission
-            SOLTHA[IAR, N] += float(LOLTHA[IAR, N])
-            SOLGHA[IAR, N] += float(LOLGHA[IAR, N])
-            WOLSHA[IAR] += float(LOLSHA[IAR, N]) * XPROB[N]
-            WOLGHA[IAR] += float(LOLGHA[IAR, N]) * XPROB[N]
-            WOLTHA[IAR] += float(LOLTHA[IAR, N]) * XPROB[N]
-            # Compute total magnitudes, sum for final report, take weighted avg
-            MGNSHA[IAR, N] = MGNTHA[IAR, N] + MGNGHA[IAR, N]
-            SGNSHA[IAR, N] += float(MGNSHA[IAR, N])
-            SGNTHA[IAR, N] += float(MGNTHA[IAR, N])
-            SGNGHA[IAR, N] += float(MGNGHA[IAR, N])
-            WGNSHA[IAR] += float(MGNSHA[IAR, N]) * XPROB[N]
-            WGNGHA[IAR] += float(MGNGHA[IAR, N]) * XPROB[N]
-            WGNTHA[IAR] += float(MGNTHA[IAR, N]) * XPROB[N]
+    WGNGHP, WGNGPP, WGNSHP, WGNSPP, WGNTHP, WGNTPP = 6 * [0]
+    WOLGHP, WOLGPP, WOLSHP, WOLSPP, WOLTHP, WOLTPP = 6 * [0]
+    WGNGHA = np.zeros(NOAREA)
+    WGNGPA = np.zeros(NOAREA)
+    WGNSHA = np.zeros(NOAREA)
+    WGNSPA = np.zeros(NOAREA)
+    WGNTHA = np.zeros(NOAREA)
+    WGNTPA = np.zeros(NOAREA)
+    WOLGHA = np.zeros(NOAREA)
+    WOLGPA = np.zeros(NOAREA)
+    WOLSHA = np.zeros(NOAREA)
+    WOLSPA = np.zeros(NOAREA)
+    WOLTHA = np.zeros(NOAREA)
+    WOLTPA = np.zeros(NOAREA)
 
-    for IAR in range(NOAREA):
-        SWNGHA[IAR] += WGNGHA[IAR]
-        SWNTHA[IAR] += WGNTHA[IAR]
-        SWNSHA[IAR] += WGNSHA[IAR]
-        SWLGHA[IAR] += WOLGHA[IAR]
-        SWLTHA[IAR] += WOLTHA[IAR]
-        SWLSHA[IAR] += WOLSHA[IAR]
+    MGNSHA = np.zeros((NOAREA, NFCST), dtype=int)
+    MGNSHP = np.zeros(NFCST, dtype=int)
+    MGNSPA = np.zeros((NOAREA, NFCST), dtype=int)
+    MGNSPP = np.zeros(NFCST, dtype=int)
 
-    for N in range(NFCST):
-        for IAR in range(NOAREA):
-            # Compute LOLES, sum for final report, take weighted avg
-            LOLSPA[IAR, N] = LOLTPA[IAR, N] + LOLGPA[IAR, N]
-            SOLSPA[IAR, N] += float(LOLSPA[IAR, N])
-            SOLTPA[IAR, N] += float(LOLTPA[IAR, N])
-            SOLGPA[IAR, N] += float(LOLGPA[IAR, N])
-            WOLGPA[IAR] += float(LOLGPA[IAR, N]) * XPROB[N]
-            WOLTPA[IAR] += float(LOLTPA[IAR, N]) * XPROB[N]
-            WOLSPA[IAR] += float(LOLSPA[IAR, N]) * XPROB[N]
+    LOLSHA = np.zeros((NOAREA, NFCST), dtype=int)
+    LOLSHP = np.zeros(NFCST, dtype=int)
+    LOLSPA = np.zeros((NOAREA, NFCST), dtype=int)
+    LOLSPP = np.zeros(NFCST, dtype=int)
 
-            # Compute total magnitudes, sum for final report, take weighted avg
-            MGNSPA[IAR, N] = MGNTPA[IAR, N] + MGNGPA[IAR, N]
-            SGNSPA[IAR, N] += float(MGNSPA[IAR, N])
-            SGNTPA[IAR, N] += float(MGNTPA[IAR, N])
-            SGNGPA[IAR, N] += float(MGNGPA[IAR, N])
-            WGNGPA[IAR] += float(MGNGPA[IAR, N]) * XPROB[N]
-            WGNTPA[IAR] += float(MGNTPA[IAR, N]) * XPROB[N]
-            WGNSPA[IAR] += float(MGNSPA[IAR, N]) * XPROB[N]
+    # Compute LOLES, sum for final report, take weighted avg
+    # Area LOLE is sum of trans & gen LOLES
+    LOLSHA[:, :NFCST] = LOLTHA[:, :NFCST] + LOLGHA[:, :NFCST]
+    SOLSHA[:, :NFCST] += LOLSHA[:, :NFCST]  # Cumulative sum of hourly area LOLES
+    SOLTHA[:, :NFCST] += LOLTHA[
+        :, :NFCST
+    ]  # Cumulative sum of hourly area LOLES assigned to transmission
+    SOLGHA[:, :NFCST] += LOLGHA[:, :NFCST]
+    WOLSHA += LOLSHA[:, :NFCST] @ XPROB[:NFCST]
+    WOLGHA += LOLGHA[:, :NFCST] @ XPROB[:NFCST]
+    WOLTHA += LOLTHA[:, :NFCST] @ XPROB[:NFCST]
+
+    # Compute total magnitudes, sum for final report, take weighted avg
+    MGNSHA[:, :NFCST] = MGNTHA[:, :NFCST] + MGNGHA[:, :NFCST]
+    SGNSHA[:, :NFCST] += MGNSHA[:, :NFCST]
+    SGNTHA[:, :NFCST] += MGNTHA[:, :NFCST]
+    SGNGHA[:, :NFCST] += MGNGHA[:, :NFCST]
+    WGNSHA += MGNSHA[:, :NFCST] @ XPROB[:NFCST]
+    WGNGHA += MGNGHA[:, :NFCST] @ XPROB[:NFCST]
+    WGNTHA += MGNTHA[:, :NFCST] @ XPROB[:NFCST]
+
+    SWNGHA += WGNGHA
+    SWNTHA += WGNTHA
+    SWNSHA += WGNSHA
+    SWLGHA += WOLGHA
+    SWLTHA += WOLTHA
+    SWLSHA += WOLSHA
+
+    # Compute LOLES, sum for final report, take weighted avg
+    LOLSPA[:, :NFCST] = LOLTPA[:, :NFCST] + LOLGPA[:, :NFCST]
+    SOLSPA[:, :NFCST] += LOLSPA[:, :NFCST]
+    SOLTPA[:, :NFCST] += LOLTPA[:, :NFCST]
+    SOLGPA[:, :NFCST] += LOLGPA[:, :NFCST]
+    WOLGPA += LOLGPA[:, :NFCST] @ XPROB[:NFCST]
+    WOLTPA += LOLTPA[:, :NFCST] @ XPROB[:NFCST]
+    WOLSPA += LOLSPA[:, :NFCST] @ XPROB[:NFCST]
+
+    # Compute total magnitudes, sum for final report, take weighted avg
+    MGNSPA[:, :NFCST] = MGNTPA[:, :NFCST] + MGNGPA[:, :NFCST]
+    SGNSPA[:, :NFCST] += MGNSPA[:, :NFCST]
+    SGNTPA[:, :NFCST] += MGNTPA[:, :NFCST]
+    SGNGPA[:, :NFCST] += MGNGPA[:, :NFCST]
+    WGNGPA += MGNGPA[:, :NFCST] @ XPROB[:NFCST]
+    WGNTPA += MGNTPA[:, :NFCST] @ XPROB[:NFCST]
+    WGNSPA += MGNSPA[:, :NFCST] @ XPROB[:NFCST]
 
     # POOL STATISTICS, TOTAL, CUMULATE, WEIGHTED AVERAGE
-    for IAR in range(NOAREA):
-        SWNGPA[IAR] += WGNGPA[IAR]
-        SWNTPA[IAR] += WGNTPA[IAR]
-        SWNSPA[IAR] += WGNSPA[IAR]
-        SWLGPA[IAR] += WOLGPA[IAR]
-        SWLTPA[IAR] += WOLTPA[IAR]
-        SWLSPA[IAR] += WOLSPA[IAR]
+    SWNGPA += WGNGPA
+    SWNTPA += WGNTPA
+    SWNSPA += WGNSPA
+    SWLGPA += WOLGPA
+    SWLTPA += WOLTPA
+    SWLSPA += WOLSPA
 
     NOERR = NORR
     for IAR in range(NOAREA):
-        IPHOUR = LOLSHA[IAR, NOERR] + 1
-        if IPHOUR > 22:
-            IPHOUR = 22
-        IPDP = LOLSPA[IAR, NOERR] + 1
-        if IPDP > 22:
-            IPDP = 22
-        IPEUE = MGNSHA[IAR, NOERR] / LSTEP + 1
-        if IPEUE > 22:
-            IPEUE = 22
-        HLOLE[IAR, IPHOUR] += 1.0
-        DPLOLE[IAR, IPDP] += 1.0
-        EUES[IAR, IPEUE] += 1.0
+        IPHOUR = min(22, LOLSHA[IAR, NOERR] + 1)
+        IPDP = min(22, LOLSPA[IAR, NOERR] + 1)
+        IPEUE = min(22, int(MGNSHA[IAR, NOERR] / LSTEP + 1))
+        HLOLE[IAR, IPHOUR - 1] += 1.0
+        DPLOLE[IAR, IPDP - 1] += 1.0
+        EUES[IAR, IPEUE - 1] += 1.0
 
-    for N in range(NFCST):
-        # Compute LOLES, sum for final report, take weighted avg
-        LOLSHP[N] = LOLTHP[N] + LOLGHP[N]
-        SOLSHP[N] += float(LOLSHP[N])
-        SOLTHP[N] += float(LOLTHP[N])
-        SOLGHP[N] += float(LOLGHP[N])
-        WOLGHP += float(LOLGHP[N]) * XPROB[N]
-        WOLTHP += float(LOLTHP[N]) * XPROB[N]
-        WOLSHP += float(LOLSHP[N]) * XPROB[N]
+    # Compute LOLES, sum for final report, take weighted avg
+    LOLSHP[:NFCST] = LOLTHP[:NFCST] + LOLGHP[:NFCST]
+    SOLSHP[:NFCST] += LOLSHP[:NFCST]
+    SOLTHP[:NFCST] += LOLTHP[:NFCST]
+    SOLGHP[:NFCST] += LOLGHP[:NFCST]
+    WOLGHP += LOLGHP[:NFCST] @ XPROB[:NFCST]
+    WOLTHP += LOLTHP[:NFCST] @ XPROB[:NFCST]
+    WOLSHP += LOLSHP[:NFCST] @ XPROB[:NFCST]
 
-        # Compute total magnitudes, sum for final report, take weighted avg
-        MGNSHP[N] = MGNTHP[N] + MGNGHP[N]
-        SGNSHP[N] += float(MGNSHP[N])
-        SGNTHP[N] += float(MGNTHP[N])
-        SGNGHP[N] += float(MGNGHP[N])
-        WGNGHP += float(MGNGHP[N]) * XPROB[N]
-        WGNTHP += float(MGNTHP[N]) * XPROB[N]
-        WGNSHP += float(MGNSHP[N]) * XPROB[N]
+    # Compute total magnitudes, sum for final report, take weighted avg
+    MGNSHP[:NFCST] = MGNTHP[:NFCST] + MGNGHP[:NFCST]
+    SGNSHP[:NFCST] += MGNSHP[:NFCST]
+    SGNTHP[:NFCST] += MGNTHP[:NFCST]
+    SGNGHP[:NFCST] += MGNGHP[:NFCST]
+    WGNGHP += MGNGHP[:NFCST] @ XPROB[:NFCST]
+    WGNTHP += MGNTHP[:NFCST] @ XPROB[:NFCST]
+    WGNSHP += MGNSHP[:NFCST] @ XPROB[:NFCST]
 
     SWNGHP += WGNGHP
     SWNTHP += WGNTHP
@@ -292,23 +269,23 @@ def year(
     SWLTHP += WOLTHP
     SWLSHP += WOLSHP
 
-    for N in range(NFCST):
-        # Compute LOLES, sum for final report, take weighted avg
-        LOLSPP[N] = LOLTPP[N] + LOLGPP[N]
-        SOLSPP[N] += float(LOLSPP[N])
-        SOLTPP[N] += float(LOLTPP[N])
-        SOLGPP[N] += float(LOLGPP[N])
-        WOLGPP += float(LOLGPP[N]) * XPROB[N]
-        WOLTPP += float(LOLTPP[N]) * XPROB[N]
-        WOLSPP += float(LOLSPP[N]) * XPROB[N]
-        # Compute total magnitudes, sum for final report, take weighted avg
-        MGNSPP[N] = MGNTPP[N] + MGNGPP[N]
-        SGNSPP[N] += float(MGNSPP[N])
-        SGNTPP[N] += float(MGNTPP[N])
-        SGNGPP[N] += float(MGNGPP[N])
-        WGNGPP += float(MGNGPP[N]) * XPROB[N]
-        WGNTPP += float(MGNTPP[N]) * XPROB[N]
-        WGNSPP += float(MGNSPP[N]) * XPROB[N]
+    # Compute LOLES, sum for final report, take weighted avg
+    LOLSPP[:NFCST] = LOLTPP[:NFCST] + LOLGPP[:NFCST]
+    SOLSPP[:NFCST] += LOLSPP[:NFCST]
+    SOLTPP[:NFCST] += LOLTPP[:NFCST]
+    SOLGPP[:NFCST] += LOLGPP[:NFCST]
+    WOLGPP += LOLGPP[:NFCST] @ XPROB[:NFCST]
+    WOLTPP += LOLTPP[:NFCST] @ XPROB[:NFCST]
+    WOLSPP += LOLSPP[:NFCST] @ XPROB[:NFCST]
+
+    # Compute total magnitudes, sum for final report, take weighted avg
+    MGNSPP[:NFCST] = MGNTPP[:NFCST] + MGNGPP[:NFCST]
+    SGNSPP[:NFCST] += MGNSPP[:NFCST]
+    SGNTPP[:NFCST] += MGNTPP[:NFCST]
+    SGNGPP[:NFCST] += MGNGPP[:NFCST]
+    WGNGPP += MGNGPP[:NFCST] @ XPROB[:NFCST]
+    WGNTPP += MGNTPP[:NFCST] @ XPROB[:NFCST]
+    WGNSPP += MGNSPP[:NFCST] @ XPROB[:NFCST]
 
     SWNGPP += WGNGPP
     SWNTPP += WGNTPP
@@ -317,14 +294,9 @@ def year(
     SWLTPP += WOLTPP
     SWLSPP += WOLSPP
 
-    # Compute square of variables
-    XNEWA = np.zeros((NOAREA, 3))
-    XNEWP = np.zeros(3)
-
-    for IAR in range(NOAREA):
-        XNEWA[IAR, 0] += (WOLSHA[IAR]) ** 2
-        XNEWA[IAR, 1] += (WGNSHA[IAR]) ** 2
-        XNEWA[IAR, 2] += (WOLSPA[IAR]) ** 2
+    XNEWA[:NOAREA, 0] += WOLSHA[:NOAREA] ** 2
+    XNEWA[:NOAREA, 1] += WGNSHA[:NOAREA] ** 2
+    XNEWA[:NOAREA, 2] += WOLSPA[:NOAREA] ** 2
 
     XNEWP[0] += WOLSHP**2
     XNEWP[1] += WGNSHP**2
@@ -356,12 +328,12 @@ def year(
         for J in range(NOAREA):
             for N in range(NFCST):
                 if LOLGHA[J, N] > 0:
-                    XMGNA = float(MGNGHA[J, N]) / float(LOLGHA[J, N])
+                    XMGNA = (MGNGHA[J, N]) / (LOLGHA[J, N])
                 else:
                     XMGNA = 0.0
 
                 if LOLGPA[J, N] > 0:
-                    XMGNP = float(MGNGPA[J, N]) / float(LOLGPA[J, N])
+                    XMGNP = (MGNGPA[J, N]) / (LOLGPA[J, N])
                 else:
                     XMGNP = 0.0
 
@@ -386,12 +358,12 @@ def year(
                     )
 
                 if LOLTHA[J, N] > 0:
-                    XMGNA = float(MGNTHA[J, N]) / float(LOLTHA[J, N])
+                    XMGNA = (MGNTHA[J, N]) / (LOLTHA[J, N])
                 else:
                     XMGNA = 0.0
 
                 if LOLTPA[J, N] > 0:
-                    XMGNP = float(MGNTPA[J, N]) / float(LOLTPA[J, N])
+                    XMGNP = (MGNTPA[J, N]) / (LOLTPA[J, N])
                 else:
                     XMGNP = 0.0
 
@@ -416,12 +388,12 @@ def year(
                     )
 
                 if LOLSHA[J, N] > 0:
-                    XMGNA = float(MGNSHA[J, N]) / float(LOLSHA[J, N])
+                    XMGNA = (MGNSHA[J, N]) / (LOLSHA[J, N])
                 else:
                     XMGNA = 0.0
 
                 if LOLSPA[J, N] > 0:
-                    XMGNP = float(MGNSPA[J, N]) / float(LOLSPA[J, N])
+                    XMGNP = (MGNSPA[J, N]) / (LOLSPA[J, N])
                 else:
                     XMGNP = 0.0
 
@@ -512,12 +484,12 @@ def year(
         f.write("\n  POOL STATISTICS \n")
         for N in range(NFCST):
             if LOLGHP[N] > 0:
-                XMGNH = float(MGNGHP[N]) / float(LOLGHP[N])
+                XMGNH = (MGNGHP[N]) / (LOLGHP[N])
             # else:
             # XMGN = 0.0  # maybe for future usage
 
             if LOLGPP[N] > 0:
-                XMGNP = float(MGNGPP[N]) / float(LOLGPP[N])
+                XMGNP = (MGNGPP[N]) / (LOLGPP[N])
             # else:
             # XMGN = 0.0  # maybe for future usage
 
@@ -533,12 +505,12 @@ def year(
                 )
 
             if LOLTHP[N] > 0:
-                XMGNH = float(MGNTHP[N]) / float(LOLTHP[N])
+                XMGNH = (MGNTHP[N]) / (LOLTHP[N])
             else:
                 XMGNH = 0.0
 
             if LOLTPP[N] > 0:
-                XMGNP = float(MGNTPP[N]) / float(LOLTPP[N])
+                XMGNP = (MGNTPP[N]) / (LOLTPP[N])
             else:
                 XMGNP = 0.0
 
@@ -554,12 +526,12 @@ def year(
                 )
 
             if LOLSHP[N] > 0:
-                XMGNH = float(MGNSHP[N]) / float(LOLSHP[N])
+                XMGNH = (MGNSHP[N]) / (LOLSHP[N])
             else:
                 XMGNH = 0.0
 
             if LOLSPP[N] > 0:
-                XMGNP = float(MGNSPP[N]) / float(LOLSPP[N])
+                XMGNP = (MGNSPP[N]) / (LOLSPP[N])
             else:
                 XMGNP = 0.0
 
@@ -634,28 +606,20 @@ def year(
                 "      %s         %8.2f  %8.2f            %s" % (XA, WOLSPP, XMGNP, XS)
             )
 
-    f.close()  # close the file "output"
-
     # Zero out statistics reated arrays and scalars:
-    for IAR in range(NOAREA):
-        WGNGHA[IAR] = 0.0
-        WGNTHA[IAR] = 0.0
-        WGNSHA[IAR] = 0.0
-        WOLGHA[IAR] = 0.0
-        WOLTHA[IAR] = 0.0
-        WOLSHA[IAR] = 0.0
+    WGNGHA[:NOAREA] = 0.0
+    WGNTHA[:NOAREA] = 0.0
+    WGNSHA[:NOAREA] = 0.0
+    WOLGHA[:NOAREA] = 0.0
+    WOLTHA[:NOAREA] = 0.0
+    WOLSHA[:NOAREA] = 0.0
 
-    for IAR in range(NOAREA):
-        WGNGPA[IAR] = 0.0
-        WGNTPA[IAR] = 0.0
-        WGNSPA[IAR] = 0.0
-        WOLGPA[IAR] = 0.0
-        WOLTPA[IAR] = 0.0
-        WOLSPA[IAR] = 0.0
-
-    for IAR in range(NOAREA):
-        WGNSPA[IAR] = 0.0
-        WOLSPA[IAR] = 0.0
+    WGNGPA[:NOAREA] = 0.0
+    WGNTPA[:NOAREA] = 0.0
+    WGNSPA[:NOAREA] = 0.0
+    WOLGPA[:NOAREA] = 0.0
+    WOLTPA[:NOAREA] = 0.0
+    WOLSPA[:NOAREA] = 0.0
 
     WGNSHP = 0.0
     WOLSHP = 0.0
@@ -670,27 +634,28 @@ def year(
     WGNTPP = 0.0
     WOLTPP = 0.0
 
-    for N in range(NFCST):
-        for IAR in range(NOAREA):
-            LOLTHA[IAR, N] = 0
-            LOLGHA[IAR, N] = 0
-            MGNTHA[IAR, N] = 0
-            MGNGHA[IAR, N] = 0
-            LOLTPA[IAR, N] = 0
-            LOLGPA[IAR, N] = 0
-            MGNTPA[IAR, N] = 0
-            MGNGPA[IAR, N] = 0
-        LOLTHP[N] = 0
-        LOLGHP[N] = 0
-        MGNTHP[N] = 0
-        MGNGHP[N] = 0
-        LOLTPP[N] = 0
-        LOLGPP[N] = 0
-        MGNTPP[N] = 0
-        MGNGPP[N] = 0
+    LOLTHA[:NFCST, :NOAREA] = 0
+    LOLGHA[:NFCST, :NOAREA] = 0
+    MGNTHA[:NFCST, :NOAREA] = 0
+    MGNGHA[:NFCST, :NOAREA] = 0
+    LOLTPA[:NFCST, :NOAREA] = 0
+    LOLGPA[:NFCST, :NOAREA] = 0
+    MGNTPA[:NFCST, :NOAREA] = 0
+    MGNGPA[:NFCST, :NOAREA] = 0
+
+    LOLTHP[:NFCST] = 0
+    LOLGHP[:NFCST] = 0
+    MGNTHP[:NFCST] = 0
+    MGNGHP[:NFCST] = 0
+    LOLTPP[:NFCST] = 0
+    LOLGPP[:NFCST] = 0
+    MGNTPP[:NFCST] = 0
+    MGNGPP[:NFCST] = 0
 
     if IYEAR <= 5:  # maybe use < 5; check back later
         f.write("  KVs = %4d %4d %4d %4d %4d" % (KWHERE, KVWHEN, KVSTAT, KVTYPE, KVLOC))
+
+    f.close()  # close the file "output"
 
     # Begin checking for convergence
     if KWHERE == 1:
@@ -763,8 +728,8 @@ def year(
             ITAB,
             INTVT,
             EVNTS,
-            IGSEED,
-            ILSEED,
+            123,  # IGSEED,
+            123,  # ILSEED,
             LT,
             BB,
             ZB,
@@ -830,8 +795,8 @@ def year(
                 ITAB,
                 INTVT,
                 EVNTS,
-                IGSEED,
-                ILSEED,
+                123,  # IGSEED,
+                123,  # ILSEED,
                 LT,
                 BB,
                 ZB,
@@ -881,7 +846,7 @@ def year(
             )
 
     if RFLAG == 1 or CLOCK >= FINISH:
-        ITAB, SUSTAT = report(
+        ITAB = report(
             IYEAR,
             ITAB,
             INDX,
@@ -942,12 +907,6 @@ def year(
             SWNTPP,
             XNEWA,
             XNEWP,
-            XG,
-            XT,
-            XS,
-            XA,
-            FH,
-            SH,
         )
 
-    return ATRIB, IPOINT, MFA, NUMINQ, SSQ, XLAST, RFLAG, INTVT, ITAB, SUSTAT
+    return IPOINT, MFA, NUMINQ, SSQ, XLAST, RFLAG, INTVT, ITAB
