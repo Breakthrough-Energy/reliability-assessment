@@ -3,35 +3,160 @@ from reliabilityassessment.monte_carlo.remove import remove
 from reliabilityassessment.monte_carlo.report import report
 
 
-def contrl(RFLAG, CLOCK, IPOINT, EVNTS, ATRIB, FINISH):
+def contrl(
+    RFLAG,
+    CLOCK,
+    NUMINQ,
+    IPOINT,
+    EVNTS,
+    ATRIB,
+    FINISH,
+    ITAB,
+    INDX,
+    SUSTAT,
+    DPLOLE,
+    EUES,
+    HLOLE,
+    LSTEP,
+    NAMA,
+    NFCST,
+    PLNDST,
+    JHOUR,
+    JPLOUT,
+    IQ,
+    RATES,
+    NHRSYR,
+    JSTEP,
+    JFREQ,
+    MXPLHR,
+    PROBG,
+    RATING,
+    DERATE,
+    CAPOWN,
+    CAPCON,
+    PROBL,
+    JENT,
+    INTCH,
+    MXCRIT,
+    JCRIT,
+    HRLOAD,
+    FCTERR,
+    LSFLG,
+    LINENO,
+    LP,
+    LT,
+    BB,
+    ZB,
+    BLP0,
+    BLPA,
+    IOI,
+    BN,
+    NR,
+    NLS,
+    CVTEST,
+    SSQ,
+    NORR,
+    XLAST,
+    INTV,
+    INTVT,
+    IOJ,
+    KVLOC,
+    KVSTAT,
+    KVTYPE,
+    KVWHEN,
+    KWHERE,
+    LOLGHA,
+    LOLGPA,
+    LOLGHP,
+    LOLGPP,
+    LOLTHA,
+    LOLTHP,
+    LOLTPA,
+    LOLTPP,
+    MGNGHA,
+    MGNGPA,
+    MGNGHP,
+    MGNGPP,
+    MGNTHA,
+    MGNTHP,
+    MGNTPA,
+    MGNTPP,
+    SGNGHA,
+    SGNGHP,
+    SGNGPA,
+    SGNGPP,
+    SGNSHA,
+    SGNSHP,
+    SGNSPA,
+    SGNSPP,
+    SGNTHA,
+    SGNTHP,
+    SGNTPA,
+    SGNTPP,
+    SOLGHA,
+    SOLGHP,
+    SOLGPA,
+    SOLGPP,
+    SOLSHA,
+    SOLSHP,
+    SOLSPA,
+    SOLSPP,
+    SOLTHA,
+    SOLTHP,
+    SOLTPA,
+    SOLTPP,
+    SWLGHA,
+    SWLGHP,
+    SWLGPA,
+    SWLGPP,
+    SWLSHA,
+    SWLSHP,
+    SWLSPA,
+    SWLSPP,
+    SWLTHA,
+    SWLTHP,
+    SWLTPA,
+    SWLTPP,
+    SWNGHA,
+    SWNGHP,
+    SWNGPA,
+    SWNGPP,
+    SWNSHA,
+    SWNSHP,
+    SWNSPA,
+    SWNSPP,
+    SWNTHA,
+    SWNTHP,
+    SWNTPA,
+    SWNTPP,
+    XNEWA,
+    XNEWP,
+):
     """
-     Pulls the next event from event list and checks its time stamp. Function ‘events’ is called.
-     Unless the end of the whole simulation is reached, function ‘report’ is called
+    Call function 'events' to pull the next event from the list and check its time
+    stamp, if the whole simulation ends, function 'report' will be called instead.
 
-    :param int MFA: pointer of first available (i.e., empty) entry
-                     in the event list
-     :param numpy.ndarray ATRIB: events attribute vector of length 2
-                                 ATRIB[0] -- global simulation clock (in unit: hour)
-                                 ATRIB[1] -- int, simulation event type
-                                             1: hourly
-                                             2: weekly
-                                             3: quarterly
-                                             4: yearly
-     :param int NUMINQ: up-to-date total number of event entries (inquires)
-     :param int IPOINT:  pointer of the first (already/previously stored) entry
-                         initial value = -1
-     :param numpy.ndarray EVNTS: 1D array of events
-     :param int RFLAG: report flag, indicating whether or not to generate an output report
-                                     with all the so-far obtained reliability assessment results
+    :param numpy.ndarray ATRIB: events attribute vector of length 2
+        ATRIB[0] -- global simulation clock (in unit: hour)
+        ATRIB[1] -- int, simulation event type
+                 1: hourly
+                 2: weekly
+                 3: quarterly
+                 4: yearly
+    :param int NUMINQ: up-to-date total number of event entries (inquires)
+    :param int IPOINT: pointer of the first (already/previously stored) entry
+        initial value = -1
+    :param numpy.ndarray EVNTS: 1D array of events
+    :param int RFLAG: indicator of whether or not to generate an output report
+        with all the so-far obtained reliability assessment results
     """
 
     print("In function 'contrl': ")
-    NUMINQ = 0  # initialize NUMINQ
 
     while True:
 
         if IPOINT == -1:  # 0 in original Fortran
-            print("Error: Pointer to event list Is -1!")
+            print("Error: Pointer to event list is -1!")
             return
 
         if CLOCK > EVNTS[IPOINT + 1]:
@@ -40,24 +165,218 @@ def contrl(RFLAG, CLOCK, IPOINT, EVNTS, ATRIB, FINISH):
                 "ATRIB[0] (the time clock this event will occur (unit: hr)) is: %.2f"
                 % (ATRIB[0])
             )
-            print("ATRIB[0] (the type of this event) is: %d" % (ATRIB[1]))
+            print("ATRIB[1] (the type of this event) is: %d" % (ATRIB[1]))
             return
 
         if RFLAG == 1:
             return
 
         if EVNTS[IPOINT + 1] > (FINISH + 1.0):
-            IYEAR = CLOCK // 8760
-            report(IYEAR)  # No return values of 'report' are explicitly needed here
+            IYEAR = int(CLOCK / 8760)
+            ITAB = report(
+                IYEAR,
+                ITAB,
+                INDX,
+                SUSTAT,
+                DPLOLE,
+                EUES,
+                HLOLE,
+                LSTEP,
+                NAMA,
+                NFCST,
+                SGNGHA,
+                SGNGHP,
+                SGNGPA,
+                SGNGPP,
+                SGNSHA,
+                SGNSHP,
+                SGNSPA,
+                SGNSPP,
+                SGNTHA,
+                SGNTHP,
+                SGNTPA,
+                SGNTPP,
+                SOLGHA,
+                SOLGHP,
+                SOLGPA,
+                SOLGPP,
+                SOLSHA,
+                SOLSHP,
+                SOLSPA,
+                SOLSPP,
+                SOLTHA,
+                SOLTHP,
+                SOLTPA,
+                SOLTPP,
+                SWLGHA,
+                SWLGHP,
+                SWLGPA,
+                SWLGPP,
+                SWLSHA,
+                SWLSHP,
+                SWLSPA,
+                SWLSPP,
+                SWLTHA,
+                SWLTHP,
+                SWLTPA,
+                SWLTPP,
+                SWNGHA,
+                SWNGHP,
+                SWNGPA,
+                SWNGPP,
+                SWNSHA,
+                SWNSHP,
+                SWNSPA,
+                SWNSPP,
+                SWNTHA,
+                SWNTHP,
+                SWNTPA,
+                SWNTPP,
+                XNEWA,
+                XNEWP,
+            )
             return
         else:
             MFA, NUMINQ, IPOINT = remove(NUMINQ, ATRIB, EVNTS, IPOINT)
             CLOCK = ATRIB[0]
             NUMBER = int(ATRIB[1])  # simulation type
 
-            # Only partial return values of the 'events' function are needed here
-            # ! Not a finalized version yet!
-            IPOINT, CLOCK, EVNTS, ATRIB, RFLAG, IYEAR, NUMINQ, *_ = events(
-                NUMBER, RFLAG
+            # # print for debug
+            # if NUMBER == 4:
+            #     print("\n%d-th YEAR" % (int(CLOCK / 8760)))
+            #     print("CLOCK = %.1f" % (CLOCK))
+            #     print("NUMBER = %d" % (NUMBER))
+            #     print("Will enter into 'events' call: \n")
+            #     input(" PRESS ANY KEY TO CONITNUE...")
+
+            (RFLAG, IPOINT, MFA, NUMINQ, SSQ, XLAST, INTVT, ITAB, IQ, JHOUR,) = events(
+                NUMBER,
+                RFLAG,
+                CLOCK,
+                ATRIB,
+                MFA,
+                NUMINQ,
+                IPOINT,
+                EVNTS,
+                PLNDST,
+                JHOUR,
+                JPLOUT,
+                IQ,
+                RATES,
+                NHRSYR,
+                JSTEP,
+                JFREQ,
+                MXPLHR,
+                PROBG,
+                RATING,
+                DERATE,
+                CAPOWN,
+                CAPCON,
+                PROBL,
+                JENT,
+                INTCH,
+                MXCRIT,
+                JCRIT,
+                NFCST,
+                HRLOAD,
+                FCTERR,
+                LSFLG,
+                LOLGHA,
+                LOLGPA,
+                LOLGHP,
+                LOLGPP,
+                LOLTHA,
+                LOLTHP,
+                LOLTPA,
+                LOLTPP,
+                MGNGHA,
+                MGNGPA,
+                MGNGHP,
+                MGNGPP,
+                MGNTHA,
+                MGNTHP,
+                MGNTPA,
+                MGNTPP,
+                LINENO,
+                LP,
+                LT,
+                BB,
+                ZB,
+                BLP0,
+                BLPA,
+                IOI,
+                BN,
+                NR,
+                NLS,
+                CVTEST,
+                DPLOLE,
+                EUES,
+                FINISH,
+                HLOLE,
+                NAMA,
+                SSQ,
+                SUSTAT,
+                XLAST,
+                INTV,
+                INTVT,
+                IOJ,
+                KVLOC,
+                KVSTAT,
+                KVTYPE,
+                KVWHEN,
+                KWHERE,
+                LSTEP,
+                NORR,
+                INDX,
+                ITAB,
+                SGNGHA,
+                SGNGHP,
+                SGNGPA,
+                SGNGPP,
+                SGNSHA,
+                SGNSHP,
+                SGNSPA,
+                SGNSPP,
+                SGNTHA,
+                SGNTHP,
+                SGNTPA,
+                SGNTPP,
+                SOLGHA,
+                SOLGHP,
+                SOLGPA,
+                SOLGPP,
+                SOLSHA,
+                SOLSHP,
+                SOLSPA,
+                SOLSPP,
+                SOLTHA,
+                SOLTHP,
+                SOLTPA,
+                SOLTPP,
+                SWLGHA,
+                SWLGHP,
+                SWLGPA,
+                SWLGPP,
+                SWLSHA,
+                SWLSHP,
+                SWLSPA,
+                SWLSPP,
+                SWLTHA,
+                SWLTHP,
+                SWLTPA,
+                SWLTPP,
+                SWNGHA,
+                SWNGHP,
+                SWNGPA,
+                SWNGPP,
+                SWNSHA,
+                SWNSHP,
+                SWNSPA,
+                SWNSPP,
+                SWNTHA,
+                SWNTHP,
+                SWNTPA,
+                SWNTPP,
+                XNEWA,
+                XNEWP,
             )
-    return
