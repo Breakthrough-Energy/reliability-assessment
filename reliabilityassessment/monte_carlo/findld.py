@@ -14,7 +14,4 @@ def findld(NFACT, JHOUR, HRLOAD, FCTERR):
 
      .. note:: in the original Fortran code, CAPREQ is annotated as "LOAD IN AREA J"
     """
-
-    print("Entering function findld")
-
     return HRLOAD[:, JHOUR] * FCTERR[:, NFACT]

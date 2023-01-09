@@ -1,5 +1,5 @@
-def _hrstat(
-    NST, MARGIN, LSFLG, LOLTHP, LOLGHP, LOLTHA, MGNTHA, MGNTHP, LOLGHA, MGNGHA, MGNGHP
+def hrstat(
+    NST, MARGIN, LSFLG, LOLGHA, LOLGHP, LOLTHA, LOLTHP, MGNGHA, MGNGHP, MGNTHA, MGNTHP
 ):
     """
     Collect hourly statistics at area level and pool level
@@ -66,8 +66,8 @@ def _hrstat(
                 MGNGHP[NST] += int(-X)
 
 
-def hrstat(
-    NST, MARGIN, LSFLG, LOLTHP, LOLGHP, LOLTHA, MGNTHA, MGNTHP, LOLGHA, MGNGHA, MGNGHP
+def _hrstat(
+    NST, MARGIN, LSFLG, LOLGHA, LOLGHP, LOLTHA, LOLTHP, MGNGHA, MGNGHP, MGNTHA, MGNTHP
 ):
     """
     Collect hourly statistics at area level and pool level
@@ -124,9 +124,9 @@ def hrstat(
     LSFLG[MARGIN < 0] += 1
     if SUM > 0.0:
         LOLTHA[:, NST][MARGIN < 0] += 1
-        MGNTHA[:, NST][MARGIN < 0] -= int(MARGIN[MARGIN < 0])
+        MGNTHA[:, NST][MARGIN < 0] -= MARGIN[MARGIN < 0].astype(int)
         MGNTHP[NST] -= int(MARGIN[MARGIN < 0].sum())
     else:
         LOLGHA[:, NST][MARGIN < 0] += 1
-        MGNGHA[:, NST][MARGIN < 0] -= int(MARGIN[MARGIN < 0])
+        MGNGHA[:, NST][MARGIN < 0] -= MARGIN[MARGIN < 0].astype(int)
         MGNGHP[NST] -= int(MARGIN[MARGIN < 0].sum())
