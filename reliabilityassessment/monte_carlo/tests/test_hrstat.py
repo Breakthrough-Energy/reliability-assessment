@@ -27,18 +27,18 @@ def test_hrstat():
         NST,
         MARGIN,
         LSFLG,
-        LOLTHP,
+        LOLGHA,
         LOLGHP,
         LOLTHA,
-        MGNTHA,
-        MGNTHP,
-        LOLGHA,
+        LOLTHP,
         MGNGHA,
         MGNGHP,
+        MGNTHA,
+        MGNTHP,
     )
 
-    LSFLG_true = np.array([52, 86, 70])
-    np.testing.assert_array_almost_equal(LSFLG, LSFLG_true)
+    LSFLG_true = np.array([52, 86, 70], dtype=int)
+    np.testing.assert_array_equal(LSFLG, LSFLG_true)
 
     LOLTHP_true = np.array([37, 13, 72, 9, 75])
     np.testing.assert_array_almost_equal(LOLTHP, LOLTHP_true)
@@ -121,18 +121,18 @@ def test_hrstat():
         NST,
         MARGIN,
         LSFLG,
-        LOLTHP,
+        LOLGHA,
         LOLGHP,
         LOLTHA,
-        MGNTHA,
-        MGNTHP,
-        LOLGHA,
+        LOLTHP,
         MGNGHA,
         MGNGHP,
+        MGNTHA,
+        MGNTHP,
     )
 
-    LSFLG_true = np.array([52, 86, 70])
-    np.testing.assert_array_almost_equal(LSFLG, LSFLG_true)
+    LSFLG_true = np.array([52, 86, 70], dtype=int)
+    np.testing.assert_array_equal(LSFLG, LSFLG_true)
 
     LOLTHP_true = np.array([37, 13, 72, 9, 75])
     np.testing.assert_array_almost_equal(LOLTHP, LOLTHP_true)

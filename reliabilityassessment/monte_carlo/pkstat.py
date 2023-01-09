@@ -1,5 +1,5 @@
 def _pkstat(
-    NST, MARGIN, LOLTPP, LOLGPP, LOLTPA, MGNTPA, MGNTPP, LOLGPA, MGNGPA, MGNGPP
+    NST, MARGIN, LOLGPA, LOLGPP, LOLTPA, LOLTPP, MGNGPA, MGNGPP, MGNTPA, MGNTPP
 ):
     """
     Collect (daily) peak statistics at area level and pool level
@@ -63,7 +63,7 @@ def _pkstat(
                 MGNGPP[NST] -= int(X)
 
 
-def pkstat(NST, MARGIN, LOLTPP, LOLGPP, LOLTPA, MGNTPA, MGNTPP, LOLGPA, MGNGPA, MGNGPP):
+def pkstat(NST, MARGIN, LOLGPA, LOLGPP, LOLTPA, LOLTPP, MGNGPA, MGNGPP, MGNTPA, MGNTPP):
     """
     Collect (daily) peak statistics at area level and pool level
 
@@ -116,9 +116,9 @@ def pkstat(NST, MARGIN, LOLTPP, LOLGPP, LOLTPA, MGNTPA, MGNTPP, LOLGPA, MGNGPA, 
 
     if SUM > 0.0:
         LOLTPA[:, NST][MARGIN < 0] += 1
-        MGNTPA[:, NST][MARGIN < 0] -= int(MARGIN[MARGIN < 0])
-        MGNTPP[NST] -= int(MARGIN[MARGIN < 0].sum())
+        MGNTPA[:, NST][MARGIN < 0] -= MARGIN[MARGIN < 0].astype(int)
+        MGNTPP[NST] -= MARGIN[MARGIN < 0].sum().astype(int)
     else:
         LOLGPA[:, NST][MARGIN < 0] += 1
-        MGNGPA[:, NST][MARGIN < 0] -= int(MARGIN[MARGIN < 0])
-        MGNGPP[NST] -= int(MARGIN[MARGIN < 0].sum())
+        MGNGPA[:, NST][MARGIN < 0] -= MARGIN[MARGIN < 0].astype(int)
+        MGNGPP[NST] -= MARGIN[MARGIN < 0].sum().astype(int)

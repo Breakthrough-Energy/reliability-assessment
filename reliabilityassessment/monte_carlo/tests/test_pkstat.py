@@ -20,7 +20,7 @@ def test_pkstat():
     MGNGPA = 1000 * np.random.rand(NOAREA, 5)
     MGNGPP = 3000 * np.random.rand(5)
 
-    _pkstat(NST, MARGIN, LOLTPP, LOLGPP, LOLTPA, MGNTPA, MGNTPP, LOLGPA, MGNGPA, MGNGPP)
+    _pkstat(NST, MARGIN, LOLGPA, LOLGPP, LOLTPA, LOLTPP, MGNGPA, MGNGPP, MGNTPA, MGNTPP)
 
     LOLTPP_true = np.array([37, 13, 72, 9, 75])
     np.testing.assert_array_almost_equal(LOLTPP, LOLTPP_true)
@@ -96,7 +96,7 @@ def test_pkstat():
     MGNGPA = 1000 * np.random.rand(NOAREA, 5)
     MGNGPP = 3000 * np.random.rand(5)
 
-    pkstat(NST, MARGIN, LOLTPP, LOLGPP, LOLTPA, MGNTPA, MGNTPP, LOLGPA, MGNGPA, MGNGPP)
+    pkstat(NST, MARGIN, LOLGPA, LOLGPP, LOLTPA, LOLTPP, MGNGPA, MGNGPP, MGNTPA, MGNTPP)
 
     LOLTPP_true = np.array([37, 13, 72, 9, 75])
     np.testing.assert_array_almost_equal(LOLTPP, LOLTPP_true)

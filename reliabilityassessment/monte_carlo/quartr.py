@@ -28,9 +28,6 @@ def quartr(IQ, RATES, CLOCK, ATRIB, NHRSYR, MFA, NUMINQ, IPOINT, EVNTS):
 
     .. note:: ATRIB, EVNTS are modified in place
     """
-
-    print("Entering function quartr")
-
     IQ = (IQ + 1) % 4
     RATING = RATES[:, IQ].copy()
     ATRIB[0] = CLOCK + NHRSYR

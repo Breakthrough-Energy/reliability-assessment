@@ -18,7 +18,6 @@ def findtn(JENT, INTCH, JDAY):
 
     .. note:: TRANSFERS treated as from higher to lower area number
     """
-    print("Entering function findtn")
 
     NOAREA = JENT.shape[0]
     TRNSFR = np.zeros((NOAREA,))
