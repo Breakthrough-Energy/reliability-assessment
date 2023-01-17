@@ -101,21 +101,22 @@ def report(
     ITAB += 1
     f.write("\n                        TABLE %d\n" % (ITAB))
 
-    f.write("\nFinal results after %d replications \n" % (IYEAR))
+    f.write("\n\t\t\t FINAL RESULTS AFTER %d REPLICATIONS \n" % (IYEAR))
 
     if INDX != 1:
         f.write(
-            "\n  AREA FORECAST    HOURLY STATISTICS           PEAK STATISTICS           REMARKS"
+            "\n  AREA FORECAST    HOURLY STATISTICS            PEAK STATISTICS           REMARKS"
         )
-        f.write("\n  NO   NO       HLOLE    XLOL       EUE       LOLE      XLOL")
+        f.write("\n  NO   NO        HLOLE    XLOL       EUE       LOLE      XLOL")
         f.write("\n                (HRS/YR)  (MW)      (MWH)     (DAYS/YR)  (MW)")
     else:
         f.write("\n  AREA FORECAST    PEAK STATISTICS           REMARKS")
-        f.write("\n  NO   NO          LOLE       XLOL")
+        f.write("\n  NO   NO        LOLE       XLOL")
         f.write("\n                   (DAYS/YR)   MW")
 
     XYEAR = IYEAR
     NOAREA = SUSTAT.shape[0] - 1
+    SSQA = np.zeros((NOAREA, 3))
     for J in range(NOAREA):
         if NFCST != 1:
             for N in range(NFCST):
@@ -135,13 +136,13 @@ def report(
                 # EUEP = SGNGPA[J,N]/XYEAR # may have future usage
                 if INDX != 1:
                     f.write(
-                        "  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                        % (J, N, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
+                        "\n  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
                     )
                 else:
                     f.write(
-                        "  %2d  %2d         %8.2f  %8.2f            %s"
-                        % (J, N, XLOLP, XMGNP, XG)
+                        "\n  %2d  %2d         %8.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOLP, XMGNP, XG)
                     )
 
                 if SOLTHA[J, N] > 0:
@@ -160,13 +161,13 @@ def report(
                 # EUEP = SGNTPA[J,N]/XYEAR # may have future usage
                 if INDX != 1:
                     f.write(
-                        "  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                        % (J, N, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
+                        "\n  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
                     )
                 else:
                     f.write(
-                        "  %2d  %2d         %8.2f  %8.2f            %s"
-                        % (J, N, XLOLP, XMGNP, XT)
+                        "\n  %2d  %2d         %8.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOLP, XMGNP, XT)
                     )
 
                 if SOLSHA[J, N] > 0.0:
@@ -186,13 +187,13 @@ def report(
                 # EUEP = SGNSPA[J,N]/XYEAR # may have future usage
                 if INDX != 1:
                     f.write(
-                        "  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                        % (J, N, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
+                        "\n  %2d  %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
                     )
                 else:
                     f.write(
-                        "  %2d  %2d         %8.2f  %8.2f            %s"
-                        % (J, N, XLOLP, XMGNP, XS)
+                        "\n  %2d  %2d         %8.2f  %8.2f            %s"
+                        % (J + 1, N + 1, XLOLP, XMGNP, XS)
                     )
 
         if SWLGHA[J] > 0.0:
@@ -212,13 +213,13 @@ def report(
         # EUEP = SWNGPA[J]/XYEAR # may have future usage
         if INDX != 1:
             f.write(
-                "  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                % (J, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
+                "\n  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                % (J + 1, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
             )
         else:
             f.write(
-                "  %2d  %s         %8.2f  %8.2f            %s"
-                % (J, XA, XLOLP, XMGNP, XG)
+                "\n  %2d  %s         %8.2f  %8.2f            %s"
+                % (J + 1, XA, XLOLP, XMGNP, XG)
             )
 
         if SWLTHA[J] > 0.0:
@@ -239,13 +240,13 @@ def report(
 
         if INDX != 1:
             f.write(
-                "  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                % (J, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
+                "\n  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                % (J + 1, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
             )
         else:
             f.write(
-                "  %2d  %s         %8.2f  %8.2f            %s"
-                % (J, XA, XLOLP, XMGNP, XT)
+                "\n  %2d  %s         %8.2f  %8.2f            %s"
+                % (J + 1, XA, XLOLP, XMGNP, XT)
             )
 
         if SWLSHA[J] > 0.0:
@@ -254,8 +255,6 @@ def report(
             XMGN = 0.0
 
         XLOL = SWLSHA[J] / XYEAR
-
-        SSQA = np.zeros((20, 3))
         SSQA[J, 0] = XNEWA[J, 0] / XYEAR - XLOL**2
         EUE = SWNSHA[J] / XYEAR
         SSQA[J, 1] = XNEWA[J, 1] / XYEAR - EUE**2
@@ -271,21 +270,23 @@ def report(
 
         if INDX != 1:
             f.write(
-                "  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                % (J, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
+                "\n  %2d  %s     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                % (J + 1, XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
             )
         else:
             f.write(
-                "  %2d  %s         %8.2f  %8.2f            %s"
-                % (J, XA, XLOLP, XMGNP, XS)
+                "\n  %2d  %s         %8.2f  %8.2f            %s"
+                % (J + 1, XA, XLOLP, XMGNP, XS)
             )
+
+        f.write("\n")
 
         SUSTAT[J, 3] = XLOL
         SUSTAT[J, 4] = XLOLP
         SUSTAT[J, 5] = EUE
 
     # Then, for Pool Statistics:
-    f.write(" \n           POOL STATISTICS \n")
+    f.write("\n\n           POOL STATISTICS \n")
     if NFCST != 1:
         for N in range(NFCST):
             if SOLGHP[N] > 0:
@@ -304,13 +305,13 @@ def report(
 
             if INDX != 1:
                 f.write(
-                    "      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                    % (N, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
+                    "\n      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                    % (N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
                 )
             else:
                 f.write(
-                    "      %2d         %8.2f  %8.2f            %s"
-                    % (N, XLOLP, XMGNP, XG)
+                    "\n      %2d         %8.2f  %8.2f            %s"
+                    % (N + 1, XLOLP, XMGNP, XG)
                 )
 
             if SOLTHP[N] > 0:
@@ -331,13 +332,13 @@ def report(
 
             if INDX != 1:
                 f.write(
-                    "      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                    % (N, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
+                    "\n      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                    % (N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
                 )
             else:
                 f.write(
-                    "      %2d         %8.2f  %8.2f            %s"
-                    % (N, XLOLP, XMGNP, XT)
+                    "\n      %2d         %8.2f  %8.2f            %s"
+                    % (N + 1, XLOLP, XMGNP, XT)
                 )
 
             if SOLSHP[N] > 0:
@@ -358,13 +359,13 @@ def report(
 
             if INDX != 1:
                 f.write(
-                    "      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
-                    % (N, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
+                    "\n      %2d     %7.2f  %8.2f   %7.0f     %7.2f  %8.2f            %s"
+                    % (N + 1, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
                 )
             else:
                 f.write(
-                    "      %2d         %8.2f  %8.2f            %s"
-                    % (N, XLOLP, XMGNP, XS)
+                    "\n      %2d         %8.2f  %8.2f            %s"
+                    % (N + 1, XLOLP, XMGNP, XS)
                 )
 
     if SWLGHP > 0.0:
@@ -385,11 +386,13 @@ def report(
 
     if INDX != 1:
         f.write(
-            "      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
+            "\n      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
             % (XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XG)
         )
     else:
-        f.write("      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XG))
+        f.write(
+            "\n      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XG)
+        )
 
     if SWLTHP > 0.0:
         XMGN = SWNTHP / SWLTHP
@@ -409,11 +412,13 @@ def report(
 
     if INDX != 1:
         f.write(
-            "      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
+            "\n      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
             % (XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XT)
         )
     else:
-        f.write("      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XT))
+        f.write(
+            "\n      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XT)
+        )
 
     if SWLSHP > 0.0:
         XMGN = SWNSHP / SWLSHP
@@ -437,11 +442,13 @@ def report(
 
     if INDX != 1:
         f.write(
-            "      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
+            "\n      %s     %7.3f  %8.2f   %7.0f     %7.3f  %8.2f            %s"
             % (XA, XLOL, XMGN, EUE, XLOLP, XMGNP, XS)
         )
     else:
-        f.write("      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XS))
+        f.write(
+            "\n      %s         %8.2f  %8.2f            %s" % (XA, XLOLP, XMGNP, XS)
+        )
 
     for IAR in range(NOAREA):
         for J in range(3):
@@ -455,8 +462,8 @@ def report(
     SUSTAT[NOAREA, 5] = EUE
 
     ITAB += 1
-    f.write("                            TABLE %4d" % (ITAB))
-    f.write("                       SUMMARY OF RESULTS\n")
+    f.write("\n\n\t\t\t\t                            TABLE %4d \n" % (ITAB))
+    f.write("\n \t\t\t\t\t\t\t\t\t\t SUMMARY OF RESULTS \n\n")
 
     if INDX != 1:
         f.write(
@@ -494,7 +501,7 @@ def report(
                 SSLO = SSQA[i, 2] / SUSTAT[i, 4] * 100
 
             f.write(
-                "          %s     %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
+                "\n          %s     %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
                 % (
                     NAMA[i],
                     SUSTAT[i, 0],
@@ -513,7 +520,7 @@ def report(
             if SUSTAT[i, 4] > 0:
                 SSLO = SSQA[i, 2] / SUSTAT[i, 4] * 100
             f.write(
-                "          %s     %7.0f     %8.0f     %5.1f     %7.3f   %7.3f"
+                "\n          %s     %7.0f     %8.0f     %5.1f     %7.3f   %7.3f"
                 % (
                     NAMA[i],
                     SUSTAT[i, 0],
@@ -542,7 +549,7 @@ def report(
         if SUSTAT[NO1, 4] > 0:
             SSLO = SSQP[2] / SUSTAT[NO1, 4] * 100.0
         f.write(
-            "\n          %s %s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
+            "\n\n          %s%s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f    %8.0f   %8.0f   %7.3f   %7.3f"
             % (
                 FH,
                 SH,
@@ -562,7 +569,7 @@ def report(
         if SUSTAT[NO1, 4] > 0:
             SSLO = SSQP[2] / SUSTAT[NO1, 4] * 100.0
         f.write(
-            "\n          %s %s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f"
+            "\n\n          %s%s    %7.0f     %8.0f     %5.1f     %7.3f    %7.3f"
             % (
                 FH,
                 SH,
@@ -595,20 +602,19 @@ def report(
     for i in range(NOAREA):
         ITAB += 1
         f.write(
-            "\t\t\t\t\t\t\t\t\t\t TABLE %5d\n\n"
+            "\n\n\t\t\t\t\t\t\t\t\t\t\t TABLE %5d\n\n"
             "\t\t\t\t\t\t\t\t PROBABILITY DISTRIBUTIONS FOR AREA %3d\n\n\n"
-            "\t\t DAILY PEAK LOLES PER YEAR t\t\t HOURLY LOLES PER YEAR \t\t\t\t ANNUAL UNSERVED ENERGY (MWH)\n\n"
-            "NUMBER \t OBSERVATIONS \t PROBABILITY"
-            "OBSERVATIONS \t PROBABILITY"
-            "\t\t\t LIMIT (MWH) \t OBSERVATIONS \t PROBABILITY \n" % (ITAB, i)
+            "\t\t DAILY PEAK LOLES PER YEAR \t\t\t HOURLY LOLES PER YEAR \t\t\t\t ANNUAL UNSERVED ENERGY (MWH)\n\n"
+            "NUMBER\t OBSERVATIONS\t PROBABILITY"
+            "\t OBSERVATIONS\t PROBABILITY\t"
+            "LIMIT (MWH)\t OBSERVATIONS\t PROBABILITY \n" % (ITAB, i + 1)
         )
         for j in range(22):
-            K = j - 1
-            LIMIT = K * LSTEP
+            LIMIT = j * LSTEP
             f.write(
-                "%4d\t\t%6.0f\t\t%5.3f\t\t\t%6.0f\t\t%5.3f\t\t\t%6d\t\t%6.0f\t\t%6.4f\n"
+                "%4d\t\t%6.0f\t\t\t%5.3f\t\t\t%6.0f\t\t\t%5.3f\t\t\t%6d\t\t%6.0f\t\t\t %6.4f\n"
                 % (
-                    K,
+                    j,
                     DPLOLE[i, j],
                     PDP[i, j],
                     HLOLE[i, j],

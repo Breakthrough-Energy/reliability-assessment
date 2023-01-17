@@ -228,7 +228,7 @@ def pmsc(
         for i in range(52):
             if i % 13 == 0:
                 f.write("\n")
-            f.write(" \f" % (LOAD[i]))
+            f.write(" %.4f" % (LOAD[i]))
 
     NPS = -1  # 0 in Fortran
     for i in range(M):
@@ -310,7 +310,10 @@ def pmsc(
         f.write("\n ")
         for _ in range(50):
             f.write(" ")
-        f.write(" \n PLANNED MAINTENANCE SCHEDULE FOR AREA %3d \n" % (IA))
+        f.write(
+            " \n\t\t\t\t\t\t\t\t\t\t\t\t PLANNED MAINTENANCE SCHEDULE FOR AREA %3d \n"
+            % (IA + 1)
+        )
         f.write("\n")
 
         # 523
@@ -831,10 +834,9 @@ def pmsc(
         f.write("\n 1")
         for _ in range(10):
             f.write("\n")
-        for _ in range(4):
-            f.write(
-                "\t\t\t\t     WEEKLY PEAK LOAD + EFFECTIVE CAPACITY (MW) ON MAINTENANCE \n"
-            )
+        f.write(
+            "\t\t\t\t     WEEKLY PEAK LOAD + EFFECTIVE CAPACITY (MW) ON MAINTENANCE \n"
+        )
 
         # 290
         f.write("0\n")
