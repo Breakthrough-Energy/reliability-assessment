@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.initl import _initl
 
 
 def test_initl():
-
     EVNTS = np.zeros(32)
     EVNTS[: 32 - 4 : 4] = np.arange(0, 32 - 4, 4) + 4
     MFA = 0

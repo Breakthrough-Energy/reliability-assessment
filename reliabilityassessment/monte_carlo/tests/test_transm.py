@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.transm import transm
 
 
 def test_transm():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------------- case 1 --------------

@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.remove import remove
 
 
 def test_remove_new():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------- case1 --------------

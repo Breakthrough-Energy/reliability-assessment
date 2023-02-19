@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.findtn import findtn
 
 
 def test_findtn():
-
     NOAREA = 3
 
     JENT = (-1) * np.ones((NOAREA, NOAREA), dtype=int)

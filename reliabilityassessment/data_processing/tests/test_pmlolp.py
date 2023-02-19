@@ -7,7 +7,6 @@ from reliabilityassessment.data_processing.pmlolp import pmlolp
 
 
 def test_pmlolp():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     CAPLOS = np.zeros(500, dtype=int)

@@ -154,7 +154,6 @@ def contrl(
     print("In function 'contrl': ")
 
     while True:
-
         if IPOINT == -1:  # 0 in original Fortran
             print("Error: Pointer to event list is -1!")
             return
@@ -241,7 +240,18 @@ def contrl(
             CLOCK = ATRIB[0]
             NUMBER = int(ATRIB[1])  # simulation type
 
-            (RFLAG, IPOINT, MFA, NUMINQ, SSQ, XLAST, INTVT, ITAB, IQ, JHOUR,) = events(
+            (
+                RFLAG,
+                IPOINT,
+                MFA,
+                NUMINQ,
+                SSQ,
+                XLAST,
+                INTVT,
+                ITAB,
+                IQ,
+                JHOUR,
+            ) = events(
                 NUMBER,
                 RFLAG,
                 CLOCK,

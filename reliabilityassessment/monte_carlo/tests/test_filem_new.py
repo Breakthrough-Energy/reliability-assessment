@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.filem import filem
 
 
 def test_filem_new():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------- case1 --------------

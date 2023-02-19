@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.mc import mc
 
 
 def test_mc():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     FileNameAndPath = Path(TEST_DIR, "testdata_mc/TAB")

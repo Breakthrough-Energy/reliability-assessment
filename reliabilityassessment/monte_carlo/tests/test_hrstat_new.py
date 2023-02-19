@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.hrstat import hrstat
 
 
 def test_hrstat_new():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ------  case1 --------------

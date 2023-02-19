@@ -4,7 +4,6 @@ from reliabilityassessment.data_processing.dpeak import _dpeak, dpeak
 
 
 def test_dpeak():
-
     # vanilla version
     HRLOAD = np.array(
         [

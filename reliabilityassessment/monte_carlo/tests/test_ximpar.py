@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.ximpar import ximpar
 
 
 def test_ximpar():
-
     # NN = 5, the size of Z, ZB matrices (no need now in Python)
     NI = 1 - 1  # be careful: 0-based index in Python
     ZIJ = 0.016667

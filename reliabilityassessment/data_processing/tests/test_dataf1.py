@@ -25,7 +25,6 @@ def smaint_mock(
     NAMU,
     NUMP,
 ):
-
     FileNameAndPath = Path(TEST_DIR, "testdata_input_processing/ID_modified")
     ID[:] = loadtxt(FileNameAndPath).astype(int)
     ID[:, [0, 1, 2, 3, 5]] -= 1  # 0-based index
@@ -39,7 +38,6 @@ def smaint_mock(
 
 
 def test_dataf1(mocker):
-
     mocker.patch(
         "reliabilityassessment.data_processing.input_processing.smaint",
         side_effect=smaint_mock,

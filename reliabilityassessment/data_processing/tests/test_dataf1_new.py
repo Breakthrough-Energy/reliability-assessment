@@ -9,7 +9,6 @@ TEST_DIR = Path(__file__).parent.absolute()
 
 
 def test_dataf1_new():
-
     filepaths = [
         Path(TEST_DIR, "testdata_input_processing"),
         Path(TEST_DIR, "testdata_input_processing/LEEI"),

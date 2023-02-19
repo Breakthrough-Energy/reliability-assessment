@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.year import year
 
 
 def test_year():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ----------------------- case 1 --------------------------------------

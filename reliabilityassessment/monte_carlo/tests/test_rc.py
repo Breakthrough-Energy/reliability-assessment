@@ -6,7 +6,6 @@ from reliabilityassessment.monte_carlo.rc import rc
 
 
 def test_rc():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     FileNameAndPath = Path(TEST_DIR, "testdata_rc/PY")

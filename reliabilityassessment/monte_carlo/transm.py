@@ -28,7 +28,6 @@ def transm(
     PLNDST,
     PCTAVL,
 ):
-
     """
     The main entry function of the transmsison module used in reliability assessment
 

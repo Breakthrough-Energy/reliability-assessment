@@ -2,7 +2,6 @@ from reliabilityassessment.monte_carlo.cvchk import cvchk
 
 
 def test_cvchk():
-
     CLOCK = 12.5
     FINISH = 9999 * 8760
     SUM = 3.0

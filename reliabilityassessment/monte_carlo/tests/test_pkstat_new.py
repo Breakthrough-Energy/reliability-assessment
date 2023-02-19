@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.pkstat import pkstat
 
 
 def test_pkstat_new():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ------  case1 --------------

@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.linp import linp
 
 
 def test_linp():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ------ test case 1--------------

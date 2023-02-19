@@ -50,7 +50,11 @@ def read_card_ZZMC(filepath):
     2nd, 3rd seasons. The ending weeks of the 4th season is assumed as 52
     """
     # e.g.  #[13, 26, 39]
-    (data["IW1"], data["IW2"], data["IW3"],) = (
+    (
+        data["IW1"],
+        data["IW2"],
+        data["IW3"],
+    ) = (
         df_ZZMC["END WK1"].item(),
         df_ZZMC["END WK2"].item(),
         df_ZZMC["END WK3"].item(),

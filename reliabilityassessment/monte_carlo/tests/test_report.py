@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.report import report
 
 
 def test_report():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------------------- case 1 --------------------------

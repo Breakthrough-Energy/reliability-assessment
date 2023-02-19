@@ -63,7 +63,6 @@ def report(
     XNEWA,
     XNEWP,
 ):
-
     """
     Post-process the simulation results and write to the final output file
 

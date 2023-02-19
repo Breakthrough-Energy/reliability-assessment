@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.dgefa import dgefa
 
 
 def test_dgefa():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ------ test case 1--------------
