@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.tm2 import tm2
 
 
 def test_tm2():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------------- case 1 --------------

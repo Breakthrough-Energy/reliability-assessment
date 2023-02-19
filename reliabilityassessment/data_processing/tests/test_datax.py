@@ -8,7 +8,6 @@ from reliabilityassessment.data_processing.readInputB import readInputB
 
 
 def test_datax():
-
     TEST_DIR = str(Path(__file__).parent.absolute())
     inputB_dict = readInputB(TEST_DIR)
     inputB_dict_nameToInt = pind(inputB_dict)

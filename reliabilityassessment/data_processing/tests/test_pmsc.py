@@ -7,7 +7,6 @@ from reliabilityassessment.data_processing.pmsc import pmsc
 
 
 def test_pmsc():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # --------------------------case1-------------------------

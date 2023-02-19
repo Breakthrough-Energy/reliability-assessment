@@ -4,7 +4,6 @@ from reliabilityassessment.data_processing.wpeakf import _wpeakf, wpeakf
 
 
 def test_wpeakf():
-
     x = np.linspace(1.0, 0.1, 7)
     # array([1.  , 0.85, 0.7 , 0.55, 0.4 , 0.25, 0.1 ])
     y = np.flip(x)

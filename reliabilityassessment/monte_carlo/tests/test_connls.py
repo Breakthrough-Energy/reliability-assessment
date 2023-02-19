@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.connls import connls
 
 
 def test_connls():
-
     NX, NR, NLS = 4, 1, 1
     # NL = 5 # not used
     NR -= 1  # 0-based index in Python!

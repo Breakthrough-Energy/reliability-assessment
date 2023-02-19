@@ -64,7 +64,6 @@ def hour(
     NR,
     NLS,
 ):
-
     """
     Schedule hourly simulation events
 
@@ -132,7 +131,6 @@ def hour(
             JPNT += NOCRIT + 5
 
     for NST in range(NFCST):
-
         CAPREQ = findld(NST, JHOUR, HRLOAD, FCTERR)
 
         FLAG = 0

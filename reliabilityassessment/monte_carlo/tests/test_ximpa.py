@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.ximpa import ximpa
 
 
 def test_ximpa():
-
     # NN = 5, the size of Z, ZB matrices (no need now in Python)
     NI, NJ = 2 - 1, 3 - 1  # be careful: 0-based index in Python
     ZIJ = 0.016667

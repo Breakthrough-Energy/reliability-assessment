@@ -7,7 +7,6 @@ from reliabilityassessment.data_processing.smaint import smaint
 
 
 def test_smaint_new():
-
     TEST_DIR = Path(__file__).parent.absolute()
     # TEST_DIR = "C:\\Users\\zylpa\\Dropbox\\PostdocTAMU\\Code\\PyREL"
 

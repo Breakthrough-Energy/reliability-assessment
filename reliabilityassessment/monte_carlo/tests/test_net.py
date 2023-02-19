@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.net import _net, net
 
 
 def test_net():
-
     M = 30
     N = 38
 

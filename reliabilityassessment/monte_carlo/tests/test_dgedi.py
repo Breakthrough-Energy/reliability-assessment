@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.dgedi import dgedi
 
 
 def test_dgedi():
-
     TEST_DIR = Path(__file__).parent.absolute()
 
     # ------ test case 1--------------

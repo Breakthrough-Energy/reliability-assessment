@@ -6,7 +6,6 @@ from reliabilityassessment.data_processing.xporta import _xporta, xporta
 
 
 def test_xporta():
-
     NOAREA = 3
 
     JENT = (-1) * np.ones((NOAREA, NOAREA), dtype=int)

@@ -2,7 +2,6 @@ from reliabilityassessment.monte_carlo.cvchk import cvchk
 
 
 def test_cvchk_new():
-
     # ---- example test case 1 from real run ------
     CLOCK = 8760.0
     FINISH = 87591240.0  # i.e. 9999 * 8760

@@ -4,7 +4,6 @@ from reliabilityassessment.monte_carlo.assign import assign
 
 
 def test_assign():
-
     # --------------- test case-1 -----------
     NN, NLS = 5, 1
 

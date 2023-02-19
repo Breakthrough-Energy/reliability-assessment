@@ -7,7 +7,6 @@ from reliabilityassessment.monte_carlo.tm1 import tm1
 
 
 def test_tm1():
-
     # ------------ case 1: artificial test data ------------------------------
 
     # NOAREA = 3, NLINES = 3
