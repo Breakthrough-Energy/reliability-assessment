@@ -7,3 +7,6 @@ Collaborators: Dr. Chanan Singh, Dr. Yongli Zhu
 
 .. include::
    data.rst
+
+.. include::
+   manual.rst
