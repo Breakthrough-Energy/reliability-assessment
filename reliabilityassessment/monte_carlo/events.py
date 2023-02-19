@@ -134,6 +134,8 @@ def events(
     SWNTPP,
     XNEWA,
     XNEWP,
+    IGSEED,
+    ILSEED,
 ):
     """
     Simulation schedule for different time-scale of events
@@ -202,18 +204,56 @@ def events(
             BN,
             NR,
             NLS,
+            IGSEED,
+            ILSEED,
         )
 
         JHOUR = JHOURT
+        return (
+            RFLAG,
+            IPOINT,
+            MFA,
+            NUMINQ,
+            SSQ,
+            XLAST,
+            INTVT,
+            ITAB,
+            IQ,
+            JHOUR,
+        )
     elif NUMBER == 2:
         # simulate weekly event
         IPOINT, MFA, NUMINQ = week(
             CLOCK, ATRIB, MFA, NUMINQ, IPOINT, EVNTS, PLNDST, JHOUR, JPLOUT
         )
+        return (
+            RFLAG,
+            IPOINT,
+            MFA,
+            NUMINQ,
+            SSQ,
+            XLAST,
+            INTVT,
+            ITAB,
+            IQ,
+            JHOUR,
+        )
     elif NUMBER == 3:
         # simulate quarterly event
         IQ, IPOINT, MFA, NUMINQ, RATING[:] = quartr(
             IQ, RATES, CLOCK, ATRIB, NHRSYR, MFA, NUMINQ, IPOINT, EVNTS
+        )
+        return (
+            RFLAG,
+            IPOINT,
+            MFA,
+            NUMINQ,
+            SSQ,
+            XLAST,
+            INTVT,
+            ITAB,
+            IQ,
+            JHOUR,
         )
     else:  # NUMBER == 4:
         # simulate yearly event
@@ -318,16 +358,15 @@ def events(
             XNEWA,
             XNEWP,
         )
-
-    return (
-        RFLAG,
-        IPOINT,
-        MFA,
-        NUMINQ,
-        SSQ,
-        XLAST,
-        INTVT,
-        ITAB,
-        IQ,
-        JHOUR,
-    )
+        return (
+            RFLAG,
+            IPOINT,
+            MFA,
+            NUMINQ,
+            SSQ,
+            XLAST,
+            INTVT,
+            ITAB,
+            IQ,
+            JHOUR,
+        )

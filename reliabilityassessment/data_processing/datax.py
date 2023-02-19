@@ -187,6 +187,22 @@ def datax(inputB_dict):
     ID[:, 6] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 4])
     ID[:, 7] = deepcopy(inputB_dict["ZZUD"]["ID"][:, 0])
 
+    NLS = inputB_dict["ZZMC"]["NLS"]  # indicator of load sharing mode
+    IOI = inputB_dict["ZZMC"]["IOI"]
+    IOJ = inputB_dict["ZZMC"]["IOJ"]
+    KVLOC = inputB_dict["ZZMC"]["KVLOC"] - 1  # 0-based index in Python
+    KVSTAT = inputB_dict["ZZMC"]["KVSTAT"]
+    KVTYPE = inputB_dict["ZZMC"]["KVTYPE"]
+    KVWHEN = inputB_dict["ZZMC"]["KVWHEN"]
+    KWHERE = inputB_dict["ZZMC"]["KWHERE"]
+    CVTEST = inputB_dict["ZZMC"]["CVTEST"]
+    MAXEUE = inputB_dict["ZZMC"]["MAXEUE"]
+    JSTEP = int(inputB_dict["ZZMC"]["JSTEP"])
+    JFREQ = int(inputB_dict["ZZMC"]["JFREQ"])
+    FINISH = inputB_dict["ZZMC"]["FINISH"] * 8760.0
+    INTV = inputB_dict["ZZMC"]["INTV"]
+    INTVT = INTV
+
     return (
         QTR,
         NORR,
@@ -216,4 +232,19 @@ def datax(inputB_dict):
         MXCRIT,
         JCRIT,
         ID,
+        NLS,
+        IOI,
+        IOJ,
+        KVLOC,
+        KVSTAT,
+        KVTYPE,
+        KVWHEN,
+        KWHERE,
+        CVTEST,
+        MAXEUE,
+        JSTEP,
+        JFREQ,
+        FINISH,
+        INTV,
+        INTVT,
     )

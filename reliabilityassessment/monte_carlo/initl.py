@@ -111,7 +111,7 @@ def initl(JSTEP, EVNTS):
         ]
     )
     # fmt: on
-    ATRIB = np.array([JSTEP, 1])
+    ATRIB = np.array([JSTEP, 1.0])
     CLOCK = 0.0
     IPOINT = 20
     MFA = 28

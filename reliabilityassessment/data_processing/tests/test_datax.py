@@ -41,6 +41,21 @@ def test_datax():
         MXCRIT,
         JCRIT,
         ID,
+        NLS,
+        IOI,
+        IOJ,
+        KVLOC,
+        KVSTAT,
+        KVTYPE,
+        KVWHEN,
+        KWHERE,
+        CVTEST,
+        MAXEUE,
+        JSTEP,
+        JFREQ,
+        FINISH,
+        INTV,
+        INTVT,
     ) = datax(inputB_dict_nameToInt)
 
     QTR_ = np.array([13 * 168 + 0.5, 26 * 168 + 0.5, 39 * 168 + 0.5])
@@ -147,3 +162,19 @@ def test_datax():
 
     ID_ = np.array([[0, 0, 0, -1, 0, -1, 0, 0], [1, 1, 1, -1, 0, -1, 0, 0]], dtype=int)
     np.testing.assert_array_equal(ID_, ID)
+
+    assert NLS == 1
+    assert IOI == 0
+    assert IOJ == 0
+    assert KVLOC == 1 - 1  # 0-based index in Python;
+    assert KVSTAT == 1
+    assert KVTYPE == 2
+    assert KVWHEN == 1
+    assert KWHERE == 1
+    assert CVTEST == 0.025
+    assert MAXEUE == 1000
+    assert JSTEP == 1
+    assert JFREQ == 1
+    assert FINISH == 9999 * 8760.0
+    assert INTV == 5
+    assert INTVT == 5

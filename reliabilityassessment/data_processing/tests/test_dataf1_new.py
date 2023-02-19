@@ -52,6 +52,23 @@ def test_dataf1_new():
         MXPLHR,
         JPLOUT,
         ITAB,
+        NLS,
+        IOI,
+        IOJ,
+        KVLOC,
+        KVSTAT,
+        KVTYPE,
+        KVWHEN,
+        KWHERE,
+        CVTEST,
+        MAXEUE,
+        JSTEP,
+        JFREQ,
+        FINISH,
+        INTV,
+        INTVT,
+        NR,
+        NAMA,
     ) = dataf1(filepaths)
 
     NORR_true = 1 - 1  # 0-based index in Python
@@ -207,3 +224,26 @@ def test_dataf1_new():
     JPLOUT_true = loadtxt(FileNameAndPath).astype(int)
     JPLOUT_true[:, 1:] -= 1  # 0-based index
     np.testing.assert_array_equal(JPLOUT, JPLOUT_true)
+
+    assert NLS == 1
+    assert IOI == 0
+    assert IOJ == 0
+    assert KVLOC == 1 - 1  # 0-based index in Python;
+    assert KVSTAT == 1
+    assert KVTYPE == 2
+    assert KVWHEN == 1
+    assert KWHERE == 1
+    assert CVTEST == 0.025
+    assert MAXEUE == 1000
+    assert JSTEP == 1
+    assert JFREQ == 1
+    assert FINISH == 9999 * 8760.0
+    assert INTV == 5
+    assert INTVT == 5
+
+    assert NR == 1 - 1  # 0-based index
+
+    FileNameAndPath = Path(TEST_DIR, "testdata_input_processing/NAMA")
+    with open(FileNameAndPath, "r") as file:
+        NAMA_true = [e.strip("\n") for e in file.readlines()]
+    assert NAMA == NAMA_true

@@ -63,6 +63,8 @@ def hour(
     BN,
     NR,
     NLS,
+    IGSEED,
+    ILSEED,
 ):
     """
     Schedule hourly simulation events
@@ -100,9 +102,9 @@ def hour(
     # ......Draw generator states and sum capacities by area...............
     NOAREA = CAPOWN.shape[0]
     if JHOUR % JFREQ == 0 or JFREQ == 1:
-        PCTAVL, AVAIL = gstate(PROBG, RATING, DERATE, PLNDST)
+        PCTAVL, AVAIL = gstate(IGSEED, PROBG, RATING, DERATE, PLNDST)
         CAPAVL, SYSOWN, SYSCON, TRNSFJ = sumcap(AVAIL, CAPOWN, CAPCON)
-        LNSTAT = lstate(PROBL, test_seed=None)
+        LNSTAT = lstate(ILSEED, PROBL)
         TRNSFR = findtn(JENT, INTCH, JDAY)
 
     # STMULT(I,1) IS FORWARD DIRECTION ADJUSTMENT
@@ -157,7 +159,7 @@ def hour(
                 NEED = abs(MARGIN[IT])
                 for j in np.where(MARGIN > 0)[0]:
                     N = LINENO[j, IT]
-                    if N > 0:
+                    if N > -1:
                         M = (LNSTAT[N] - 1) * 3 + 1
                         XX = BLPA[N, M + (LP[N, 1] != j)]
                         LNCAP[N] = int(XX)
