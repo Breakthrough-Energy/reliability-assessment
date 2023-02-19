@@ -2,6 +2,8 @@ Reliability Assessment
 ======================
 Collaborators: Dr. Chanan Singh, Dr. Yongli Zhu
 
+.. contents:: :local:
+
 .. include::
    summary.rst
 
@@ -13,3 +15,6 @@ Collaborators: Dr. Chanan Singh, Dr. Yongli Zhu
 
 .. include::
    installation.rst
+
+.. include::
+   usage.rst
