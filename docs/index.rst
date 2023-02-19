@@ -10,3 +10,6 @@ Collaborators: Dr. Chanan Singh, Dr. Yongli Zhu
 
 .. include::
    manual.rst
+
+.. include::
+   installation.rst
