@@ -7,17 +7,20 @@ def gstate(IGSEED, PROBG, RATING, DERATE, PLNDST):
     """
     It samples the state of available capacity for each generator up to NUNITS
 
-    :param array IGSEED: list of seeded random numbers for generator state sampling
-    :param array PROBG: 2D array of accumulated probability for each capacity tier of each unit
-    :param array RATING:  array of the fully rated capacity of each unit
-    :param array DERATE: array of the derated capacity of each unit
-    :param array PLNDST: array of the on/off status (due to planned maintenance) of each unit
-
-    :return: PCTAVL (array) -- array of unadjusted power capacity (in p.u. value) of each unit
-             AVAIL (array) -- array of the finalized power capacity (in nominal value)
-                              of each unit
-    .. note:: the purpose of using 'IGSEED' is to mimic the random number generating procedure in Fortran
-              to guarantee the same pseudo random sequence being generated.
+    :param numpy.ndarray IGSEED: list of seeded random numbers for generator state
+        sampling
+    :param numpy.ndarray PROBG: 2D array of accumulated probability for each capacity
+        tier of each unit
+    :param numpy.ndarray RATING: array of the fully rated capacity of each unit
+    :param numpy.ndarray DERATE: array of the derated capacity of each unit
+    :param numpy.ndarray PLNDST: array of the on/off status (due to planned
+        maintenance) of each unit
+    :return: (*tuple*) -- PCTAVL: array of unadjusted power capacity (in p.u.
+        value) of each unit; AVAIL: array of the finalized power capacity (
+        in nominal value) of each unit
+    .. note:: the purpose of using 'IGSEED' is to mimic the random number generating
+        procedure in Fortran to guarantee the same pseudo random sequence being
+        generated.
     """
     NUNITS = len(PROBG)
     # print("Enter subroutine gstate, total number of Gen units is %d" % (NUNITS))

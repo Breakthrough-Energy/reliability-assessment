@@ -3,14 +3,16 @@ import numpy as np
 
 def lstate(ILSEED, PROBL):
     """Establishes the line state according the probability of the line being in
-    each particular state. This implementation assumes the lines can be in up to 6 states overall.
+    each particular state. This implementation assumes the lines can be in up to 6
+    states overall.
 
     :param array ILSEED: list of seeded random numbers for line state sampling
-    :param numpy.ndarray PROBL: array of the cumulative capacity probability of each line
-
+    :param numpy.ndarray PROBL: array of the cumulative capacity probability of
+        each line
     :return: (*numpy.ndarray*) -- array of line state value (in integer) of each line
-    .. note:: the purpose of using 'ILSEED' is to mimic the random number generating procedure in Fortran
-              to guarantee the same pseudo random sequence being generated.
+    .. note:: the purpose of using 'ILSEED' is to mimic the random number generating
+        procedure in Fortran to guarantee the same pseudo random sequence being
+        generated.
     """
 
     if not isinstance(PROBL, np.ndarray):

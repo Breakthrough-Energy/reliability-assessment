@@ -8,9 +8,8 @@ def seeder(JSEED, NUNITS, NLINES):
     :param int JSEED:  the random number seed
     :param int NUNITS: the total number of generator units
     :param int NLINES: the total number of lines
-
-    :return: (*tuple*) -- IGSEED: list of seeded random numbers for generator state sampling
-                          ILSEED: list of seeded random numbers for line state sampling
+    :return: (*tuple*) -- IGSEED: list of seeded random numbers for generator state
+        sampling; ILSEED: list of seeded random numbers for line state sampling
     """
     IGSEED = np.zeros(1 + NUNITS, dtype=np.int32)
     ILSEED = np.zeros(1 + NLINES, dtype=np.int32)

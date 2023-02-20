@@ -8,8 +8,8 @@ def dataf1(filepaths):
     Data file reading and preprocessing
 
     :param list filepaths: the filepath to file 'INPUTB' and 'LEEI' respectively
-    :return: (*tuple*)  -- the return values of 'input_processing',
-                           the reference bus number and the list of areas' names.
+    :return: (*tuple*)  -- the return values of 'input_processing' together with
+        the reference bus number and the list of area names.
     """
 
     NR = 1 - 1  # 0-based index in Python
