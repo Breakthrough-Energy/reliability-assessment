@@ -6,6 +6,7 @@ from reliabilityassessment.data_processing.dataf1 import dataf1
 from reliabilityassessment.monte_carlo.contrl import contrl
 from reliabilityassessment.monte_carlo.initfl import initfl
 from reliabilityassessment.monte_carlo.initl import initl
+from reliabilityassessment.monte_carlo.seeder import seeder
 
 
 def narpMain(TEST_DIR):
@@ -13,11 +14,9 @@ def narpMain(TEST_DIR):
     Main entry function of the whole NARP program
 
     ..note: This python program is based on a previous Fortran program originally
-            developed by Dr. Chanan Singh (Texas A&M) and the Associated  Power Analysts, Inc.
+            developed by Dr. Chanan Singh (Texas A&M) and the Associated  Power Analysts, Inc.
     """
-
-    print("\n Version-0,  01/01/2023 \n")
-
+    print("\n NARP Python Version-0,  01/01/2023 \n")
     print("\n call function initfl \n")
     MFA, IPOINT, EVNTS = initfl()
 
@@ -88,18 +87,19 @@ def narpMain(TEST_DIR):
     NUNITS = PROBG.shape[0]
     NLINES = LP.shape[0]
     NOAREA = HRLOAD.shape[0]
+    # seeding:
+    JSEED = 123456
+    IGSEED, ILSEED = seeder(JSEED, NUNITS, NLINES)
     # ----------------------------Finish data processing part--------------------------
 
     # ----------------------------Begin Monte Carlo simulation part --------------------------
     ATRIB, CLOCK, IPOINT, MFA, NUMINQ = initl(JSTEP, EVNTS)
-
-    IQ = 0  # Initialize the quater index to be 0 (i.e. the 1st quater)
-    JHOUR = 0  # initiialzie the hour idnex
+    IQ = 0  # initialize the quarter index to be 0 (i.e., the 1st quarter)
+    JHOUR = 0  # initialize the hour index
     SSQ = 0.0
     XLAST = 0.0  # initial values for convergence-related quantities
-
     NHRSYR = 8760
-    RFLAG = 0  # Initialize the normal return flag
+    RFLAG = 0  # initialize the normal return flag
     INDX = 0
     if JSTEP == 24:
         INDX = 1
@@ -310,4 +310,6 @@ def narpMain(TEST_DIR):
         SWNTPP,
         XNEWA,
         XNEWP,
+        IGSEED,
+        ILSEED,
     )

@@ -131,6 +131,8 @@ def contrl(
     SWNTPP,
     XNEWA,
     XNEWP,
+    IGSEED,
+    ILSEED,
 ):
     """
     Call function 'events' to pull the next event from the list and check its time
@@ -171,7 +173,7 @@ def contrl(
             return
 
         if EVNTS[IPOINT + 1] > (FINISH + 1.0):
-            IYEAR = int(CLOCK / 8760)
+            IYEAR = CLOCK // 8760  # IYEAR = int(CLOCK / 8760)
             ITAB = report(
                 IYEAR,
                 ITAB,
@@ -381,4 +383,6 @@ def contrl(
                 SWNTPP,
                 XNEWA,
                 XNEWP,
+                IGSEED,
+                ILSEED,
             )

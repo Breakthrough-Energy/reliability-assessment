@@ -9,10 +9,10 @@ def week(CLOCK, ATRIB, MFA, NUMINQ, IPOINT, EVNTS, PLNDST, JHOUR, JPLOUT):
     :param numpy.ndarray ATRIB: events attribute vector of length 2
                                 ATRIB[0] -- global simulation clock (in unit: hour)
                                 ATRIB[1] -- int, simulation type
-                                 1: hourly
-                                 2: weekly
-                                 3: quarterly
-                                 4: yearly
+                                 0: hourly
+                                 1: weekly
+                                 2: quarterly
+                                 3: yearly
     :param int MFA: pointer of the first available (i.e. empty) entry in the event list
     :param int NUMINQ: up-to-date total number of event entries (inquires)
     :param int IPOINT: pointer of the first (already/previously stored) entry in the

@@ -422,7 +422,7 @@ def pmsc(
 
         # Create MWEEK(J)
         K1 = MWI[i]
-        MWEEK[:M] = 0  # in original Fortran "in range(INUO)"
+        MWEEK[:M] = 0
 
         for K2 in np.where(ID1[:M, 1] == K1)[0]:
             MWEEK[K2] = SCHLOS[K2] * (DURLOS[K2, 0] + DURLOS[K2, 1])
@@ -840,9 +840,9 @@ def pmsc(
 
         # 290
         f.write("0\n")
-        for _ in range(4):
+        for KI in range(4):
             for KJ in range(13):
-                f.write("  %6d" % (EFLOAD[KJ]))
+                f.write("  %.4f" % (EFLOAD[KI * 13 + KJ]))
             f.write("\n")
 
         # 268
@@ -850,9 +850,9 @@ def pmsc(
 
         # 290
         f.write("0\n")
-        for _ in range(4):
+        for KI in range(4):
             for KJ in range(13):
-                f.write("  %6d" % (LOAD[KJ]))
+                f.write("  %.4f" % (LOAD[KI * 13 + KJ]))
             f.write("\n")
 
     f.close()

@@ -64,12 +64,6 @@ def tm2(
     ZT = ZB[:NX, :NX].copy()
 
     for i in range(NL):
-        # D = BLP[i, 0] - BLP0[i]
-        # IDD = D * 1000.0
-        # if IDD == 0:
-        #     continue
-        # D and IDD are not used elsewhere in the original Fortran code,
-        # so the above lines are replaced by the follows.
         if BLP[i, 0] == BLP0[i]:
             continue
 
@@ -113,7 +107,7 @@ def tm2(
             ZB[:NX, :NX] = Z[:NX, :NX].copy()
 
     # Assigns injections at buses so as to balance
-    # Positive and negative injections
+    # positive and negative injections
     INJ1, LODC = assign(INJ, LOD, LT, NN, NLS)
 
     THET = theta(ZB, INJ1)
@@ -145,15 +139,10 @@ def tm2(
             INDIC = 1
 
     if INDIC != 1:
-        # Not sure whether BN[i, 2] should be BN[j, 2] or not (check later)
-        # If yes, we can simplify the for-loop as :
-        # BN[LT[:NN], 1] = INJ1[:NN].copy()
-        # BN[:NN, 2] = LODC[:NN].copy()
         for i in range(NN):
             j = LT[i]
             BN[j, 1] = INJ1[i]
             BN[i, 2] = LODC[i]
-
         # INL=0 in Fortran, this variable is defined but never used.
 
         # GO TO 1000
@@ -191,7 +180,7 @@ def tm2(
         FLOW[0 : NXD2 - NXD1 + 1] = RES[NXD1 - 1 : NXD2, 0].copy()
 
         if IOI != 0:
-            f = open("traout.txt ", "a")  # or maybe just 'w' ; will later check
+            f = open("traout.txt ", "w")  # maybe 'a' ; need later check
             f.write("\n     %8d  %4d  %1d\n" % (LCLOCK, JHOUR, JFLAG))
 
             # print table of units on outage or derated to traout file

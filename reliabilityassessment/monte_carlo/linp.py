@@ -103,12 +103,14 @@ def linp(M, N, A, XOB, XOBI, IBAS, BS, LCLOCK, N1):
             P = mc(M, IND, TAB, A)
             ICOUN = 0
 
-            RAT1 = -1.0  # this initial value was commnented in original Fortran
             for i in np.where(P[:M] > 1e-07)[0]:
                 BNUM = BS[i] if abs(BS[i]) >= 1e-13 else 0.0
                 RAT = BNUM / P[i]
                 ICOUN += 1
-                if ICOUN == 1 or RAT < RAT1:
+                if ICOUN == 1:
+                    RAT1, IPIV = RAT, i
+                    continue
+                if RAT < RAT1:
                     RAT1, IPIV = RAT, i
                     continue
                 if IPH != 2 and BS[i] == 0 and XOB[IBAS[i]] == 1:
