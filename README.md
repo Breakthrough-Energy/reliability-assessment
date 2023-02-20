@@ -122,7 +122,8 @@ After the simulation finishes successfully with convergence,  an "output" text f
 
 (up to refine or change)
 
-![new_flowchart](https://user-images.githubusercontent.com/45750983/201003713-9491169c-7811-4058-b9aa-2faa1010fc3f.png)
+<img width="1016" alt="new_flowchart" src="https://user-images.githubusercontent.com/45750983/220204728-d35e0ac6-146b-4701-991a-1166b844ea44.png">
+
 
 ## Features (last updated on Sep.27.2021)
 |  | NARP (Ours) | PRAS (NREL) | Impact on Reliability Indices |
